@@ -173,7 +173,8 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
 .hbar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .hbar-lbl{font-size:11px;color:var(--t2);min-width:120px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hbar-track{flex:1;height:28px;background:var(--track-bg);border-radius:8px;overflow:visible;position:relative}
-.hbar-fill{height:100%;border-radius:8px;display:flex;align-items:center;padding-left:10px;font-family:'JetBrains Mono';font-weight:600;font-size:11px;color:#fff;transition:width .6s;white-space:nowrap;min-width:fit-content}
+.hbar-fill{height:100%;border-radius:8px;display:flex;align-items:center;padding-left:10px;font-family:'JetBrains Mono';font-weight:600;font-size:11px;color:#fff;transition:width .6s;white-space:nowrap;min-width:fit-content;text-shadow:0 1px 3px rgba(0,0,0,.5);overflow:visible}
+.hbar-fill span{position:relative;z-index:1}
 
 /* TAB CONTENT */
 .tab-content{display:none}
@@ -294,7 +295,7 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
       <div class="kpi c-accent">
         <div class="kpi-l">Receita Acumulada 2026</div>
         <div class="kpi-v accent">R$&nbsp;162.273</div>
-        <div class="kpi-s">Jan+Fev+Mar <span class="badge-up">+100% vs 2025</span></div>
+        <div class="kpi-s">Acumulado Q1/2026 <span class="badge-up">+100% vs 2025</span></div>
       </div>
       <div class="kpi c-teal">
         <div class="kpi-l">Reserva Real (D+30)</div>
@@ -876,8 +877,7 @@ function atualizarKPIsFiltrados(mesesSelecionados){
   }
   if(kpis[1]&&receitaAcum>0){
     kpis[1].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(receitaAcum).toLocaleString('pt-BR');
-    var mesesLabel=mesesSelecionados.map(function(m){return ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][m]}).join('+');
-    kpis[1].querySelector('.kpi-s').innerHTML=mesesLabel;
+    kpis[1].querySelector('.kpi-s').innerHTML='Acumulado '+mesesSelecionados.length+' meses';
   }
 
   // Atualizar Fluxo de Caixa KPIs
