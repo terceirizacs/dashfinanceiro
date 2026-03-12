@@ -562,17 +562,159 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
 <script>
 const PWD='Terceirizacs123';
 
+// ============ GOOGLE SHEETS API ============
+// COLE AQUI a URL do seu Apps Script após fazer o deploy:
+const API_URL='https://script.google.com/macros/s/AKfycbxVkfYjqjtPnY7CcAE4yWZTgArSMOLi5KIN6F30MbrQgi3WEh4ZfWOuRICSPaNpjfUT/exec';
+
+async function carregarDadosAPI(){
+  if(!API_URL || API_URL==='COLE_SUA_URL_AQUI'){
+    console.log('API não configurada — usando dados estáticos');
+    return null;
+  }
+  try{
+    document.getElementById('loadingOverlay').querySelector('.loading-text').textContent='Buscando dados da planilha...';
+    const resp=await fetch(API_URL);
+    const data=await resp.json();
+    if(data.erro){console.error('Erro API:',data.erro);return null}
+    console.log('Dados carregados:',data.atualizadoEm);
+    return data;
+  }catch(e){
+    console.error('Erro ao carregar API:',e);
+    return null;
+  }
+}
+
+function processarDadosAPI(data){
+  if(!data) return;
+
+  // --- Atualizar CUSTO X CLIENTE (Lucratividade por cliente) ---
+  if(data.custoCliente){
+    const mesMap={'JANEIRO':'jan','FEVEREIRO':'fev','MARÇO':'mar','ABRIL':'abr','MAIO':'mai','JUNHO':'jun','JULHO':'jul','AGOSTO':'ago','SETEMBRO':'set','OUTUBRO':'out','NOVEMBRO':'nov','DEZEMBRO':'dez'};
+    for(var mesNome in data.custoCliente){
+      var mesKey=mesMap[mesNome];
+      if(!mesKey) continue;
+      var bloco=data.custoCliente[mesNome];
+      clientData[mesKey]=bloco.clientes.map(function(cl){
+        var totalMRR=bloco.total.receita||1;
+        return{
+          name:cl.nome,
+          revenue:cl.receita,
+          cost:cl.custoSubtotal,
+          profit:cl.lucroPorCliente,
+          costPct:Math.round(cl.custoPctCliente*1000)/10,
+          mrr:Math.round((cl.receita/totalMRR)*1000)/10,
+          risk:cl.custoPctCliente>1?'high':cl.custoPctCliente>0.45?'medium':'low',
+          riskLabel:cl.custoPctCliente>1?'PREJUÍZO':cl.custoPctCliente>0.45?'ATENÇÃO':'SAUDÁVEL'
+        };
+      });
+      // Detecta concentração e expiração
+      clientData[mesKey].forEach(function(cl){
+        if(cl.mrr>25) {cl.risk='high';cl.riskLabel='CONCENTRAÇÃO'}
+        if(cl.name.toLowerCase().indexOf('kelem')>=0) {cl.risk='high';cl.riskLabel='EXPIRA MAR'}
+      });
+    }
+  }
+
+  // --- Atualizar KPIs da Visão Geral ---
+  if(data.custoCliente){
+    // Achar último mês com dados
+    var mesesOrdem=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+    var ultimoMes=null;
+    var mrrAtual=0;
+    var numContratos=0;
+    var receitaAcum=0;
+    mesesOrdem.forEach(function(m){
+      if(data.custoCliente[m]&&data.custoCliente[m].total&&data.custoCliente[m].total.receita>0){
+        ultimoMes=m;
+        mrrAtual=data.custoCliente[m].total.receita;
+        numContratos=data.custoCliente[m].numClientes||data.custoCliente[m].clientes.length;
+        receitaAcum+=data.custoCliente[m].total.receita;
+      }
+    });
+    // Atualizar KPIs no DOM
+    var kpis=document.querySelectorAll('#tab-geral .kpi');
+    if(kpis[0]){
+      kpis[0].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(mrrAtual).toLocaleString('pt-BR');
+      kpis[0].querySelector('.kpi-s').textContent=numContratos+' contratos ativos';
+    }
+    if(kpis[1]){
+      kpis[1].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(receitaAcum).toLocaleString('pt-BR');
+    }
+  }
+
+  // --- Atualizar Fluxo de Caixa ---
+  if(data.fluxoInter){
+    var kpisFluxo=document.querySelectorAll('#tab-fluxo .kpi');
+    if(kpisFluxo[0]) kpisFluxo[0].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(data.fluxoInter.saldoAtual).toLocaleString('pt-BR');
+  }
+  if(data.fluxoNubank){
+    var kpisFluxo=document.querySelectorAll('#tab-fluxo .kpi');
+    if(kpisFluxo[1]) kpisFluxo[1].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(data.fluxoNubank.saldoAtual).toLocaleString('pt-BR');
+  }
+
+  // --- Atualizar Receita 2025 no gráfico ---
+  if(data.receita2025&&data.receita2025.totalReceita){
+    receita2025Data=data.receita2025.totalReceita;
+  }
+
+  // --- Atualizar gráficos com dados novos ---
+  if(data.custoCliente){
+    var meses=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+    receita2026Data=meses.map(function(m){
+      return data.custoCliente[m]?data.custoCliente[m].total.receita:0;
+    });
+  }
+
+  // --- Atualizar Recebimentos ---
+  if(data.recebimentos&&data.recebimentos.length>0){
+    var tbody=document.querySelector('#tblEntradas tbody');
+    if(tbody){
+      tbody.innerHTML='';
+      var mesesNome=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      data.recebimentos.forEach(function(r){
+        if(r.mesNum<1||r.mesNum>12) return;
+        var statusClass=r.status==='PAGO'?'pago':r.status==='PARCIAL'?'parcial':'pendente';
+        var valColor=r.status==='PAGO'?'var(--green)':r.status==='PARCIAL'?'var(--gold)':'var(--red)';
+        var tr=document.createElement('tr');
+        tr.setAttribute('data-month',r.mesNum);
+        tr.innerHTML='<td>'+mesesNome[r.mesNum]+'</td>'
+          +'<td>'+(r.descricao||r.cliente)+'</td>'
+          +'<td class="mono">R$ '+Math.round(r.previsto).toLocaleString('pt-BR')+'</td>'
+          +'<td class="mono" style="color:'+valColor+'">R$ '+Math.round(r.recebido).toLocaleString('pt-BR')+'</td>'
+          +'<td><span class="tag '+statusClass+'">'+r.status+'</span></td>';
+        tbody.appendChild(tr);
+      });
+    }
+  }
+
+  // --- Timestamp de atualização ---
+  if(data.atualizadoEm){
+    var d=new Date(data.atualizadoEm);
+    var badge=document.getElementById('dateBadge');
+    if(badge) badge.textContent=d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' (API)';
+  }
+
+  // Refresh client table and charts
+  updateClientTable();
+  initCharts();
+}
+
+// Variáveis globais para dados dos gráficos (sobrescritas pela API)
+var receita2025Data=[0,4497,4497,5997,5997,11491,14488,14488,30485,30511,35482,44479];
+var receita2026Data=[50479,51315,60479,0,0,0,0,0,0,0,0,0];
+
 function doLogin(){
   const v=document.getElementById('pwdInput').value;
   if(v===PWD){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('loadingOverlay').style.display='flex';
-    setTimeout(()=>{
+    carregarDadosAPI().then(function(data){
+      if(data) processarDadosAPI(data);
       document.getElementById('loadingOverlay').style.display='none';
       document.getElementById('wrap').style.display='block';
       initCharts();
       updateClientTable();
-    },1200);
+    });
   }else{
     document.getElementById('pwdError').style.display='block';
     document.getElementById('pwdInput').style.borderColor='var(--red)';
@@ -803,8 +945,8 @@ function initCharts(){
       data:{
         labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
         datasets:[
-          {label:'2025 Realizado',data:[0,4497,4497,5997,5997,11491,14488,14488,30485,30511,35482,44479],borderColor:t3,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:t3,tension:.3},
-          {label:'2026 Realizado',data:[50479,51315,60479,null,null,null,null,null,null,null,null,null],borderColor:accent,backgroundColor:'rgba(139,124,247,.1)',borderWidth:3,pointRadius:4,pointBackgroundColor:accent,fill:true,tension:.3},
+          {label:'2025 Realizado',data:receita2025Data,borderColor:t3,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:t3,tension:.3},
+          {label:'2026 Realizado',data:receita2026Data.map(function(v){return v||null}),borderColor:accent,backgroundColor:'rgba(139,124,247,.1)',borderWidth:3,pointRadius:4,pointBackgroundColor:accent,fill:true,tension:.3},
           {label:'2026 Projeção',data:[44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479],borderColor:accent,borderDash:[5,5],backgroundColor:'transparent',borderWidth:1,pointRadius:0,tension:0}
         ]
       },
