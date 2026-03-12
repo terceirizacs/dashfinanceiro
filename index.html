@@ -57,7 +57,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
 .tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;border-color:transparent}
 
 /* FILTER BAR - like Bruno */
-.filter-bar{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px 24px;margin-bottom:28px;backdrop-filter:blur(20px)}
+.filter-bar{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px 24px;margin-bottom:28px;backdrop-filter:blur(20px);position:relative;z-index:100}
 .filter-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .filter-title{font-size:14px;font-weight:700}
 .filter-actions{display:flex;gap:6px}
@@ -72,7 +72,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
 .ms-trigger{padding:9px 12px;border-radius:9px;border:1px solid var(--border);background:var(--track-bg);color:var(--t2);font-size:13px;cursor:pointer;user-select:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ms-trigger:hover,.ms-trigger.open{border-color:var(--accent);color:var(--t1)}
 .ms-count{background:var(--accent);color:#fff;font-size:11px;padding:1px 7px;border-radius:7px;margin-left:4px;font-weight:700}
-.ms-dropdown{position:absolute;top:100%;left:0;right:0;background:#1e293b;border:1px solid var(--border);border-radius:12px;max-height:280px;overflow-y:auto;z-index:50;display:none;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.ms-dropdown{position:absolute;top:100%;left:0;right:0;background:#1e293b;border:1px solid var(--border);border-radius:12px;max-height:280px;overflow-y:auto;z-index:999;display:none;box-shadow:0 12px 40px rgba(0,0,0,.4)}
 [data-theme="light"] .ms-dropdown{background:#fff}
 .ms-dropdown.show{display:block}
 .ms-selall{padding:9px 12px;font-size:13px;color:var(--accent);cursor:pointer;border-bottom:1px solid var(--border);font-weight:600}
@@ -297,9 +297,9 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
         <div class="kpi-s">Jan+Fev+Mar <span class="badge-up">+100% vs 2025</span></div>
       </div>
       <div class="kpi c-teal">
-        <div class="kpi-l">Reserva / Caixa após Pgtos</div>
-        <div class="kpi-v teal">R$&nbsp;31.835</div>
-        <div class="kpi-s">Saldo acumulado: R$37.963</div>
+        <div class="kpi-l">Reserva Real (D+30)</div>
+        <div class="kpi-v teal" id="kpiReservaD30">R$&nbsp;2.393</div>
+        <div class="kpi-s" id="kpiReservaD30Sub">Caixa: R$31.835 - Desp. pendentes: R$29.442</div>
       </div>
       <div class="kpi c-green">
         <div class="kpi-l">Caixa Disponível</div>
@@ -347,11 +347,14 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
           <div class="prog-track"><div class="prog-fill" style="width:68%;background:var(--orange)"></div></div>
         </div>
         <div class="info-box">
-          <div class="label">Reserva & Caixa</div>
-          <div class="info-row"><span class="k">Saldo Acumulado</span><span class="v">R$ 37.963</span></div>
-          <div class="info-row"><span class="k">Caixa Após Pagamentos (Mar)</span><span class="v" style="color:var(--green)">R$ 31.835</span></div>
-          <div class="info-row"><span class="k">Variação Caixa Inter (Mar)</span><span class="v" style="color:var(--red)">- R$ 957</span></div>
-          <div class="info-row"><span class="k">Saldo Nubank</span><span class="v">R$ 94</span></div>
+          <div class="label">Reserva & Caixa (Lógica D+30)</div>
+          <div class="info-row"><span class="k">Saldo Atual (Inter + Nubank)</span><span class="v" id="rSaldoAtual">R$ 31.835</span></div>
+          <div class="info-row"><span class="k">Despesas D+30 a Pagar</span><span class="v" style="color:var(--gold)" id="rDespD30">R$ 29.442</span></div>
+          <div class="info-row"><span class="k">Reserva Real (após D+30)</span><span class="v" style="color:var(--green);font-weight:700" id="rReservaReal">R$ 2.393</span></div>
+          <div class="info-row"><span class="k">Saldo Acumulado</span><span class="v" id="rSaldoAcum">R$ 37.963</span></div>
+          <div style="margin-top:8px;padding:8px 10px;background:rgba(139,124,247,.08);border-radius:8px;font-size:10px;color:var(--t3);line-height:1.5">
+            <strong style="color:var(--accent)">D+30:</strong> Você recebe antes e paga em 30 dias. A reserva real mostra o que sobra no caixa após pagar todas as despesas pendentes do mês.
+          </div>
         </div>
       </div>
     </div>
@@ -813,7 +816,10 @@ createMultiSelect('fMes',[
 function applyFilters(){
   const search=document.getElementById('searchInput').value.toLowerCase();
   const months=document.getElementById('fMes')._selected;
-  // Filter tables
+  const years=document.getElementById('fAno')._selected;
+  const selectedMonths=[...months].map(Number);
+
+  // 1. Filtrar tabelas em todas as abas
   document.querySelectorAll('.tbl tbody tr').forEach(tr=>{
     const text=tr.textContent.toLowerCase();
     const month=tr.getAttribute('data-month')||'';
@@ -821,8 +827,86 @@ function applyFilters(){
     const matchM=months.size===12||!month||months.has(month);
     tr.style.display=(matchQ&&matchM)?'':'none';
   });
-  // Update tags
+
+  // 2. Atualizar KPIs da Visão Geral baseado nos meses selecionados
+  atualizarKPIsFiltrados(selectedMonths);
+
+  // 3. Atualizar gráficos com meses filtrados
+  atualizarGraficosFiltrados(selectedMonths);
+
+  // 4. Atualizar tabela de clientes
+  updateClientTable();
+
+  // 5. Tags visuais
   updateFilterTags();
+}
+
+function atualizarKPIsFiltrados(mesesSelecionados){
+  // Dados mensais 2026 (do CUSTO X CLIENTE)
+  var mesesNomes=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+  var mesesKeys=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+  // Calcular receita acumulada dos meses selecionados
+  var receitaAcum=0;
+  var ultimoMesComDados='';
+  var numContratos=0;
+  var mrrUltimoMes=0;
+
+  // Dados de receita 2026 por mês
+  var rec2026Mensal=receita2026Data||[50479,51315,60479,0,0,0,0,0,0,0,0,0];
+
+  mesesSelecionados.forEach(function(m){
+    var idx=m-1;
+    if(idx>=0&&idx<12&&rec2026Mensal[idx]>0){
+      receitaAcum+=rec2026Mensal[idx];
+      mrrUltimoMes=rec2026Mensal[idx];
+      ultimoMesComDados=mesesKeys[idx];
+      // Contar contratos do mês
+      if(clientData[mesesKeys[idx]]){
+        numContratos=clientData[mesesKeys[idx]].length;
+      }
+    }
+  });
+
+  // Atualizar KPIs Visão Geral
+  var kpis=document.querySelectorAll('#tab-geral .kpi');
+  if(kpis[0]&&mrrUltimoMes>0){
+    kpis[0].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(mrrUltimoMes).toLocaleString('pt-BR');
+    kpis[0].querySelector('.kpi-s').textContent=numContratos+' contratos ativos';
+  }
+  if(kpis[1]&&receitaAcum>0){
+    kpis[1].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(receitaAcum).toLocaleString('pt-BR');
+    var mesesLabel=mesesSelecionados.map(function(m){return ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][m]}).join('+');
+    kpis[1].querySelector('.kpi-s').innerHTML=mesesLabel;
+  }
+
+  // Atualizar Fluxo de Caixa KPIs
+  var entradasTotal=0,saidasTotal=0;
+  var entradasMensal=[47560,51375,28485,0,0,0,0,0,0,0,0,0];
+  var saidasMensal=[41964,38131,29442,0,0,0,0,0,0,0,0,0];
+  mesesSelecionados.forEach(function(m){
+    var idx=m-1;
+    entradasTotal+=entradasMensal[idx]||0;
+    saidasTotal+=saidasMensal[idx]||0;
+  });
+  var kpisFluxo=document.querySelectorAll('#tab-fluxo .kpi');
+  if(kpisFluxo[2]) kpisFluxo[2].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(entradasTotal).toLocaleString('pt-BR');
+  if(kpisFluxo[3]) kpisFluxo[3].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(saidasTotal).toLocaleString('pt-BR');
+
+  // Atualizar select da tabela de clientes para o último mês selecionado
+  if(ultimoMesComDados){
+    var sel=document.getElementById('clientMonthFilter');
+    if(sel){
+      for(var i=0;i<sel.options.length;i++){
+        if(sel.options[i].value===ultimoMesComDados){sel.selectedIndex=i;break}
+      }
+    }
+  }
+}
+
+function atualizarGraficosFiltrados(mesesSelecionados){
+  // Highlight selected months in charts by rebuilding
+  initCharts(mesesSelecionados);
 }
 
 function resetFilters(){
@@ -929,7 +1013,8 @@ function updateClientTable(){
 function gc(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
 let charts={};
 
-function initCharts(){
+function initCharts(mesesFiltro){
+  if(!mesesFiltro) mesesFiltro=[1,2,3,4,5,6,7,8,9,10,11,12];
   const accent=gc('--accent'),green=gc('--green'),red=gc('--red'),gold=gc('--gold'),
         teal=gc('--teal'),orange=gc('--orange'),sky=gc('--sky'),pink=gc('--pink'),
         cyan=gc('--cyan'),t2=gc('--t2'),t3=gc('--t3'),border=gc('--border');
