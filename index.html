@@ -200,6 +200,47 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
 .tbl-scroll{overflow-x:auto}
 .info-box{padding:14px;background:var(--chart-bg);border-radius:12px;margin-top:16px}
 .info-box .label{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:600}
+/* === EXECUTIVE TAB STYLES === */
+.exec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:20px}
+.gauge-wrap{display:flex;align-items:center;gap:16px;padding:10px 0}
+.gauge-ring{position:relative;width:80px;height:80px;flex-shrink:0}
+.gauge-ring svg{width:80px;height:80px;transform:rotate(-90deg)}
+.gauge-ring circle{fill:none;stroke-width:6}
+.gauge-ring .track{stroke:var(--track-bg)}
+.gauge-ring .fill{stroke-linecap:round;transition:stroke-dashoffset .8s ease}
+.gauge-info{flex:1}
+.gauge-info .val{font-family:'JetBrains Mono';font-size:22px;font-weight:700}
+.gauge-info .lbl{font-size:11px;color:var(--t3);margin-top:2px}
+.deviation-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:var(--chart-bg);margin-bottom:8px}
+.deviation-row .dev-lbl{flex:1;font-size:12px;color:var(--t2)}
+.deviation-row .dev-val{font-family:'JetBrains Mono';font-size:13px;font-weight:700}
+.deviation-row .dev-bar{width:80px;height:6px;border-radius:3px;background:var(--track-bg);overflow:hidden}
+.deviation-row .dev-fill{height:100%;border-radius:3px;transition:width .6s}
+.partner-card{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;background:var(--chart-bg);margin-bottom:8px}
+.partner-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0}
+.partner-info{flex:1}
+.partner-info .p-name{font-size:13px;font-weight:600;color:var(--t1)}
+.partner-info .p-sub{font-size:11px;color:var(--t3);margin-top:2px}
+.partner-vals{text-align:right}
+.partner-vals .p-total{font-family:'JetBrains Mono';font-size:15px;font-weight:700;color:var(--t1)}
+.partner-vals .p-status{font-size:10px;margin-top:3px}
+.tech-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;margin-bottom:4px}
+.tech-row:nth-child(odd){background:var(--chart-bg)}
+.tech-row .t-icon{font-size:14px;width:24px;text-align:center;flex-shrink:0}
+.tech-row .t-name{flex:1;font-size:12px;color:var(--t2)}
+.tech-row .t-val{font-family:'JetBrains Mono';font-size:12px;font-weight:600;color:var(--t1)}
+.tech-row .t-pct{font-size:10px;color:var(--t3);min-width:40px;text-align:right}
+.yoy-compare{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center;padding:12px 0}
+.yoy-year{font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.yoy-val{font-family:'JetBrains Mono';font-size:20px;font-weight:700;margin-top:4px}
+.yoy-arrow{font-size:20px;padding:8px 0}
+.exec-alert{display:flex;align-items:flex-start;gap:10px;padding:14px;border-radius:12px;margin-bottom:10px;border-left:3px solid}
+.exec-alert.alert-red{background:rgba(248,113,113,.06);border-color:var(--red)}
+.exec-alert.alert-gold{background:rgba(251,191,36,.06);border-color:var(--gold)}
+.exec-alert.alert-green{background:rgba(52,211,153,.06);border-color:var(--green)}
+.exec-alert .a-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.exec-alert .a-text{font-size:12px;color:var(--t2);line-height:1.6}
+.exec-alert .a-text strong{color:var(--t1)}
 .info-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px}
 .info-row .k{color:var(--t2)}
 .info-row .v{font-family:'JetBrains Mono';color:var(--t1)}
@@ -253,6 +294,7 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
     <button class="tab-btn active" onclick="switchTab('geral',this)">&#128202; Visão Geral</button>
     <button class="tab-btn" onclick="switchTab('fluxo',this)">&#128176; Fluxo de Caixa</button>
     <button class="tab-btn" onclick="switchTab('clientes',this)">&#128101; Clientes & Custos</button>
+    <button class="tab-btn" onclick="switchTab('exec',this)">&#127942; Visão Executiva</button>
   </nav>
 
   <!-- FILTER BAR - like Bruno -->
@@ -551,6 +593,321 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
             <div style="margin-bottom:6px"><span style="color:var(--gold);font-weight:700">2.</span> Renovar Kelem antes de Mar — ou prospectar substituto de R$6k/mês</div>
             <div style="margin-bottom:6px"><span style="color:var(--gold);font-weight:700">3.</span> Resolver inadimplência César — R$4.165 em atraso (Fev)</div>
             <div><span style="color:var(--green);font-weight:700">4.</span> Aumentar reserva de caixa — fôlego atual de 0,9 mês é crítico</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== TAB 4: VISÃO EXECUTIVA ======== -->
+  <div class="tab-content" id="tab-exec">
+    <div class="sec">Painel Executivo — Visão Macro</div>
+
+    <!-- KPIs Executivos -->
+    <div class="kpis">
+      <div class="kpi c-accent">
+        <div class="kpi-l">Lucro Projetado 2026 <span class="tooltip" data-tip="Receita projetada R$533.748 menos despesas projetadas R$235.644">?</span></div>
+        <div class="kpi-v accent" id="execLucroProj">R$&nbsp;298.104</div>
+        <div class="kpi-s">Margem projetada: 55,8%</div>
+      </div>
+      <div class="kpi c-green">
+        <div class="kpi-l">Realizado vs Projetado <span class="tooltip" data-tip="Compara receita real acumulada com a projetada para o mesmo período">?</span></div>
+        <div class="kpi-v green" id="execDesvio">+21,5%</div>
+        <div class="kpi-s">Receita acima do plano</div>
+      </div>
+      <div class="kpi c-gold">
+        <div class="kpi-l">Passivo com Sócios <span class="tooltip" data-tip="Total que a empresa ainda deve aos sócios (distribuição + prolabore pendentes)">?</span></div>
+        <div class="kpi-v gold" id="execPassivo">R$&nbsp;16.055</div>
+        <div class="kpi-s">Março — pendente de pagamento</div>
+      </div>
+      <div class="kpi c-red">
+        <div class="kpi-l">Custo Creator / Receita <span class="tooltip" data-tip="Quanto da receita é consumido por custos diretos de creators (mão de obra de conteúdo)">?</span></div>
+        <div class="kpi-v red" id="execCreatorPct">47,7%</div>
+        <div class="kpi-s">R$20.642 de R$30.485 (set/2025)</div>
+      </div>
+    </div>
+
+    <!-- Projeção vs Realizado -->
+    <div class="sec">Projeção vs Realizado — 2026</div>
+    <div class="exec-grid">
+      <div class="card" style="grid-column:1/-1">
+        <div class="card-t">Receita: Projetado vs Realizado</div>
+        <div class="card-d">Comparação mensal da receita planejada com a receita efetiva</div>
+        <div class="chart-wrap" style="height:300px"><canvas id="execProjRealChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="exec-grid">
+      <!-- Desvio Orçamentário -->
+      <div class="card">
+        <div class="card-t">Desvio Orçamentário Q1/2026</div>
+        <div class="card-d">Diferença entre realizado e projetado por mês</div>
+        <div style="padding:12px 0">
+          <div class="deviation-row">
+            <div class="dev-lbl"><strong>Janeiro</strong> — Receita</div>
+            <div class="dev-val" style="color:var(--green)">+R$ 6.000</div>
+            <div class="dev-bar"><div class="dev-fill" style="width:100%;background:var(--green)"></div></div>
+          </div>
+          <div class="deviation-row">
+            <div class="dev-lbl"><strong>Janeiro</strong> — Despesa</div>
+            <div class="dev-val" style="color:var(--red)">+R$ 23.925</div>
+            <div class="dev-bar"><div class="dev-fill" style="width:100%;background:var(--red)"></div></div>
+          </div>
+          <div class="deviation-row">
+            <div class="dev-lbl"><strong>Fevereiro</strong> — Receita</div>
+            <div class="dev-val" style="color:var(--green)">+R$ 6.836</div>
+            <div class="dev-bar"><div class="dev-fill" style="width:80%;background:var(--green)"></div></div>
+          </div>
+          <div class="deviation-row">
+            <div class="dev-lbl"><strong>Fevereiro</strong> — Despesa</div>
+            <div class="dev-val" style="color:var(--red)">+R$ 17.992</div>
+            <div class="dev-bar"><div class="dev-fill" style="width:75%;background:var(--red)"></div></div>
+          </div>
+          <div class="deviation-row">
+            <div class="dev-lbl"><strong>Março</strong> — Receita</div>
+            <div class="dev-val" style="color:var(--green)">+R$ 16.000</div>
+            <div class="dev-bar"><div class="dev-fill" style="width:100%;background:var(--green)"></div></div>
+          </div>
+          <div class="deviation-row">
+            <div class="dev-lbl"><strong>Março</strong> — Despesa</div>
+            <div class="dev-val" style="color:var(--gold)">+R$ 9.752</div>
+            <div class="dev-bar"><div class="dev-fill" style="width:50%;background:var(--gold)"></div></div>
+          </div>
+        </div>
+        <div class="info-box">
+          <div class="label">Análise</div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.7">
+            Receita Q1 real <strong style="color:var(--green)">R$162.273</strong> vs projetado <strong>R$133.437</strong> (+21,6%).
+            Despesas reais <strong style="color:var(--red)">R$109.537</strong> vs projetado <strong>R$57.869</strong> — despesas acima do plano por pagamentos a sócios e custos operacionais não previstos na projeção base.
+          </div>
+        </div>
+      </div>
+
+      <!-- Gauge - Margem Lucro -->
+      <div class="card">
+        <div class="card-t">Indicadores de Performance</div>
+        <div class="card-d">Métricas-chave para acompanhamento executivo</div>
+        <div class="gauge-wrap">
+          <div class="gauge-ring">
+            <svg viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="34"/><circle class="fill" cx="40" cy="40" r="34" stroke="var(--green)" style="stroke-dasharray:213.6;stroke-dashoffset:94"/></svg>
+          </div>
+          <div class="gauge-info">
+            <div class="val" style="color:var(--green)">55,8%</div>
+            <div class="lbl">Margem Projetada 2026</div>
+          </div>
+        </div>
+        <div class="gauge-wrap">
+          <div class="gauge-ring">
+            <svg viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="34"/><circle class="fill" cx="40" cy="40" r="34" stroke="var(--accent)" style="stroke-dasharray:213.6;stroke-dashoffset:47"/></svg>
+          </div>
+          <div class="gauge-info">
+            <div class="val" style="color:var(--accent)">78%</div>
+            <div class="lbl">Execução do Plano (Receita Q1)</div>
+          </div>
+        </div>
+        <div class="gauge-wrap">
+          <div class="gauge-ring">
+            <svg viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="34"/><circle class="fill" cx="40" cy="40" r="34" stroke="var(--gold)" style="stroke-dasharray:213.6;stroke-dashoffset:100"/></svg>
+          </div>
+          <div class="gauge-info">
+            <div class="val" style="color:var(--gold)">53,2%</div>
+            <div class="lbl">Custo Operacional / Receita (Q1)</div>
+          </div>
+        </div>
+        <div class="gauge-wrap">
+          <div class="gauge-ring">
+            <svg viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="34"/><circle class="fill" cx="40" cy="40" r="34" stroke="var(--teal)" style="stroke-dasharray:213.6;stroke-dashoffset:170"/></svg>
+          </div>
+          <div class="gauge-info">
+            <div class="val" style="color:var(--teal)">20,4%</div>
+            <div class="lbl">Crescimento MoM Receita (Fev→Mar)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Despesas Detalhadas + Creator Costs -->
+    <div class="sec">Estrutura de Custos Detalhada</div>
+    <div class="exec-grid">
+      <!-- Breakdown Despesas por Categoria -->
+      <div class="card">
+        <div class="card-t">Despesas por Categoria — Projeção 2026</div>
+        <div class="card-d">Breakdown anual de todos os custos planejados</div>
+        <div class="chart-wrap" style="height:260px"><canvas id="execDespCatChart"></canvas></div>
+        <div class="legend" id="execDespLegend"></div>
+      </div>
+
+      <!-- Custos de Tecnologia -->
+      <div class="card">
+        <div class="card-t">Stack Tecnológico — Custo Mensal</div>
+        <div class="card-d">Investimento recorrente em ferramentas e infraestrutura</div>
+        <div style="padding:8px 0">
+          <div class="tech-row"><div class="t-icon">🤖</div><div class="t-name">Z-api (2 instâncias WhatsApp)</div><div class="t-val">R$ 200</div><div class="t-pct">32,7%</div></div>
+          <div class="tech-row"><div class="t-icon">🧠</div><div class="t-name">OpenAI ChatGPT</div><div class="t-val">R$ 116</div><div class="t-pct">18,9%</div></div>
+          <div class="tech-row"><div class="t-icon">📧</div><div class="t-name">Google Workspace (Meet)</div><div class="t-val">R$ 98</div><div class="t-pct">16,0%</div></div>
+          <div class="tech-row"><div class="t-icon">🖥️</div><div class="t-name">Hostinger (N8N)</div><div class="t-val">R$ 90</div><div class="t-pct">14,7%</div></div>
+          <div class="tech-row"><div class="t-icon">🔒</div><div class="t-name">Cloudflare</div><div class="t-val">R$ 30</div><div class="t-pct">4,9%</div></div>
+          <div class="tech-row"><div class="t-icon">📞</div><div class="t-name">BrDid (Telefonia)</div><div class="t-val">R$ 27</div><div class="t-pct">4,4%</div></div>
+          <div class="tech-row"><div class="t-icon">🏷️</div><div class="t-name">Evento Fire</div><div class="t-val">R$ 343</div><div class="t-pct">—</div></div>
+        </div>
+        <div class="info-box">
+          <div class="label">Total SaaS/Tech</div>
+          <div style="font-size:14px;font-family:'JetBrains Mono';font-weight:700;color:var(--accent)">R$ 561/mês · R$ 6.732/ano</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px">1,3% da receita projetada — nível saudável para o porte</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Distribuição Sócios + YoY -->
+    <div class="sec">Passivo com Sócios & Comparativo Anual</div>
+    <div class="exec-grid">
+      <!-- Sócios - Status Pagamento -->
+      <div class="card">
+        <div class="card-t">Status de Pagamento — Sócios (Março)</div>
+        <div class="card-d">Distribuição de lucros + Prolabore — o que foi pago e o que falta</div>
+
+        <div class="partner-card">
+          <div class="partner-avatar" style="background:linear-gradient(135deg,var(--accent),var(--a2))">P</div>
+          <div class="partner-info">
+            <div class="p-name">Pamela</div>
+            <div class="p-sub">Distribuição + Prolabore</div>
+          </div>
+          <div class="partner-vals">
+            <div class="p-total" style="color:var(--accent)">R$ 16.276</div>
+            <div class="p-status"><span class="tag parcial">PARCIAL</span> <span style="font-size:10px;color:var(--t3);font-family:'JetBrains Mono'">Pago: R$7.782 · Falta: R$7.051</span></div>
+          </div>
+        </div>
+
+        <div class="partner-card">
+          <div class="partner-avatar" style="background:linear-gradient(135deg,var(--teal),var(--green))">Ph</div>
+          <div class="partner-info">
+            <div class="p-name">Phellipe</div>
+            <div class="p-sub">Distribuição + Prolabore</div>
+          </div>
+          <div class="partner-vals">
+            <div class="p-total" style="color:var(--accent)">R$ 16.276</div>
+            <div class="p-status"><span class="tag parcial">PARCIAL</span> <span style="font-size:10px;color:var(--t3);font-family:'JetBrains Mono'">Pago: R$7.782 · Falta: R$7.051</span></div>
+          </div>
+        </div>
+
+        <div class="partner-card">
+          <div class="partner-avatar" style="background:linear-gradient(135deg,var(--gold),var(--orange))">T</div>
+          <div class="partner-info">
+            <div class="p-name">Tiago</div>
+            <div class="p-sub">Distribuição</div>
+          </div>
+          <div class="partner-vals">
+            <div class="p-total" style="color:var(--accent)">R$ 4.400</div>
+            <div class="p-status"><span class="tag parcial">PARCIAL</span> <span style="font-size:10px;color:var(--t3);font-family:'JetBrains Mono'">Pago: R$2.200 · Falta: R$2.200</span></div>
+          </div>
+        </div>
+
+        <div class="partner-card">
+          <div class="partner-avatar" style="background:linear-gradient(135deg,var(--red),var(--orange))">Pe</div>
+          <div class="partner-info">
+            <div class="p-name">Pedro (Andrea Vermont)</div>
+            <div class="p-sub">Custo Fixo — R$5.000/mês</div>
+          </div>
+          <div class="partner-vals">
+            <div class="p-total" style="color:var(--red)">R$ 5.000</div>
+            <div class="p-status"><span class="tag pendente">A PAGAR</span></div>
+          </div>
+        </div>
+
+        <div class="info-box" style="margin-top:12px">
+          <div class="label">Total Passivo Março</div>
+          <div style="font-size:14px;font-family:'JetBrains Mono';font-weight:700;color:var(--gold)">R$ 41.952 total · R$ 16.302 faltando</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px">Inclui distribuição, prolabore e Pedro. Impacto direto no caixa D+30.</div>
+        </div>
+      </div>
+
+      <!-- YoY + Creator Costs -->
+      <div class="card">
+        <div class="card-t">Crescimento Anual (2025 → 2026)</div>
+        <div class="card-d">Comparativo Year over Year — projeção vs realizado 2025</div>
+        <div class="yoy-compare">
+          <div>
+            <div class="yoy-year">Receita 2025</div>
+            <div class="yoy-val" style="color:var(--t2)">R$ 202.412</div>
+          </div>
+          <div class="yoy-arrow" style="color:var(--green)">→</div>
+          <div>
+            <div class="yoy-year">Projeção 2026</div>
+            <div class="yoy-val" style="color:var(--green)">R$ 533.748</div>
+          </div>
+        </div>
+        <div style="text-align:center;padding:4px 0 16px">
+          <span class="badge-up" style="font-size:14px;padding:6px 14px">+163,7% de crescimento</span>
+        </div>
+
+        <div class="yoy-compare" style="border-top:1px solid var(--border);padding-top:16px">
+          <div>
+            <div class="yoy-year">Despesas 2025</div>
+            <div class="yoy-val" style="color:var(--t2)">R$ 185.848</div>
+          </div>
+          <div class="yoy-arrow" style="color:var(--red)">→</div>
+          <div>
+            <div class="yoy-year">Projeção 2026</div>
+            <div class="yoy-val" style="color:var(--red)">R$ 235.644</div>
+          </div>
+        </div>
+        <div style="text-align:center;padding:4px 0 16px">
+          <span class="badge-warn" style="font-size:14px;padding:6px 14px">+26,8% de aumento</span>
+        </div>
+
+        <div class="info-box">
+          <div class="label">Custo por Creator</div>
+          <table class="tbl" style="margin-top:8px">
+            <thead><tr><th>Creator</th><th>% do Contrato</th><th>Custo Total</th><th>Eficiência</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Bruno</strong></td><td class="mono">19,9%</td><td class="mono">R$ 5.000</td><td><span class="tag low">EFICIENTE</span></td></tr>
+              <tr><td><strong>Gess</strong></td><td class="mono">11,1%</td><td class="mono">R$ 3.147</td><td><span class="tag low">EFICIENTE</span></td></tr>
+              <tr><td><strong>Gabriel</strong></td><td class="mono">11,1%</td><td class="mono">R$ 1.797</td><td><span class="tag low">EFICIENTE</span></td></tr>
+              <tr><td><strong>Arlene</strong></td><td class="mono">11,1%</td><td class="mono">R$ 2.697</td><td><span class="tag low">EFICIENTE</span></td></tr>
+              <tr><td><strong>Andrea</strong></td><td class="mono" style="color:var(--red)">50,0%</td><td class="mono">R$ 8.000</td><td><span class="tag high">ALTO CUSTO</span></td></tr>
+            </tbody>
+          </table>
+          <div style="font-size:11px;color:var(--t3);margin-top:8px">Andrea consome 50% do contrato (R$8k de R$16k). Renegociar ou substituir pode agregar R$3-4k/mês de margem.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Despesas 2025 vs 2026 Chart + Alertas -->
+    <div class="sec">Comparativo de Despesas & Alertas Executivos</div>
+    <div class="exec-grid">
+      <div class="card">
+        <div class="card-t">Despesas 2025 vs 2026 — Por Mês</div>
+        <div class="card-d">Evolução mensal das despesas com comparativo inter-anual</div>
+        <div class="chart-wrap" style="height:280px"><canvas id="execDespYoYChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-t">Alertas para Tomada de Decisão</div>
+        <div class="card-d">Pontos críticos que exigem ação imediata do CFO</div>
+        <div style="padding:10px 0">
+          <div class="exec-alert alert-red">
+            <div class="a-icon">🚨</div>
+            <div class="a-text"><strong>Concentração de receita:</strong> Andrea Vermont = 26,4% do MRR. Perda desse contrato impactaria -R$16k/mês. Diversificar é prioridade #1.</div>
+          </div>
+          <div class="exec-alert alert-red">
+            <div class="a-icon">⚠️</div>
+            <div class="a-text"><strong>Custo Andrea (Pedro):</strong> R$5.000/mês fixo = 50% do contrato. Margem líquida de apenas R$3k após impostos. Renegociar valor ou modelo.</div>
+          </div>
+          <div class="exec-alert alert-gold">
+            <div class="a-icon">📋</div>
+            <div class="a-text"><strong>Kelem expira em Março:</strong> R$6.000/mês em risco. Se não renovar, receita cai 9,9%. Ter plano B com prospect equivalente.</div>
+          </div>
+          <div class="exec-alert alert-gold">
+            <div class="a-icon">💰</div>
+            <div class="a-text"><strong>Despesas Q1 acima do plano:</strong> Real R$109k vs Projetado R$58k (+89%). Principal causa: distribuição aos sócios não está na projeção base. Revisar projeção.</div>
+          </div>
+          <div class="exec-alert alert-green">
+            <div class="a-icon">📈</div>
+            <div class="a-text"><strong>Receita crescendo forte:</strong> +21,6% acima do plano no Q1. Dois novos contratos (Acelera + CSM) trouxeram R$10k/mês. Manter pipeline ativo.</div>
+          </div>
+          <div class="exec-alert alert-green">
+            <div class="a-icon">💡</div>
+            <div class="a-text"><strong>Stack tech enxuto:</strong> R$561/mês (1,3% da receita) é benchmark excelente. Sem desperdício em ferramentas — manter.</div>
           </div>
         </div>
       </div>
@@ -1100,6 +1457,66 @@ function initCharts(mesesFiltro){
       options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const total=ctx.dataset.data.reduce((a,b)=>a+b,0);return `${ctx.label}: R$ ${ctx.raw.toLocaleString('pt-BR')} (${((ctx.raw/total)*100).toFixed(1)}%)`}}}}}
     });
     document.getElementById('concLegend').innerHTML=l2.map((lb,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${c2[i]}"></div>${lb}</div>`).join('');
+  }
+
+  // ===== EXECUTIVE TAB CHARTS =====
+
+  // Projeção vs Realizado
+  const epr=document.getElementById('execProjRealChart');
+  if(epr){
+    if(charts.epr) charts.epr.destroy();
+    const projMensal=[44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479];
+    const realMensal=receita2026Data.map(function(v){return v||null});
+    const despProj=[18040,20140,19690,19701,19540,19698,19540,19540,19540,20138,19540,20540];
+    const despReal=[41964,38131,29442,null,null,null,null,null,null,null,null,null];
+    charts.epr=new Chart(epr,{
+      type:'bar',
+      data:{
+        labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+        datasets:[
+          {label:'Receita Projetada',data:projMensal,backgroundColor:'rgba(139,124,247,.25)',borderColor:accent,borderWidth:2,borderDash:[5,5],borderRadius:4,barPercentage:.35,categoryPercentage:.7,order:2},
+          {label:'Receita Real',data:realMensal,backgroundColor:green,borderRadius:6,barPercentage:.35,categoryPercentage:.7,order:1},
+          {label:'Despesa Projetada',data:despProj,type:'line',borderColor:t3,borderDash:[4,4],backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,tension:.3,order:0},
+          {label:'Despesa Real',data:despReal,type:'line',borderColor:red,backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:red,tension:.3,order:0}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t2,font:{family:"'JetBrains Mono'",size:10}}}},scales:{x:{ticks:tickOpt(t3),grid:{display:false}},y:{ticks:{...tickOpt(t3),callback:v=>'R$'+Math.round(v/1000)+'k'},grid:gridOpt}}}
+    });
+  }
+
+  // Despesas por Categoria (Donut)
+  const edc=document.getElementById('execDespCatChart');
+  if(edc){
+    if(charts.edc) charts.edc.destroy();
+    const dLabels=['Distrib. Lucros','Prolabore','Pedro (Fixo)','Impostos','Contabilidade','Evento Fire','Tecnologia','Outros'];
+    const dData=[54000,54000,60000,32186,3600,4116,6155,21587];
+    const dColors=[accent,teal,red,orange,sky,gold,cyan,t3];
+    charts.edc=new Chart(edc,{
+      type:'doughnut',data:{labels:dLabels,datasets:[{data:dData,backgroundColor:dColors,borderWidth:0,hoverOffset:8}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const total=ctx.dataset.data.reduce((a,b)=>a+b,0);return `${ctx.label}: R$ ${ctx.raw.toLocaleString('pt-BR')} (${((ctx.raw/total)*100).toFixed(1)}%)`}}}}}
+    });
+    document.getElementById('execDespLegend').innerHTML=dLabels.map((lb,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${dColors[i]}"></div>${lb} <span style="font-family:'JetBrains Mono';font-size:10px;color:var(--t3);margin-left:4px">R$${Math.round(dData[i]/1000)}k</span></div>`).join('');
+  }
+
+  // Despesas YoY (2025 vs 2026)
+  const edy=document.getElementById('execDespYoYChart');
+  if(edy){
+    if(charts.edy) charts.edy.destroy();
+    const desp2025=[0,4000,3750,6401,5860,11362,14919,14642,27550,28205,34584,34576];
+    const desp2026Real=[41964,38131,29442,null,null,null,null,null,null,null,null,null];
+    const desp2026Proj=[18040,20140,19690,19701,19540,19698,19540,19540,19540,20138,19540,20540];
+    charts.edy=new Chart(edy,{
+      type:'line',
+      data:{
+        labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+        datasets:[
+          {label:'Despesas 2025',data:desp2025,borderColor:t3,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:t3,tension:.3},
+          {label:'Despesas 2026 Real',data:desp2026Real,borderColor:red,backgroundColor:'rgba(248,113,113,.08)',borderWidth:3,pointRadius:5,pointBackgroundColor:red,fill:true,tension:.3},
+          {label:'Despesas 2026 Projeção',data:desp2026Proj,borderColor:orange,borderDash:[5,5],backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,tension:.3}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t2,font:{family:"'JetBrains Mono'",size:10}}}},scales:{x:{ticks:tickOpt(t3),grid:{display:false}},y:{ticks:{...tickOpt(t3),callback:v=>'R$'+Math.round(v/1000)+'k'},grid:gridOpt}}}
+    });
   }
 }
 </script>
