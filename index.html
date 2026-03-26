@@ -1004,13 +1004,97 @@ function processarDadosAPI(data){
   }
 
   // --- Atualizar Fluxo de Caixa ---
+  var saldoInter=0,saldoNubank=0;
   if(data.fluxoInter){
+    saldoInter=data.fluxoInter.saldoAtual||0;
     var kpisFluxo=document.querySelectorAll('#tab-fluxo .kpi');
-    if(kpisFluxo[0]) kpisFluxo[0].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(data.fluxoInter.saldoAtual).toLocaleString('pt-BR');
+    if(kpisFluxo[0]) kpisFluxo[0].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(saldoInter).toLocaleString('pt-BR');
   }
   if(data.fluxoNubank){
+    saldoNubank=data.fluxoNubank.saldoAtual||0;
     var kpisFluxo=document.querySelectorAll('#tab-fluxo .kpi');
-    if(kpisFluxo[1]) kpisFluxo[1].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(data.fluxoNubank.saldoAtual).toLocaleString('pt-BR');
+    if(kpisFluxo[1]) kpisFluxo[1].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(saldoNubank).toLocaleString('pt-BR');
+  }
+  // Atualizar Caixa Disponível na Visão Geral
+  var caixaTotal=saldoInter+saldoNubank;
+  if(kpis[3]){
+    kpis[3].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(caixaTotal).toLocaleString('pt-BR');
+    kpis[3].querySelector('.kpi-s').textContent='Inter: R$'+Math.round(saldoInter).toLocaleString('pt-BR')+' · Nubank: R$'+Math.round(saldoNubank).toLocaleString('pt-BR');
+  }
+  // Atualizar Reserva D+30 e info box
+  var rSaldo=document.getElementById('rSaldoAtual');
+  if(rSaldo) rSaldo.textContent='R$ '+Math.round(caixaTotal).toLocaleString('pt-BR');
+
+  // Atualizar Controle Financeiro (Saldo Inter/Nubank por mês)
+  if(data.controleFinanceiro&&data.controleFinanceiro.meses){
+    var cfMeses=data.controleFinanceiro.meses;
+    var ultimoCF=cfMeses[cfMeses.length-1];
+    if(ultimoCF){
+      var rAcum=document.getElementById('rSaldoAcum');
+      if(rAcum) rAcum.textContent='R$ '+Math.round(ultimoCF.saldoAcumulado||0).toLocaleString('pt-BR');
+    }
+  }
+
+  // --- Atualizar Distribuição Sócios ---
+  if(data.distribuicao){
+    var distTbl=document.querySelector('#tab-clientes table.tbl:last-of-type');
+    if(distTbl){
+      var distBody=distTbl.querySelector('tbody');
+      if(distBody){
+        var mOrdem=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+        var mAbrev=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        var mesesComDados=mOrdem.filter(function(m){return data.distribuicao[m]&&data.distribuicao[m].resumo&&(data.distribuicao[m].resumo.pamela>0||data.distribuicao[m].resumo.phellipe>0);});
+        if(mesesComDados.length>0){
+          // Atualizar header
+          var thead=distTbl.querySelector('thead tr');
+          thead.innerHTML='<th>Sócio</th>';
+          mesesComDados.forEach(function(m){thead.innerHTML+='<th>'+mAbrev[mOrdem.indexOf(m)]+'</th>';});
+          thead.innerHTML+='<th>Total</th>';
+          // Preencher dados
+          var socios=['pamela','phellipe','thiago'];
+          var socioNomes=['Pamela','Phellipe','Tiago'];
+          distBody.innerHTML='';
+          socios.forEach(function(s,i){
+            var tr='<tr><td><strong>'+socioNomes[i]+'</strong></td>';
+            var total=0;
+            mesesComDados.forEach(function(m){
+              var val=data.distribuicao[m].resumo[s]||0;
+              total+=val;
+              tr+='<td class="mono">R$ '+Math.round(val).toLocaleString('pt-BR')+'</td>';
+            });
+            tr+='<td class="mono" style="color:var(--accent)"><strong>R$ '+Math.round(total).toLocaleString('pt-BR')+'</strong></td></tr>';
+            distBody.innerHTML+=tr;
+          });
+        }
+      }
+    }
+  }
+
+  // --- Atualizar Projeção com status de contrato ---
+  if(data.projecao2026&&data.projecao2026.receitas){
+    var alertsDiv=document.querySelector('#tab-geral .alert-item');
+    if(alertsDiv){
+      var alertContainer=alertsDiv.parentElement;
+      // Limpar alertas antigos e gerar novos baseados nos dados
+      var newAlerts='';
+      var cancelados=data.projecao2026.receitas.filter(function(r){return r.periodo&&r.periodo.toUpperCase()==='CANCELADO';});
+      cancelados.forEach(function(c){
+        var totalVal=c.valores.reduce(function(a,b){return a+b;},0);
+        newAlerts+='<div class="alert-item warning"><div class="alert-icon">&#9888;&#65039;</div><div><div class="alert-title">'+c.nome+' — CANCELADO</div><div class="alert-desc">Contrato cancelado. Receita perdida: R$ '+Math.round(totalVal).toLocaleString('pt-BR')+'</div></div></div>';
+      });
+      // Manter alerta de concentração se Andrea > 25%
+      var andreaRec=data.projecao2026.receitas.find(function(r){return r.nome&&r.nome.toLowerCase().indexOf('andrea')>=0;});
+      var totalProj=data.projecao2026.totalReceita?data.projecao2026.totalReceita.reduce(function(a,b){return a+b;},0):0;
+      if(andreaRec&&totalProj>0){
+        var andreaTotal=andreaRec.valores.reduce(function(a,b){return a+b;},0);
+        var andreaPct=Math.round(andreaTotal/totalProj*100);
+        if(andreaPct>20) newAlerts+='<div class="alert-item critical"><div class="alert-icon">&#9888;&#65039;</div><div><div class="alert-title">Concentração: Andrea Vermont = '+andreaPct+'% da receita projetada</div><div class="alert-desc">R$ '+Math.round(andreaRec.valores[0]).toLocaleString('pt-BR')+'/mês. Diversificar base é prioridade.</div></div></div>';
+      }
+      // Alerta positivo de contratos ativos
+      var ativos=data.projecao2026.receitas.filter(function(r){return !r.periodo||r.periodo.toUpperCase()==='CONTRATO';}).length;
+      newAlerts+='<div class="alert-item positive"><div class="alert-icon">&#128640;</div><div><div class="alert-title">'+ativos+' contratos ativos na projeção 2026</div><div class="alert-desc">MRR projetado de R$ '+Math.round(mrrAtual).toLocaleString('pt-BR')+'/mês.</div></div></div>';
+      if(newAlerts) alertContainer.innerHTML=newAlerts;
+    }
   }
 
   // --- Atualizar Receita 2025 no gráfico ---
@@ -1028,6 +1112,9 @@ function processarDadosAPI(data){
 
   // --- Atualizar Recebimentos ---
   if(data.recebimentos&&data.recebimentos.length>0){
+    // Atualizar header para incluir distribuição
+    var theadEntradas=document.querySelector('#tblEntradas thead tr');
+    if(theadEntradas) theadEntradas.innerHTML='<th>Mês</th><th>Cliente</th><th>Previsto</th><th>Recebido</th><th>Status</th><th>Pamela</th><th>Phellipe</th><th>Tiago</th><th>Pedro</th>';
     var tbody=document.querySelector('#tblEntradas tbody');
     if(tbody){
       tbody.innerHTML='';
@@ -1036,13 +1123,18 @@ function processarDadosAPI(data){
         if(r.mesNum<1||r.mesNum>12) return;
         var statusClass=r.status==='PAGO'?'pago':r.status==='PARCIAL'?'parcial':'pendente';
         var valColor=r.status==='PAGO'?'var(--green)':r.status==='PARCIAL'?'var(--gold)':'var(--red)';
+        var dist=r.distribuicao||{};
         var tr=document.createElement('tr');
         tr.setAttribute('data-month',r.mesNum);
         tr.innerHTML='<td>'+mesesNome[r.mesNum]+'</td>'
           +'<td>'+(r.descricao||r.cliente)+'</td>'
           +'<td class="mono">R$ '+Math.round(r.previsto).toLocaleString('pt-BR')+'</td>'
           +'<td class="mono" style="color:'+valColor+'">R$ '+Math.round(r.recebido).toLocaleString('pt-BR')+'</td>'
-          +'<td><span class="tag '+statusClass+'">'+r.status+'</span></td>';
+          +'<td><span class="tag '+statusClass+'">'+r.status+'</span></td>'
+          +'<td class="mono" style="font-size:11px">'+(dist.pamela?'R$ '+Math.round(dist.pamela).toLocaleString('pt-BR'):'-')+'</td>'
+          +'<td class="mono" style="font-size:11px">'+(dist.phellipe?'R$ '+Math.round(dist.phellipe).toLocaleString('pt-BR'):'-')+'</td>'
+          +'<td class="mono" style="font-size:11px">'+(dist.thiago?'R$ '+Math.round(dist.thiago).toLocaleString('pt-BR'):'-')+'</td>'
+          +'<td class="mono" style="font-size:11px">'+(dist.pedro?'R$ '+Math.round(dist.pedro).toLocaleString('pt-BR'):'-')+'</td>';
         tbody.appendChild(tr);
       });
     }
