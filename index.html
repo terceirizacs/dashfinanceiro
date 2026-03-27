@@ -175,6 +175,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
 .hbar-track{flex:1;height:28px;background:var(--track-bg);border-radius:8px;overflow:visible;position:relative}
 .hbar-fill{height:100%;border-radius:8px;display:flex;align-items:center;padding-left:10px;font-family:'JetBrains Mono';font-weight:600;font-size:11px;color:#fff;transition:width .6s;white-space:nowrap;min-width:fit-content;text-shadow:0 1px 3px rgba(0,0,0,.5);overflow:visible}
 .hbar-fill span{position:relative;z-index:1}
+.hbar-val{font-family:'JetBrains Mono';font-weight:600;font-size:11px;color:var(--t1);white-space:nowrap;flex-shrink:0;min-width:80px;text-align:right}
 
 /* TAB CONTENT */
 .tab-content{display:none}
@@ -511,14 +512,14 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
         <div class="card-t">Saídas por Categoria</div>
         <div class="card-d">Distribuição acumulada Q1/2026</div>
         <div style="padding:10px 0">
-          <div class="hbar-row"><div class="hbar-lbl">Distrib. Sócios</div><div class="hbar-track"><div class="hbar-fill" style="width:52%;background:var(--accent)">R$ 56.313</div></div></div>
-          <div class="hbar-row"><div class="hbar-lbl">Mão de Obra</div><div class="hbar-track"><div class="hbar-fill" style="width:15%;background:var(--teal)">R$ 16.000</div></div></div>
-          <div class="hbar-row"><div class="hbar-lbl">Impostos</div><div class="hbar-track"><div class="hbar-fill" style="width:8%;background:var(--red)">R$ 8.836</div></div></div>
-          <div class="hbar-row"><div class="hbar-lbl">Prolabore</div><div class="hbar-track"><div class="hbar-fill" style="width:7%;background:var(--orange)">R$ 7.818</div></div></div>
-          <div class="hbar-row"><div class="hbar-lbl">Custos Fixos</div><div class="hbar-track"><div class="hbar-fill" style="width:7%;background:var(--sky)">R$ 7.179</div></div></div>
-          <div class="hbar-row"><div class="hbar-lbl">Tecnologia</div><div class="hbar-track"><div class="hbar-fill" style="width:5%;background:var(--cyan)">R$ 5.074</div></div></div>
-          <div class="hbar-row"><div class="hbar-lbl">Evento Fire</div><div class="hbar-track"><div class="hbar-fill" style="width:1%;background:var(--pink)">R$ 1.029</div></div></div>
-          <div class="hbar-row"><div class="hbar-lbl">Outros</div><div class="hbar-track"><div class="hbar-fill" style="width:7%;background:var(--t3)">R$ 7.287</div></div></div>
+          <div class="hbar-row"><div class="hbar-lbl">Distrib. Sócios</div><div class="hbar-track"><div class="hbar-fill" style="width:52%;background:var(--accent)"></div></div><span class="hbar-val">R$ 56.313</span></div>
+          <div class="hbar-row"><div class="hbar-lbl">Mão de Obra</div><div class="hbar-track"><div class="hbar-fill" style="width:15%;background:var(--teal)"></div></div><span class="hbar-val">R$ 16.000</span></div>
+          <div class="hbar-row"><div class="hbar-lbl">Impostos</div><div class="hbar-track"><div class="hbar-fill" style="width:8%;background:var(--red)"></div></div><span class="hbar-val">R$ 8.836</span></div>
+          <div class="hbar-row"><div class="hbar-lbl">Prolabore</div><div class="hbar-track"><div class="hbar-fill" style="width:7%;background:var(--orange)"></div></div><span class="hbar-val">R$ 7.818</span></div>
+          <div class="hbar-row"><div class="hbar-lbl">Custos Fixos</div><div class="hbar-track"><div class="hbar-fill" style="width:7%;background:var(--sky)"></div></div><span class="hbar-val">R$ 7.179</span></div>
+          <div class="hbar-row"><div class="hbar-lbl">Tecnologia</div><div class="hbar-track"><div class="hbar-fill" style="width:5%;background:var(--cyan)"></div></div><span class="hbar-val">R$ 5.074</span></div>
+          <div class="hbar-row"><div class="hbar-lbl">Evento Fire</div><div class="hbar-track"><div class="hbar-fill" style="width:1%;background:var(--pink)"></div></div><span class="hbar-val">R$ 1.029</span></div>
+          <div class="hbar-row"><div class="hbar-lbl">Outros</div><div class="hbar-track"><div class="hbar-fill" style="width:7%;background:var(--t3)"></div></div><span class="hbar-val">R$ 7.287</span></div>
         </div>
       </div>
     </div>
