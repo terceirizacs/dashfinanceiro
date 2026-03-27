@@ -1089,8 +1089,11 @@ function processarDadosAPI(data){
   // 1. Lucro Projetado e Margem (Projeção 2026)
   if(data.projecao2026){
     var recTot=data.projecao2026.totalReceita?data.projecao2026.totalReceita.reduce(function(a,b){return a+b;},0):0;
+    // Usar totalDespesa da API se disponível, senão somar despesas individualmente
     var despTotArr=[];
-    if(data.projecao2026.despesas){
+    if(data.projecao2026.totalDespesa&&data.projecao2026.totalDespesa.length>0){
+      despTotArr=data.projecao2026.totalDespesa;
+    }else if(data.projecao2026.despesas){
       for(var m=0;m<12;m++){
         var mTot=0;
         data.projecao2026.despesas.forEach(function(d){mTot+=(d.valores[m]||0);});
@@ -1131,8 +1134,8 @@ function processarDadosAPI(data){
     var gEV=document.getElementById('gaugeExecVal');
     if(gEV) gEV.textContent=execPct.toFixed(0)+'%';
 
-    // Gauge Custo Operacional
-    var despReal=cfM.reduce(function(s,m){return s+(m.custosFixos||0)+(m.custosVariaveis||0)+(m.impostos||0);},0);
+    // Gauge Custo Operacional (receita - saldo = despesas reais)
+    var despReal=cfM.reduce(function(s,m){return s+(m.faturamento||0)-(m.valorContaMes||0);},0);
     var custoPct=recReal>0?Math.round(despReal/recReal*1000)/10:0;
     setGauge('gaugeCusto',custoPct);
     var gCV=document.getElementById('gaugeCustoVal');
@@ -1148,11 +1151,18 @@ function processarDadosAPI(data){
       if(gMoM) gMoM.textContent=(momPct>=0?'+':'')+momPct.toFixed(1)+'%';
     }
 
-    // Crescimento Anual
+    // Crescimento Anual — receita e despesa projetadas
     var yoyRecProj=document.querySelector('.yoy-val[style*="green"]');
-    if(yoyRecProj&&data.projecao2026.totalReceita) yoyRecProj.textContent='R$ '+fN(recTot);
+    if(yoyRecProj&&recTot>0) yoyRecProj.textContent='R$ '+fN(recTot);
     var yoyDespProj=document.querySelectorAll('.yoy-val[style*="red"]');
-    if(yoyDespProj[0]) yoyDespProj[0].textContent='R$ '+fN(despTot);
+    if(yoyDespProj.length>0&&despTot>0) yoyDespProj[yoyDespProj.length-1].textContent='R$ '+fN(despTot);
+    // Atualizar % crescimento receita
+    if(recTot>0&&data.receita2025){
+      var rec2025Total=data.receita2025.totalReceita?data.receita2025.totalReceita.reduce(function(a,b){return a+b;},0):202412;
+      var crescRec=rec2025Total>0?Math.round((recTot-rec2025Total)/rec2025Total*1000)/10:0;
+      var badgeUp=document.querySelector('.badge-up');
+      if(badgeUp) badgeUp.textContent='+'+crescRec.toFixed(1)+'% de crescimento';
+    }
   }
 
   // 3. Status Sócios (dinâmico da API — sem Pedro)
@@ -1190,28 +1200,42 @@ function processarDadosAPI(data){
     }
   }
 
-  // 4. Despesas por Categoria Detalhado (da aba Pagamentos)
+  // 4. Despesas por Categoria — MÊS VIGENTE, agrupado por fornecedor (soma duplicados exceto reembolso)
   if(data.pagamentos&&data.pagamentos.length>0){
+    // Descobrir último mês com pagamentos
+    var maxMes=0;
+    data.pagamentos.forEach(function(p){if(p.mesNum>maxMes)maxMes=p.mesNum;});
+    var mesesNomeExec=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     var catTotais={};
     data.pagamentos.forEach(function(p){
-      var cat=p.fornecedor||p.descricao||'Outros';
-      if(!catTotais[cat])catTotais[cat]=0;
-      catTotais[cat]+=(p.pago||p.previsto||0);
+      if(p.mesNum!==maxMes)return;
+      var nome=p.fornecedor||p.descricao||'Outros';
+      var isReembolso=nome.toLowerCase().indexOf('reembolso')>=0;
+      if(isReembolso){
+        // Reembolso: separar cada um
+        var key=nome+' ('+p.descricao+')';
+        if(!catTotais[key])catTotais[key]=0;
+        catTotais[key]+=(p.pago||p.previsto||0);
+      }else{
+        if(!catTotais[nome])catTotais[nome]=0;
+        catTotais[nome]+=(p.pago||p.previsto||0);
+      }
     });
-    var catArr=Object.entries(catTotais).sort(function(a,b){return b[1]-a[1];});
+    var catArr=Object.entries(catTotais).filter(function(c){return c[1]>0;}).sort(function(a,b){return b[1]-a[1];});
     var totalDesp=catArr.reduce(function(s,c){return s+c[1];},0);
     var cores=['var(--accent)','var(--teal)','var(--green)','var(--gold)','var(--orange)','var(--pink)','var(--sky)','var(--red)','var(--cyan)','var(--t3)'];
     var detDiv=document.getElementById('execDespDetalhado');
     if(detDiv){
-      var dh='';
+      var dh='<div style="font-size:12px;color:var(--t2);margin-bottom:12px;font-weight:600">'+mesesNomeExec[maxMes]+' 2026</div>';
+      var mxCat=catArr.length>0?catArr[0][1]:1;
       catArr.forEach(function(c,i){
         var pct=totalDesp>0?Math.round(c[1]/totalDesp*1000)/10:0;
-        var w=Math.max(pct,2);
+        var w=Math.max(Math.round(c[1]/mxCat*100),3);
         var cor=cores[i%cores.length];
-        var tipText=c[0]+': R$ '+fN(c[1])+' ('+pct.toFixed(1)+'% do total)';
+        var tipText=c[0]+': R$ '+fN(c[1])+' ('+pct.toFixed(1)+'% do total de '+mesesNomeExec[maxMes]+')';
         dh+='<div class="hbar-row" title="'+tipText+'" style="cursor:pointer"><div class="hbar-lbl">'+c[0]+'</div><div class="hbar-track"><div class="hbar-fill" style="width:'+w+'%;background:'+cor+'"></div></div><span class="hbar-val">R$ '+fN(c[1])+'</span></div>';
       });
-      dh+='<div class="info-box" style="margin-top:12px"><div class="label">Total Pagamentos</div><div style="font-size:14px;font-family:JetBrains Mono;font-weight:700;color:var(--accent)">R$ '+fN(totalDesp)+'</div></div>';
+      dh+='<div class="info-box" style="margin-top:12px"><div class="label">Total '+mesesNomeExec[maxMes]+'</div><div style="font-size:14px;font-family:JetBrains Mono;font-weight:700;color:var(--accent)">R$ '+fN(totalDesp)+'</div></div>';
       detDiv.innerHTML=dh;
     }
   }
