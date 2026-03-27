@@ -988,7 +988,7 @@ function processarDadosAPI(data){
       if(data.custoCliente[m]&&data.custoCliente[m].total&&data.custoCliente[m].total.receita>0){
         ultimoMes=m;
         mrrAtual=data.custoCliente[m].total.receita;
-        numContratos=data.custoCliente[m].numClientes||data.custoCliente[m].clientes.length;
+        numContratos=data.custoCliente[m].clientes.length||data.custoCliente[m].numClientes||0;
         receitaAcum+=data.custoCliente[m].total.receita;
       }
     });
