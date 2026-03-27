@@ -964,7 +964,7 @@ function processarDadosAPI(data){
     }
   }
 
-  // --- Atualizar Distribuição Sócios ---
+  // --- Atualizar Distribuição Sócios (usa socios.totalAPagar ou totalPamela/totalPhellipe/totalThiago) ---
   if(data.distribuicao){
     var distTbl=document.querySelector('#tab-clientes table.tbl:last-of-type');
     if(distTbl){
@@ -972,22 +972,30 @@ function processarDadosAPI(data){
       if(distBody){
         var mOrdem=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
         var mAbrev=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-        var mesesComDados=mOrdem.filter(function(m){return data.distribuicao[m]&&data.distribuicao[m].resumo&&(data.distribuicao[m].resumo.pamela>0||data.distribuicao[m].resumo.phellipe>0);});
+        var mesesComDados=mOrdem.filter(function(m){
+          var d=data.distribuicao[m];
+          if(!d)return false;
+          if(d.socios&&(d.socios.pamela||d.socios.phellipe))return true;
+          if(d.totalPamela>0||d.totalPhellipe>0)return true;
+          return false;
+        });
         if(mesesComDados.length>0){
-          // Atualizar header
           var thead=distTbl.querySelector('thead tr');
           thead.innerHTML='<th>Sócio</th>';
           mesesComDados.forEach(function(m){thead.innerHTML+='<th>'+mAbrev[mOrdem.indexOf(m)]+'</th>';});
           thead.innerHTML+='<th>Total</th>';
-          // Preencher dados
           var socios=['pamela','phellipe','thiago'];
           var socioNomes=['Pamela','Phellipe','Tiago'];
+          var totalKeys={pamela:'totalPamela',phellipe:'totalPhellipe',thiago:'totalThiago'};
           distBody.innerHTML='';
           socios.forEach(function(s,i){
             var tr='<tr><td><strong>'+socioNomes[i]+'</strong></td>';
             var total=0;
             mesesComDados.forEach(function(m){
-              var val=data.distribuicao[m].resumo[s]||0;
+              var d=data.distribuicao[m];
+              var val=0;
+              if(d.socios&&d.socios[s]) val=d.socios[s].totalAPagar||0;
+              else if(d[totalKeys[s]]) val=d[totalKeys[s]];
               total+=val;
               tr+='<td class="mono">R$ '+Math.round(val).toLocaleString('pt-BR')+'</td>';
             });
