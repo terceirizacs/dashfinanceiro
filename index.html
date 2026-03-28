@@ -838,6 +838,136 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
         </div>
       </div>
     </div>
+
+    <!-- Previsão de Caixa D+30/D+60/D+90 -->
+    <div class="sec">Previsão de Caixa — D+30 / D+60 / D+90 <span class="help-icon">?<span class="help-tip">Projeção do saldo de caixa nos próximos 30, 60 e 90 dias. Soma o saldo atual (Inter + Nubank) com recebimentos previstos e subtrai pagamentos previstos no período.</span></span></div>
+    <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi c-green" id="kpiCaixaD30">
+        <div class="kpi-l">Caixa D+30 <span class="help-icon">?<span class="help-tip">Saldo previsto daqui a 30 dias = Saldo atual + Recebimentos pendentes (próx. 30d) − Pagamentos previstos (próx. 30d)</span></span></div>
+        <div class="kpi-v green" id="execCaixaD30">R$&nbsp;—</div>
+        <div class="kpi-s" id="execCaixaD30Sub">Carregando...</div>
+      </div>
+      <div class="kpi c-accent" id="kpiCaixaD60">
+        <div class="kpi-l">Caixa D+60 <span class="help-icon">?<span class="help-tip">Saldo previsto daqui a 60 dias = Saldo atual + Recebimentos pendentes (próx. 60d) − Pagamentos previstos (próx. 60d)</span></span></div>
+        <div class="kpi-v accent" id="execCaixaD60">R$&nbsp;—</div>
+        <div class="kpi-s" id="execCaixaD60Sub">Carregando...</div>
+      </div>
+      <div class="kpi c-gold" id="kpiCaixaD90">
+        <div class="kpi-l">Caixa D+90 <span class="help-icon">?<span class="help-tip">Saldo previsto daqui a 90 dias = Saldo atual + Recebimentos pendentes (próx. 90d) − Pagamentos previstos (próx. 90d)</span></span></div>
+        <div class="kpi-v gold" id="execCaixaD90">R$&nbsp;—</div>
+        <div class="kpi-s" id="execCaixaD90Sub">Carregando...</div>
+      </div>
+    </div>
+
+    <!-- Aging de Recebimentos (Inadimplência) -->
+    <div class="sec">Aging de Recebimentos — Inadimplência <span class="help-icon">?<span class="help-tip">Mostra clientes com valores pendentes (recebido menor que previsto). Quanto mais antigo o atraso, mais crítico.</span></span></div>
+    <div class="card">
+      <div class="card-t">Clientes com Recebimentos Pendentes</div>
+      <div class="card-d">Diferença entre valor previsto e recebido por cliente — ordenado por valor em aberto</div>
+      <div class="tbl-scroll">
+        <table class="tbl" id="tblAging">
+          <thead><tr><th>Mês</th><th>Cliente</th><th>Previsto</th><th>Recebido</th><th>Em Aberto</th><th>Status</th></tr></thead>
+          <tbody><tr><td colspan="6" style="text-align:center;color:var(--t3)">Carregando dados...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="info-box" style="margin-top:12px" id="agingResumo">
+        <div class="label">Resumo Inadimplência</div>
+        <div style="font-size:12px;color:var(--t2)">Carregando...</div>
+      </div>
+    </div>
+
+    <!-- DRE Simplificado Mensal -->
+    <div class="sec">DRE Simplificado Mensal <span class="help-icon">?<span class="help-tip">Demonstrativo de Resultado do Exercício simplificado. Mostra receita bruta, impostos, custos fixos, retirada de sócios e saldo final mês a mês, com dados do Controle Financeiro.</span></span></div>
+    <div class="card">
+      <div class="card-t">Demonstrativo de Resultado — 2026</div>
+      <div class="card-d">Visão mensal de receitas, deduções e resultado operacional</div>
+      <div class="tbl-scroll">
+        <table class="tbl" id="tblDRE">
+          <thead><tr><th>Linha</th></tr></thead>
+          <tbody><tr><td style="text-align:center;color:var(--t3)">Carregando dados...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Break-even -->
+    <div class="sec">Análise de Break-even <span class="help-icon">?<span class="help-tip">Ponto de equilíbrio: receita mínima necessária para cobrir todos os custos fixos mensais. Margem de segurança mostra quanto a receita atual supera esse ponto.</span></span></div>
+    <div class="exec-grid">
+      <div class="card">
+        <div class="card-t">Break-even Mensal <span class="help-icon">?<span class="help-tip">Custo fixo médio = média dos custos fixos mensais do Controle Financeiro. A receita precisa ser pelo menos igual ao custo fixo para não ter prejuízo.</span></span></div>
+        <div class="card-d">Receita mínima necessária para cobrir custos fixos</div>
+        <div style="padding:16px 0">
+          <div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+            <div class="kpi c-red" style="padding:16px">
+              <div class="kpi-l" style="font-size:10px">Custo Fixo Médio/Mês</div>
+              <div class="kpi-v red" id="execBreakCusto" style="font-size:20px">R$&nbsp;—</div>
+            </div>
+            <div class="kpi c-gold" style="padding:16px">
+              <div class="kpi-l" style="font-size:10px">Receita Mínima (Break-even)</div>
+              <div class="kpi-v gold" id="execBreakMin" style="font-size:20px">R$&nbsp;—</div>
+            </div>
+            <div class="kpi c-green" style="padding:16px">
+              <div class="kpi-l" style="font-size:10px">Margem de Segurança</div>
+              <div class="kpi-v green" id="execBreakMargem" style="font-size:20px">R$&nbsp;—</div>
+              <div class="kpi-s" id="execBreakMargemPct"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-t">Gauge Break-even</div>
+        <div class="card-d">Receita atual vs ponto de equilíbrio</div>
+        <div style="display:flex;align-items:center;justify-content:center;padding:24px 0">
+          <div style="position:relative;width:160px;height:160px">
+            <svg viewBox="0 0 80 80" style="width:160px;height:160px;transform:rotate(-90deg)">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" stroke-width="6"/>
+              <circle id="gaugeBreakeven" cx="40" cy="40" r="34" fill="none" stroke="var(--green)" stroke-width="6" stroke-linecap="round" style="stroke-dasharray:213.6;stroke-dashoffset:213.6;transition:stroke-dashoffset 1s ease"/>
+            </svg>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+              <div style="font-family:'JetBrains Mono';font-weight:700;font-size:22px;color:var(--green)" id="gaugeBreakevenVal">—</div>
+              <div style="font-size:10px;color:var(--t3)">acima do BE</div>
+            </div>
+          </div>
+        </div>
+        <div class="info-box" id="breakEvenInfo">
+          <div class="label">Análise</div>
+          <div style="font-size:12px;color:var(--t2)">Carregando...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Índice de Concentração (HHI) -->
+    <div class="sec">Índice de Concentração de Clientes (HHI) <span class="help-icon">?<span class="help-tip">O Índice Herfindahl-Hirschman (HHI) mede a concentração da base de clientes. Quanto maior o HHI, mais dependente a empresa é de poucos clientes. Abaixo de 1500 = diversificado, 1500-2500 = moderado, acima de 2500 = concentrado.</span></span></div>
+    <div class="exec-grid">
+      <div class="card">
+        <div class="card-t">HHI Score & Classificação</div>
+        <div class="card-d">Análise de risco de concentração da base de clientes</div>
+        <div style="display:flex;align-items:center;gap:24px;padding:20px 0;flex-wrap:wrap;justify-content:center">
+          <div style="text-align:center">
+            <div style="font-family:'JetBrains Mono';font-size:42px;font-weight:700" id="execHHIScore">—</div>
+            <div style="font-size:12px;color:var(--t3)">HHI Score</div>
+            <div style="margin-top:8px" id="execHHITag"><span class="tag medium">Calculando...</span></div>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <div style="background:var(--border);border-radius:8px;height:12px;position:relative;overflow:hidden" id="execHHIBar">
+              <div style="position:absolute;left:0;top:0;height:100%;border-radius:8px;transition:width .8s ease" id="execHHIFill"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:4px">
+              <span>0 (diversificado)</span><span>2500</span><span>10000 (monopolista)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-t">Top Clientes & Impacto de Perda</div>
+        <div class="card-d">Principais clientes por participação na receita</div>
+        <div id="execHHITop3" style="padding:12px 0">Carregando...</div>
+        <div class="info-box" style="margin-top:12px" id="execHHIImpacto">
+          <div class="label">Impacto de Perda do Maior Cliente</div>
+          <div style="font-size:12px;color:var(--t2)">Carregando...</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <footer>
@@ -1301,6 +1431,282 @@ function processarDadosAPI(data){
           dl+='</div></div>';
           distLucroDiv.innerHTML=dl;
         }
+      }
+    }
+  }
+
+  // ===== SEÇÃO 1: Previsão de Caixa D+30/D+60/D+90 =====
+  {
+    var saldoAtual=(data.fluxoInter?data.fluxoInter.saldoAtual||0:0)+(data.fluxoNubank?data.fluxoNubank.saldoAtual||0:0);
+    var hoje=new Date();
+    var mesAtual=hoje.getMonth()+1; // 1-12
+    var recPrev30=0,recPrev60=0,recPrev90=0;
+    var pagPrev30=0,pagPrev60=0,pagPrev90=0;
+
+    // Calcular recebimentos previstos pendentes por horizonte
+    if(data.recebimentos){
+      data.recebimentos.forEach(function(r){
+        if(r.status==='PAGO') return;
+        var valPendente=(r.previsto||0)-(r.recebido||0);
+        if(valPendente<=0) return;
+        var diffMes=(r.mesNum||0)-mesAtual;
+        if(diffMes>=0&&diffMes<=1) recPrev30+=valPendente;
+        if(diffMes>=0&&diffMes<=2) recPrev60+=valPendente;
+        if(diffMes>=0&&diffMes<=3) recPrev90+=valPendente;
+      });
+    }
+
+    // Calcular pagamentos previstos por horizonte
+    if(data.pagamentos){
+      data.pagamentos.forEach(function(p){
+        var valPendente=(p.previsto||0)-(p.pago||0);
+        if(valPendente<=0) return;
+        var diffMes=(p.mesNum||0)-mesAtual;
+        if(diffMes>=0&&diffMes<=1) pagPrev30+=valPendente;
+        if(diffMes>=0&&diffMes<=2) pagPrev60+=valPendente;
+        if(diffMes>=0&&diffMes<=3) pagPrev90+=valPendente;
+      });
+    }
+
+    var caixaD30=saldoAtual+recPrev30-pagPrev30;
+    var caixaD60=saldoAtual+recPrev60-pagPrev60;
+    var caixaD90=saldoAtual+recPrev90-pagPrev90;
+
+    var elD30=document.getElementById('execCaixaD30');
+    var elD60=document.getElementById('execCaixaD60');
+    var elD90=document.getElementById('execCaixaD90');
+    if(elD30){elD30.innerHTML='R$&nbsp;'+fN(caixaD30);elD30.className='kpi-v '+(caixaD30>=0?'green':'red');}
+    if(elD60){elD60.innerHTML='R$&nbsp;'+fN(caixaD60);elD60.className='kpi-v '+(caixaD60>=0?'accent':'red');}
+    if(elD90){elD90.innerHTML='R$&nbsp;'+fN(caixaD90);elD90.className='kpi-v '+(caixaD90>=0?'gold':'red');}
+
+    // Ajustar cor do card pai
+    var kD30=document.getElementById('kpiCaixaD30');if(kD30)kD30.className='kpi '+(caixaD30>=0?'c-green':'c-red');
+    var kD60=document.getElementById('kpiCaixaD60');if(kD60)kD60.className='kpi '+(caixaD60>=0?'c-accent':'c-red');
+    var kD90=document.getElementById('kpiCaixaD90');if(kD90)kD90.className='kpi '+(caixaD90>=0?'c-gold':'c-red');
+
+    var elD30s=document.getElementById('execCaixaD30Sub');
+    var elD60s=document.getElementById('execCaixaD60Sub');
+    var elD90s=document.getElementById('execCaixaD90Sub');
+    if(elD30s) elD30s.textContent='Saldo: R$'+fN(saldoAtual)+' + Rec: R$'+fN(recPrev30)+' − Pag: R$'+fN(pagPrev30);
+    if(elD60s) elD60s.textContent='Saldo: R$'+fN(saldoAtual)+' + Rec: R$'+fN(recPrev60)+' − Pag: R$'+fN(pagPrev60);
+    if(elD90s) elD90s.textContent='Saldo: R$'+fN(saldoAtual)+' + Rec: R$'+fN(recPrev90)+' − Pag: R$'+fN(pagPrev90);
+  }
+
+  // ===== SEÇÃO 2: Aging de Recebimentos (Inadimplência) =====
+  if(data.recebimentos){
+    var mesesNomeAging=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    var aging=data.recebimentos.filter(function(r){return (r.recebido||0)<(r.previsto||0);}).sort(function(a,b){return (a.mesNum||0)-(b.mesNum||0);});
+    var tbodyAging=document.querySelector('#tblAging tbody');
+    if(tbodyAging){
+      if(aging.length===0){
+        tbodyAging.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--green);font-weight:600">Nenhuma inadimplência detectada</td></tr>';
+      }else{
+        tbodyAging.innerHTML='';
+        var totalFaltaAging=0;
+        aging.forEach(function(r,idx){
+          var falta=(r.previsto||0)-(r.recebido||0);
+          totalFaltaAging+=falta;
+          var mesAtualAg=new Date().getMonth()+1;
+          var atraso=(r.mesNum||0)<mesAtualAg;
+          var statusClass=r.status==='PAGO'?'pago':r.status==='PARCIAL'?'parcial':'pendente';
+          var rowStyle=atraso?'background:rgba(248,113,113,.06);':'';
+          var tr=document.createElement('tr');
+          tr.style.cssText=rowStyle;
+          tr.innerHTML='<td>'+mesesNomeAging[r.mesNum||0]+'</td>'
+            +'<td>'+(r.descricao||r.cliente||'—')+'</td>'
+            +'<td class="mono">R$ '+fN(r.previsto||0)+'</td>'
+            +'<td class="mono" style="color:'+(r.recebido>0?'var(--gold)':'var(--red)')+'">R$ '+fN(r.recebido||0)+'</td>'
+            +'<td class="mono" style="color:var(--red);font-weight:700">R$ '+fN(falta)+'</td>'
+            +'<td><span class="tag '+statusClass+'">'+r.status+'</span>'+(atraso?' <span class="tag high" style="margin-left:4px">ATRASADO</span>':'')+'</td>';
+          tbodyAging.appendChild(tr);
+        });
+        var agingResumo=document.getElementById('agingResumo');
+        if(agingResumo){
+          agingResumo.innerHTML='<div class="label">Resumo Inadimplência</div>'
+            +'<div style="display:flex;gap:20px;margin-top:8px;flex-wrap:wrap">'
+            +'<div><div style="font-size:10px;color:var(--t3)">Total em Aberto</div><div style="font-family:JetBrains Mono;font-weight:700;color:var(--red)">R$ '+fN(totalFaltaAging)+'</div></div>'
+            +'<div><div style="font-size:10px;color:var(--t3)">Clientes Inadimplentes</div><div style="font-family:JetBrains Mono;font-weight:700;color:var(--gold)">'+aging.length+'</div></div>'
+            +'<div><div style="font-size:10px;color:var(--t3)">Ticket Médio em Aberto</div><div style="font-family:JetBrains Mono;font-weight:700;color:var(--t1)">R$ '+fN(totalFaltaAging/aging.length)+'</div></div>'
+            +'</div>';
+        }
+      }
+    }
+  }
+
+  // ===== SEÇÃO 3: DRE Simplificado Mensal =====
+  if(data.controleFinanceiro&&data.controleFinanceiro.meses){
+    var cfm=data.controleFinanceiro.meses;
+    var tblDRE=document.getElementById('tblDRE');
+    if(tblDRE&&cfm.length>0){
+      var mesesAbrevDRE=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      // Header
+      var thead=tblDRE.querySelector('thead tr');
+      thead.innerHTML='<th>Linha</th>';
+      var totalRec=0,totalImp=0,totalCF=0,totalRet=0,totalSaldo=0;
+      cfm.forEach(function(m,i){
+        var label=m.mes||mesesAbrevDRE[i]||('M'+(i+1));
+        thead.innerHTML+='<th style="text-align:right">'+label+'</th>';
+      });
+      thead.innerHTML+='<th style="text-align:right;color:var(--accent)">Total</th>';
+
+      var tbody=tblDRE.querySelector('tbody');
+      tbody.innerHTML='';
+
+      // Linhas do DRE
+      var linhas=[
+        {label:'Receita Bruta (Faturamento)',key:'faturamento',color:'var(--green)',sign:1},
+        {label:'(-) Impostos',key:'impostos',color:'var(--red)',sign:-1},
+        {label:'= Receita Líquida',key:'_recLiq',color:'var(--accent)',sign:1,calc:true},
+        {label:'(-) Custos Fixos',key:'custosFixos',color:'var(--red)',sign:-1},
+        {label:'(-) Retirada Sócios',key:'retiradaSocios',color:'var(--red)',sign:-1},
+        {label:'= Saldo Final',key:'valorContaMes',color:'_dynamic',sign:1}
+      ];
+
+      linhas.forEach(function(ln){
+        var tr=document.createElement('tr');
+        var isHeader=ln.label.charAt(0)==='=';
+        var lnStyle=isHeader?'font-weight:700;border-top:2px solid var(--border);':'';
+        var html='<td style="'+lnStyle+'">'+ln.label+'</td>';
+        var rowTotal=0;
+
+        cfm.forEach(function(m){
+          var val=0;
+          if(ln.calc&&ln.key==='_recLiq'){
+            val=(m.faturamento||0)-(m.impostos||0);
+          }else{
+            val=m[ln.key]||0;
+          }
+          rowTotal+=val;
+          var displayColor=ln.color;
+          if(ln.color==='_dynamic') displayColor=val>=0?'var(--green)':'var(--red)';
+          html+='<td class="mono" style="text-align:right;'+lnStyle+'color:'+displayColor+'">'+((ln.sign<0&&val>0)?'−':'')+' R$ '+fN(Math.abs(val))+'</td>';
+        });
+
+        var totalColor=ln.color;
+        if(ln.color==='_dynamic') totalColor=rowTotal>=0?'var(--green)':'var(--red)';
+        html+='<td class="mono" style="text-align:right;'+lnStyle+'color:'+totalColor+';font-weight:700">'+((ln.sign<0&&rowTotal>0)?'−':'')+' R$ '+fN(Math.abs(rowTotal))+'</td>';
+        tr.innerHTML=html;
+        tbody.appendChild(tr);
+      });
+    }
+  }
+
+  // ===== SEÇÃO 4: Break-even =====
+  if(data.controleFinanceiro&&data.controleFinanceiro.meses){
+    var cfmBE=data.controleFinanceiro.meses;
+    var mesesComCusto=cfmBE.filter(function(m){return (m.custosFixos||0)>0;});
+    if(mesesComCusto.length>0){
+      var somaCustos=mesesComCusto.reduce(function(s,m){return s+(m.custosFixos||0)+(m.retiradaSocios||0)+(m.impostos||0);},0);
+      var custoFixoMedio=somaCustos/mesesComCusto.length;
+
+      // Receita média dos meses com dados
+      var mesesComReceita=cfmBE.filter(function(m){return (m.faturamento||0)>0;});
+      var receitaMedia=mesesComReceita.length>0?mesesComReceita.reduce(function(s,m){return s+(m.faturamento||0);},0)/mesesComReceita.length:0;
+
+      var breakEven=custoFixoMedio; // ponto de equilíbrio = custos fixos (margem contribuição ~100% para serviços)
+      var margemSeguranca=receitaMedia-breakEven;
+      var margemSegPct=receitaMedia>0?Math.round(margemSeguranca/receitaMedia*1000)/10:0;
+
+      var elBECusto=document.getElementById('execBreakCusto');
+      if(elBECusto) elBECusto.innerHTML='R$&nbsp;'+fN(custoFixoMedio);
+      var elBEMin=document.getElementById('execBreakMin');
+      if(elBEMin) elBEMin.innerHTML='R$&nbsp;'+fN(breakEven);
+      var elBEMargem=document.getElementById('execBreakMargem');
+      if(elBEMargem){
+        elBEMargem.innerHTML=(margemSeguranca>=0?'+':'')+' R$&nbsp;'+fN(margemSeguranca);
+        elBEMargem.className='kpi-v '+(margemSeguranca>=0?'green':'red');
+      }
+      var elBEMargemPct=document.getElementById('execBreakMargemPct');
+      if(elBEMargemPct) elBEMargemPct.textContent=margemSegPct.toFixed(1)+'% acima do break-even';
+
+      // Gauge
+      var bePct=breakEven>0?Math.min(Math.round(receitaMedia/breakEven*100),200):0;
+      var beOffset=213.6-(213.6*Math.min(bePct,200)/200);
+      var gaugeEl=document.getElementById('gaugeBreakeven');
+      if(gaugeEl){
+        gaugeEl.style.strokeDashoffset=beOffset;
+        gaugeEl.style.stroke=margemSeguranca>=0?'var(--green)':'var(--red)';
+      }
+      var gBEV=document.getElementById('gaugeBreakevenVal');
+      if(gBEV) gBEV.textContent=bePct+'%';
+
+      var beInfo=document.getElementById('breakEvenInfo');
+      if(beInfo){
+        var analise=margemSeguranca>0
+          ?'A receita média mensal (R$ '+fN(receitaMedia)+') está <strong style="color:var(--green)">'+margemSegPct.toFixed(1)+'% acima</strong> do ponto de equilíbrio. A empresa tem folga financeira de R$ '+fN(margemSeguranca)+'/mês.'
+          :'A receita média mensal (R$ '+fN(receitaMedia)+') está <strong style="color:var(--red)">abaixo</strong> do ponto de equilíbrio. Deficit de R$ '+fN(Math.abs(margemSeguranca))+'/mês.';
+        beInfo.innerHTML='<div class="label">Análise</div><div style="font-size:12px;color:var(--t2);line-height:1.7">'+analise+'</div>';
+      }
+    }
+  }
+
+  // ===== SEÇÃO 5: Índice de Concentração (HHI) =====
+  if(data.custoCliente){
+    var mesesOrdemHHI=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+    var ultimoMesHHI=null;
+    mesesOrdemHHI.forEach(function(m){if(data.custoCliente[m]&&data.custoCliente[m].total&&data.custoCliente[m].total.receita>0) ultimoMesHHI=m;});
+
+    if(ultimoMesHHI){
+      var blocoHHI=data.custoCliente[ultimoMesHHI];
+      var totalRecHHI=blocoHHI.total.receita||1;
+      var clientes=blocoHHI.clientes.map(function(cl){
+        var pct=(cl.receita||0)/totalRecHHI*100;
+        return {nome:cl.nome,receita:cl.receita||0,pct:pct};
+      }).sort(function(a,b){return b.receita-a.receita;});
+
+      // Calcular HHI
+      var hhi=clientes.reduce(function(s,cl){return s+cl.pct*cl.pct;},0);
+      hhi=Math.round(hhi);
+
+      var classificacao=hhi<1500?'DIVERSIFICADO':hhi<2500?'MODERADO':'CONCENTRADO';
+      var tagClass=hhi<1500?'low':hhi<2500?'medium':'high';
+      var corHHI=hhi<1500?'var(--green)':hhi<2500?'var(--gold)':'var(--red)';
+
+      var elHHI=document.getElementById('execHHIScore');
+      if(elHHI){elHHI.textContent=hhi.toLocaleString('pt-BR');elHHI.style.color=corHHI;}
+
+      var elHHITag=document.getElementById('execHHITag');
+      if(elHHITag) elHHITag.innerHTML='<span class="tag '+tagClass+'">'+classificacao+'</span>';
+
+      // Barra HHI
+      var fillPct=Math.min(hhi/10000*100,100);
+      var elHHIFill=document.getElementById('execHHIFill');
+      if(elHHIFill){elHHIFill.style.width=fillPct+'%';elHHIFill.style.background=corHHI;}
+
+      // Top 3 clientes
+      var top3=clientes.slice(0,3);
+      var elTop3=document.getElementById('execHHITop3');
+      if(elTop3){
+        var h3='';
+        top3.forEach(function(cl,i){
+          var cores=['var(--accent)','var(--teal)','var(--gold)'];
+          var barW=Math.max(cl.pct,3);
+          h3+='<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">';
+          h3+='<div style="width:28px;height:28px;border-radius:50%;background:'+cores[i]+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff">'+(i+1)+'</div>';
+          h3+='<div style="flex:1"><div style="font-weight:600;font-size:13px">'+cl.nome+'</div>';
+          h3+='<div style="background:var(--border);border-radius:4px;height:6px;margin-top:4px"><div style="height:100%;border-radius:4px;background:'+cores[i]+';width:'+barW+'%"></div></div></div>';
+          h3+='<div style="text-align:right"><div style="font-family:JetBrains Mono;font-weight:700;font-size:14px">'+cl.pct.toFixed(1)+'%</div>';
+          h3+='<div style="font-size:11px;color:var(--t3);font-family:JetBrains Mono">R$ '+fN(cl.receita)+'</div></div>';
+          h3+='</div>';
+        });
+        elTop3.innerHTML=h3;
+      }
+
+      // Impacto de perda do maior cliente
+      var elImpacto=document.getElementById('execHHIImpacto');
+      if(elImpacto&&clientes.length>0){
+        var maior=clientes[0];
+        var receitaSemMaior=totalRecHHI-maior.receita;
+        var impactoPct=Math.round(maior.pct*10)/10;
+        var ih='<div class="label">Impacto de Perda do Maior Cliente</div>';
+        ih+='<div style="display:flex;gap:20px;margin-top:8px;flex-wrap:wrap">';
+        ih+='<div><div style="font-size:10px;color:var(--t3)">Cliente</div><div style="font-weight:700;color:var(--t1)">'+maior.nome+'</div></div>';
+        ih+='<div><div style="font-size:10px;color:var(--t3)">Receita Perdida</div><div style="font-family:JetBrains Mono;font-weight:700;color:var(--red)">−R$ '+fN(maior.receita)+'/mês</div></div>';
+        ih+='<div><div style="font-size:10px;color:var(--t3)">Participação</div><div style="font-family:JetBrains Mono;font-weight:700;color:var(--red)">'+impactoPct+'%</div></div>';
+        ih+='<div><div style="font-size:10px;color:var(--t3)">Receita Restante</div><div style="font-family:JetBrains Mono;font-weight:700;color:var(--gold)">R$ '+fN(receitaSemMaior)+'/mês</div></div>';
+        ih+='</div>';
+        if(impactoPct>20) ih+='<div style="margin-top:8px;font-size:11px;color:var(--red);font-weight:600">Alto risco: perder '+maior.nome+' representaria queda de '+impactoPct+'% na receita mensal.</div>';
+        elImpacto.innerHTML=ih;
       }
     }
   }
