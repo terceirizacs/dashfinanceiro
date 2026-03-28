@@ -1086,72 +1086,85 @@ function processarDadosAPI(data){
   // ===== VISÃO EXECUTIVA — Dados dinâmicos da API =====
   var fN=function(v){return Math.round(v).toLocaleString('pt-BR');};
 
-  // 1. Lucro Projetado e Margem (Projeção 2026)
-  if(data.projecao2026){
-    var recTot=data.projecao2026.totalReceita?data.projecao2026.totalReceita.reduce(function(a,b){return a+b;},0):0;
-    // Usar totalDespesa da API se disponível, senão somar despesas individualmente
-    var despTotArr=[];
-    if(data.projecao2026.totalDespesa&&data.projecao2026.totalDespesa.length>0){
-      despTotArr=data.projecao2026.totalDespesa;
-    }else if(data.projecao2026.despesas){
-      for(var m=0;m<12;m++){
-        var mTot=0;
-        data.projecao2026.despesas.forEach(function(d){mTot+=(d.valores[m]||0);});
-        despTotArr.push(mTot);
-      }
-    }
-    var despTot=despTotArr.reduce(function(a,b){return a+b;},0);
-    var lucroProj=recTot-despTot;
-    var margemProj=recTot>0?Math.round(lucroProj/recTot*1000)/10:0;
-    var elLucro=document.getElementById('execLucroProj');
-    if(elLucro) elLucro.innerHTML='R$&nbsp;'+fN(lucroProj);
-    var elMargem=document.getElementById('execMargemProj');
-    if(elMargem) elMargem.textContent='Margem projetada: '+margemProj.toFixed(1)+'% · Receita: R$'+fN(recTot)+' · Despesas: R$'+fN(despTot);
+  // 1. Lucro Projetado e Margem — fonte: Recebimentos vs Pagamentos Terceiriza
+  var recTot=0,despTot=0,despTotArr=[0,0,0,0,0,0,0,0,0,0,0,0],recTotArr=[0,0,0,0,0,0,0,0,0,0,0,0];
+  var setGauge=function(id,pct){var el=document.getElementById(id);if(el){var offset=213.6-(213.6*Math.min(Math.abs(pct),100)/100);el.style.strokeDashoffset=offset;}};
 
-    // Gauges
-    var setGauge=function(id,pct){var el=document.getElementById(id);if(el){var offset=213.6-(213.6*Math.min(pct,100)/100);el.style.strokeDashoffset=offset;}};
-    setGauge('gaugeMargem',margemProj);
-    var gMV=document.getElementById('gaugeMargemVal');
-    if(gMV) gMV.textContent=margemProj.toFixed(1)+'%';
+  // Receita total = soma de recebimentos previstos por mês
+  if(data.recebimentos&&data.recebimentos.length>0){
+    data.recebimentos.forEach(function(r){
+      if(r.mesNum>=1&&r.mesNum<=12){recTotArr[r.mesNum-1]+=(r.previsto||0);}
+    });
+    recTot=recTotArr.reduce(function(a,b){return a+b;},0);
+  }else if(data.projecao2026&&data.projecao2026.totalReceita){
+    recTotArr=data.projecao2026.totalReceita;
+    recTot=recTotArr.reduce(function(a,b){return a+b;},0);
   }
 
-  // 2. Realizado vs Projetado + Gauges
-  if(data.controleFinanceiro&&data.controleFinanceiro.meses&&data.projecao2026){
-    var cfM=data.controleFinanceiro.meses;
-    var recReal=cfM.reduce(function(s,m){return s+(m.faturamento||0);},0);
-    var nMeses=cfM.length;
-    var recProjQ=0;var despProjQ=0;
-    for(var qi=0;qi<nMeses&&qi<12;qi++){recProjQ+=(data.projecao2026.totalReceita?data.projecao2026.totalReceita[qi]:0)||0;despProjQ+=despTotArr[qi]||0;}
-    var desvPct=recProjQ>0?Math.round((recReal-recProjQ)/recProjQ*1000)/10:0;
-    var elDesvio=document.getElementById('execDesvio');
-    if(elDesvio){elDesvio.textContent=(desvPct>=0?'+':'')+desvPct.toFixed(1)+'%';elDesvio.style.color=desvPct>=0?'var(--green)':'var(--red)';}
-    var elDesvioSub=document.getElementById('execDesvioSub');
-    if(elDesvioSub) elDesvioSub.textContent=desvPct>=0?'Receita acima do plano':'Receita abaixo do plano';
+  // Despesa total = soma de pagamentos previstos por mês
+  if(data.pagamentos&&data.pagamentos.length>0){
+    data.pagamentos.forEach(function(p){
+      if(p.mesNum>=1&&p.mesNum<=12){despTotArr[p.mesNum-1]+=(p.previsto||0);}
+    });
+    despTot=despTotArr.reduce(function(a,b){return a+b;},0);
+  }else if(data.projecao2026&&data.projecao2026.totalDespesa){
+    despTotArr=data.projecao2026.totalDespesa;
+    despTot=despTotArr.reduce(function(a,b){return a+b;},0);
+  }
 
-    // Gauge Execução
-    var execPct=recProjQ>0?Math.round(recReal/recProjQ*1000)/10:0;
+  var lucroProj=recTot-despTot;
+  var margemProj=recTot>0?Math.round(lucroProj/recTot*1000)/10:0;
+  var elLucro=document.getElementById('execLucroProj');
+  if(elLucro) elLucro.innerHTML='R$&nbsp;'+fN(lucroProj);
+  var elMargem=document.getElementById('execMargemProj');
+  if(elMargem) elMargem.textContent='Margem: '+margemProj.toFixed(1)+'% · Recebimentos: R$'+fN(recTot)+' · Pagamentos: R$'+fN(despTot);
+
+  // Gauge Margem
+  setGauge('gaugeMargem',Math.max(margemProj,0));
+  var gMV=document.getElementById('gaugeMargemVal');
+  if(gMV) gMV.textContent=margemProj.toFixed(1)+'%';
+
+  // 2. Realizado vs Projetado + Gauges
+  {
+    // Receita recebida (status PAGO) vs prevista
+    var recRecebida=0,recPrevista=0;
+    if(data.recebimentos){
+      data.recebimentos.forEach(function(r){recRecebida+=(r.recebido||0);recPrevista+=(r.previsto||0);});
+    }
+    var desvPct=recPrevista>0?Math.round((recRecebida-recPrevista)/recPrevista*1000)/10:0;
+    var elDesvio=document.getElementById('execDesvio');
+    if(elDesvio&&recPrevista>0){elDesvio.textContent=(desvPct>=0?'+':'')+desvPct.toFixed(1)+'%';elDesvio.style.color=desvPct>=0?'var(--green)':'var(--red)';}
+    var elDesvioSub=document.getElementById('execDesvioSub');
+    if(elDesvioSub&&recPrevista>0) elDesvioSub.textContent='Recebido: R$'+fN(recRecebida)+' vs Previsto: R$'+fN(recPrevista);
+
+    // Gauge Execução (recebido / previsto)
+    var execPct=recPrevista>0?Math.round(recRecebida/recPrevista*1000)/10:0;
     setGauge('gaugeExec',execPct);
     var gEV=document.getElementById('gaugeExecVal');
     if(gEV) gEV.textContent=execPct.toFixed(0)+'%';
 
-    // Gauge Custo Operacional (receita - saldo = despesas reais)
-    var despReal=cfM.reduce(function(s,m){return s+(m.faturamento||0)-(m.valorContaMes||0);},0);
-    var custoPct=recReal>0?Math.round(despReal/recReal*1000)/10:0;
+    // Gauge Custo Operacional (pagamentos pagos / receita recebida)
+    var pagoPeriodo=0;
+    if(data.pagamentos){data.pagamentos.forEach(function(p){pagoPeriodo+=(p.pago||0);});}
+    var custoPct=recRecebida>0?Math.round(pagoPeriodo/recRecebida*1000)/10:0;
     setGauge('gaugeCusto',custoPct);
     var gCV=document.getElementById('gaugeCustoVal');
     if(gCV) gCV.textContent=custoPct.toFixed(1)+'%';
 
-    // Gauge MoM
-    if(cfM.length>=2){
-      var lastRec=cfM[cfM.length-1].faturamento||0;
-      var prevRec=cfM[cfM.length-2].faturamento||0;
-      var momPct=prevRec>0?Math.round((lastRec-prevRec)/prevRec*1000)/10:0;
+    // Gauge MoM — receita por mês (recebimentos)
+    var recMensal={};
+    if(data.recebimentos){data.recebimentos.forEach(function(r){if(r.mesNum>=1){recMensal[r.mesNum]=(recMensal[r.mesNum]||0)+(r.recebido||0);}});}
+    var mesesComRec=Object.keys(recMensal).map(Number).sort(function(a,b){return a-b;});
+    if(mesesComRec.length>=2){
+      var lastM=mesesComRec[mesesComRec.length-1];
+      var prevM=mesesComRec[mesesComRec.length-2];
+      var momPct=recMensal[prevM]>0?Math.round((recMensal[lastM]-recMensal[prevM])/recMensal[prevM]*1000)/10:0;
       setGauge('gaugeMoM',Math.abs(momPct));
       var gMoM=document.getElementById('gaugeMoMVal');
       if(gMoM) gMoM.textContent=(momPct>=0?'+':'')+momPct.toFixed(1)+'%';
     }
 
-    // Crescimento Anual — receita e despesa projetadas
+    // Crescimento Anual — usa totais de recebimentos/pagamentos
     var yoyRecProj=document.querySelector('.yoy-val[style*="green"]');
     if(yoyRecProj&&recTot>0) yoyRecProj.textContent='R$ '+fN(recTot);
     var yoyDespProj=document.querySelectorAll('.yoy-val[style*="red"]');
@@ -1162,6 +1175,11 @@ function processarDadosAPI(data){
       var crescRec=rec2025Total>0?Math.round((recTot-rec2025Total)/rec2025Total*1000)/10:0;
       var badgeUp=document.querySelector('.badge-up');
       if(badgeUp) badgeUp.textContent='+'+crescRec.toFixed(1)+'% de crescimento';
+      // Atualizar % despesas
+      var desp2025Total=data.receita2025.totalDespesa?data.receita2025.totalDespesa.reduce(function(a,b){return a+b;},0):185848;
+      var crescDesp=desp2025Total>0?Math.round((despTot-desp2025Total)/desp2025Total*1000)/10:0;
+      var badgeWarn=document.querySelector('.badge-warn');
+      if(badgeWarn) badgeWarn.textContent='+'+crescDesp.toFixed(1)+'% de aumento';
     }
   }
 
@@ -1200,42 +1218,41 @@ function processarDadosAPI(data){
     }
   }
 
-  // 4. Despesas por Categoria — MÊS VIGENTE, agrupado por fornecedor (soma duplicados exceto reembolso)
-  if(data.pagamentos&&data.pagamentos.length>0){
-    // Descobrir último mês com pagamentos
-    var maxMes=0;
-    data.pagamentos.forEach(function(p){if(p.mesNum>maxMes)maxMes=p.mesNum;});
-    var mesesNomeExec=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-    var catTotais={};
-    data.pagamentos.forEach(function(p){
-      if(p.mesNum!==maxMes)return;
-      var nome=p.fornecedor||p.descricao||'Outros';
-      var isReembolso=nome.toLowerCase().indexOf('reembolso')>=0;
-      if(isReembolso){
-        // Reembolso: separar cada um
-        var key=nome+' ('+p.descricao+')';
-        if(!catTotais[key])catTotais[key]=0;
-        catTotais[key]+=(p.pago||p.previsto||0);
-      }else{
-        if(!catTotais[nome])catTotais[nome]=0;
-        catTotais[nome]+=(p.pago||p.previsto||0);
-      }
-    });
-    var catArr=Object.entries(catTotais).filter(function(c){return c[1]>0;}).sort(function(a,b){return b[1]-a[1];});
-    var totalDesp=catArr.reduce(function(s,c){return s+c[1];},0);
-    var cores=['var(--accent)','var(--teal)','var(--green)','var(--gold)','var(--orange)','var(--pink)','var(--sky)','var(--red)','var(--cyan)','var(--t3)'];
+  // 4. Despesas por Categoria — aba CUSTO X CLIENTE, mês anterior ao vigente
+  if(data.custoCliente){
+    var mesesNomeExec2=['','JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+    var mesesLabelExec=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    // Descobrir último mês e pegar o anterior
+    var mesesDisponiveis=[];
+    mesesNomeExec2.forEach(function(m,i){if(i>0&&data.custoCliente[m])mesesDisponiveis.push(i);});
+    // Mês anterior ao vigente (se março é vigente, pega fevereiro)
+    var mesExibir=mesesDisponiveis.length>=2?mesesDisponiveis[mesesDisponiveis.length-2]:mesesDisponiveis[mesesDisponiveis.length-1];
+    var mesKey=mesesNomeExec2[mesExibir]||'';
+    var bloco=data.custoCliente[mesKey];
     var detDiv=document.getElementById('execDespDetalhado');
-    if(detDiv){
-      var dh='<div style="font-size:12px;color:var(--t2);margin-bottom:12px;font-weight:600">'+mesesNomeExec[maxMes]+' 2026</div>';
-      var mxCat=catArr.length>0?catArr[0][1]:1;
-      catArr.forEach(function(c,i){
-        var pct=totalDesp>0?Math.round(c[1]/totalDesp*1000)/10:0;
-        var w=Math.max(Math.round(c[1]/mxCat*100),3);
+    if(detDiv&&bloco&&bloco.clientes){
+      // Headers do CUSTO X CLIENTE: FACEBOOK, CLOUD AI, CHATWOOT, SERVIDOR, CHIP, MÃO-DE-OBRA (PEDRO/THIAGO/MARCOS), IMPOSTOS, FINANCEIRO, PAMELA, PHELLIPE, CONTABILIDADE, INSS, TLF, HOTMART, ZAPSIM, GASTOS CARTÃO
+      // Mostrar clientes com receita e custo
+      var dh='<div style="font-size:12px;color:var(--t2);margin-bottom:12px;font-weight:600">'+mesesLabelExec[mesExibir]+' 2026 — Custo por Cliente</div>';
+      var clientesCusto=bloco.clientes.map(function(cl){return[cl.nome,cl.custoSubtotal,cl.receita,cl.lucroPorCliente,cl.custoPctCliente];}).sort(function(a,b){return b[1]-a[1];});
+      var mxCusto=clientesCusto.length>0?clientesCusto[0][1]:1;
+      var totalCusto=clientesCusto.reduce(function(s,c){return s+c[1];},0);
+      var totalRec=bloco.total.receita||0;
+      var cores=['var(--accent)','var(--teal)','var(--green)','var(--gold)','var(--orange)','var(--pink)','var(--sky)','var(--red)','var(--cyan)','var(--t3)'];
+      clientesCusto.forEach(function(c,i){
+        var pct=totalCusto>0?Math.round(c[1]/totalCusto*1000)/10:0;
+        var custoPct=c[4]?Math.round(c[4]*1000)/10:0;
+        var w=mxCusto>0?Math.max(Math.round(c[1]/mxCusto*100),3):3;
         var cor=cores[i%cores.length];
-        var tipText=c[0]+': R$ '+fN(c[1])+' ('+pct.toFixed(1)+'% do total de '+mesesNomeExec[maxMes]+')';
+        var tipText=c[0]+' | Receita: R$'+fN(c[2])+' | Custo: R$'+fN(c[1])+' | Lucro: R$'+fN(c[3])+' | Custo/Cliente: '+custoPct.toFixed(1)+'%';
         dh+='<div class="hbar-row" title="'+tipText+'" style="cursor:pointer"><div class="hbar-lbl">'+c[0]+'</div><div class="hbar-track"><div class="hbar-fill" style="width:'+w+'%;background:'+cor+'"></div></div><span class="hbar-val">R$ '+fN(c[1])+'</span></div>';
       });
-      dh+='<div class="info-box" style="margin-top:12px"><div class="label">Total '+mesesNomeExec[maxMes]+'</div><div style="font-size:14px;font-family:JetBrains Mono;font-weight:700;color:var(--accent)">R$ '+fN(totalDesp)+'</div></div>';
+      dh+='<div class="info-box" style="margin-top:12px"><div class="label">'+mesesLabelExec[mesExibir]+' — Resumo</div>';
+      dh+='<div style="display:flex;gap:20px;margin-top:8px;flex-wrap:wrap">';
+      dh+='<div><div style="font-size:10px;color:var(--t3)">Receita</div><div style="font-family:JetBrains Mono;font-weight:700;color:var(--green)">R$ '+fN(totalRec)+'</div></div>';
+      dh+='<div><div style="font-size:10px;color:var(--t3)">Custos</div><div style="font-family:JetBrains Mono;font-weight:700;color:var(--red)">R$ '+fN(totalCusto)+'</div></div>';
+      dh+='<div><div style="font-size:10px;color:var(--t3)">Lucro</div><div style="font-family:JetBrains Mono;font-weight:700;color:var(--accent)">R$ '+fN(totalRec-totalCusto)+'</div></div>';
+      dh+='</div></div>';
       detDiv.innerHTML=dh;
     }
   }
