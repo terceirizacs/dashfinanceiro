@@ -1018,13 +1018,13 @@ function processarDadosAPI(data){
         receitaAcum+=data.custoCliente[m].total.receita;
       }
     });
-    // Atualizar KPIs no DOM
+    // Atualizar KPIs no DOM (só se encontrou dados válidos)
     var kpis=document.querySelectorAll('#tab-geral .kpi');
-    if(kpis[0]){
+    if(kpis[0]&&mrrAtual>0){
       kpis[0].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(mrrAtual).toLocaleString('pt-BR');
       kpis[0].querySelector('.kpi-s').textContent=numContratos+' contratos ativos';
     }
-    if(kpis[1]){
+    if(kpis[1]&&receitaAcum>0){
       kpis[1].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(receitaAcum).toLocaleString('pt-BR');
     }
   }
