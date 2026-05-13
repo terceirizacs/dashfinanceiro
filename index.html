@@ -592,7 +592,9 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
       <select class="month-select" id="clientMonthFilter" onchange="updateClientTable()">
         <option value="jan">Janeiro 2026</option>
         <option value="fev">Fevereiro 2026</option>
-        <option value="mar" selected>Março 2026</option>
+        <option value="mar">Março 2026</option>
+        <option value="abr" selected>Abril 2026</option>
+        <option value="mai">Maio 2026</option>
       </select>
     </div>
     <div class="card" style="margin-bottom:20px">
@@ -1097,15 +1099,18 @@ function processarDadosAPI(data){
       var bloco=data.custoCliente[mesNome];
       clientData[mesKey]=bloco.clientes.map(function(cl){
         var totalMRR=bloco.total.receita||1;
+        // Normaliza % custo (pode vir como 0.5186 decimal ou 51.86 já em %)
+        var pctRaw = cl.custoPctCliente || 0;
+        var pctNorm = (pctRaw > 0 && pctRaw <= 2) ? pctRaw * 100 : pctRaw;
         return{
           name:cl.nome,
           revenue:cl.receita,
           cost:cl.custoSubtotal,
           profit:cl.lucroPorCliente,
-          costPct:Math.round(cl.custoPctCliente*1000)/10,
+          costPct:Math.round(pctNorm*10)/10,
           mrr:Math.round((cl.receita/totalMRR)*1000)/10,
-          risk:cl.custoPctCliente>1?'high':cl.custoPctCliente>0.45?'medium':'low',
-          riskLabel:cl.custoPctCliente>1?'PREJUÍZO':cl.custoPctCliente>0.45?'ATENÇÃO':'SAUDÁVEL'
+          risk:pctNorm>100?'high':pctNorm>45?'medium':'low',
+          riskLabel:pctNorm>100?'PREJUÍZO':pctNorm>45?'ATENÇÃO':'SAUDÁVEL'
         };
       });
       // Detecta concentração e expiração
@@ -2046,6 +2051,10 @@ function updateClientTable(){
   const data=clientData[month];
   const body=document.getElementById('clientBody');
   body.innerHTML='';
+  if(!data || !data.length){
+    body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--t3)">Sem dados para esse mês. Verifique se a aba CUSTO X CLIENTE tem o bloco preenchido.</td></tr>';
+    return;
+  }
   data.forEach(c=>{
     const costColor=c.costPct>50?'var(--red)':c.costPct>35?'var(--gold)':'var(--green)';
     const profitColor=c.profit<0?'var(--red)':'var(--green)';
