@@ -1063,6 +1063,18 @@ function processarDadosAPI(data){
     }
     setTxt('kpiFluxoCaixaSub', '(Receita − Despesa) / Receita · '+(k.mesAnterior||''));
 
+    // Visão Executiva — Custo Creator / Receita (mês anterior)
+    const elCre = document.getElementById('execCreatorPct');
+    if(elCre){
+      const cor = (k.custoCreatorPct||0)>=50?'var(--red)':(k.custoCreatorPct||0)>=35?'var(--gold)':'var(--green)';
+      elCre.innerHTML = (k.custoCreatorPct!=null?k.custoCreatorPct.toFixed(1).replace('.',',')+'%':'—');
+      elCre.style.color = cor;
+      const elCreSub = elCre.parentElement && elCre.parentElement.querySelector('.kpi-s');
+      if(elCreSub){
+        elCreSub.textContent = fmt(k.custoCreatorValor).replace('&nbsp;',' ')+' de '+fmt(k.custoCreatorReceita).replace('&nbsp;',' ')+' · '+(k.custoCreatorMesUsado||k.mesAnterior||'');
+      }
+    }
+
     // Crescimento 2025 vs 2026
     if(k.crescimentoPct!==null){
       const cresc = k.crescimentoPct;
