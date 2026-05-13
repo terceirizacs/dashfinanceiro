@@ -101,6 +101,8 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
 .kpi.c-green::before{background:var(--green)}
 .kpi.c-accent::before{background:var(--accent)}
 .kpi.c-teal::before{background:var(--teal)}
+.kpi.c-orange::before{background:var(--orange)}
+.kpi.c-pink::before{background:var(--pink)}
 .kpi.c-red::before{background:var(--red)}
 .kpi.c-gold::before{background:var(--gold)}
 .kpi-l{font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;font-weight:500;margin-bottom:10px}
@@ -108,6 +110,8 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
 .kpi-v.green{color:var(--green)}
 .kpi-v.accent{color:var(--accent)}
 .kpi-v.teal{color:var(--teal)}
+.kpi-v.orange{color:var(--orange)}
+.kpi-v.pink{color:var(--pink)}
 .kpi-v.red{color:var(--red)}
 .kpi-v.gold{color:var(--gold)}
 .kpi-s{font-size:12px;color:var(--t3);margin-top:8px;font-family:'JetBrains Mono'}
@@ -331,24 +335,48 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
     <div class="sec">Indicadores Chave</div>
     <div class="kpis">
       <div class="kpi c-green">
-        <div class="kpi-l">MRR Atual (Mar/2026)</div>
-        <div class="kpi-v green">R$&nbsp;60.479</div>
-        <div class="kpi-s">10 contratos ativos</div>
+        <div class="kpi-l">MRR Atual <span id="kpiMRRLabel">(—)</span></div>
+        <div class="kpi-v green" id="kpiMRR">R$&nbsp;—</div>
+        <div class="kpi-s" id="kpiMRRSub">Projeção do mês atual</div>
       </div>
       <div class="kpi c-accent">
-        <div class="kpi-l">Receita Acumulada 2026</div>
-        <div class="kpi-v accent">R$&nbsp;162.273</div>
-        <div class="kpi-s">Acumulado Q1/2026 <span class="badge-up">+100% vs 2025</span></div>
+        <div class="kpi-l">Subtotal Receitas <span id="kpiSubRecLabel">(—)</span></div>
+        <div class="kpi-v accent" id="kpiSubRec">R$&nbsp;—</div>
+        <div class="kpi-s" id="kpiSubRecSub">Mês anterior · base de análise</div>
       </div>
       <div class="kpi c-teal">
-        <div class="kpi-l">Reserva Real (D+30)</div>
-        <div class="kpi-v teal" id="kpiReservaD30">R$&nbsp;2.393</div>
-        <div class="kpi-s" id="kpiReservaD30Sub">Caixa: R$31.835 - Desp. pendentes: R$29.442</div>
+        <div class="kpi-l">Reserva (média)</div>
+        <div class="kpi-v teal" id="kpiReservaD30">R$&nbsp;—</div>
+        <div class="kpi-s" id="kpiReservaD30Sub">Média dos meses fechados</div>
       </div>
       <div class="kpi c-green">
-        <div class="kpi-l">Caixa Disponível</div>
-        <div class="kpi-v green">R$&nbsp;31.835</div>
-        <div class="kpi-s">Inter: R$31.741 · Nubank: R$94</div>
+        <div class="kpi-l">Saldo Total (Inter)</div>
+        <div class="kpi-v green" id="kpiSaldoTotal">R$&nbsp;—</div>
+        <div class="kpi-s" id="kpiSaldoTotalSub">Aba Fluxo de Caixa Inter</div>
+      </div>
+    </div>
+    <div id="kpiBaseInfo" style="margin:12px 0 8px;padding:10px 14px;background:rgba(139,124,247,.08);border-left:3px solid var(--accent);border-radius:6px;font-size:12px;color:var(--t2)">📅 <strong style="color:var(--t1)">Mês base:</strong> carregando...</div>
+
+    <div class="kpis" style="margin-top:8px">
+      <div class="kpi c-orange">
+        <div class="kpi-l">Custo por Cliente <span style="color:var(--t3);font-size:10px">(mês ant.)</span></div>
+        <div class="kpi-v orange" id="kpiCustoClienteVal">R$ —</div>
+        <div class="kpi-s" id="kpiCustoClienteSub">—</div>
+      </div>
+      <div class="kpi c-pink">
+        <div class="kpi-l">Retirada Sócios <span style="color:var(--t3);font-size:10px">(atual)</span></div>
+        <div class="kpi-v pink" id="kpiRetiradaSociosVal">R$ —</div>
+        <div class="kpi-s" id="kpiRetiradaSociosSub">—</div>
+      </div>
+      <div class="kpi c-teal">
+        <div class="kpi-l">Fluxo de Caixa <span style="color:var(--t3);font-size:10px">(mês ant.)</span></div>
+        <div class="kpi-v teal" id="kpiFluxoCaixaVal">R$ —</div>
+        <div class="kpi-s" id="kpiFluxoCaixaSub">—</div>
+      </div>
+      <div class="kpi c-accent">
+        <div class="kpi-l">Crescimento <span style="color:var(--t3);font-size:10px">(2026 vs 2025)</span></div>
+        <div class="kpi-v accent" id="kpiCrescimentoVal">—</div>
+        <div class="kpi-s" id="kpiCrescimentoSub">—</div>
       </div>
     </div>
 
@@ -973,6 +1001,70 @@ async function carregarDadosAPI(){
 
 function processarDadosAPI(data){
   if(!data) return;
+
+  // --- KPIs DINÂMICOS (vindos do GAS, calculados com base no mês anterior/atual) ---
+  if(data.kpis){
+    const k=data.kpis;
+    const fmt=v=>'R$&nbsp;'+Math.round(v||0).toLocaleString('pt-BR');
+    function set(id,html){const el=document.getElementById(id); if(el) el.innerHTML=html;}
+    function setTxt(id,txt){const el=document.getElementById(id); if(el) el.textContent=txt;}
+
+    // MRR atual (mês atual)
+    setTxt('kpiMRRLabel','('+(k.mesAtual||'')+')');
+    set('kpiMRR', fmt(k.mrrAtual));
+    setTxt('kpiMRRSub','Projeção do mês atual · '+(k.mesAtual||''));
+
+    // Subtotal Receitas (mês anterior)
+    setTxt('kpiSubRecLabel','('+(k.mesAnterior||'')+')');
+    set('kpiSubRec', fmt(k.subtotalReceitas));
+    setTxt('kpiSubRecSub','Mês anterior · receita projetada');
+
+    // Reserva média
+    set('kpiReservaD30', fmt(k.reservaMedia));
+    setTxt('kpiReservaD30Sub','Média de '+(k.reservaMesesCalculados||0)+' meses fechados (até '+(k.mesAnterior||'')+')');
+
+    // Saldo Total Inter
+    set('kpiSaldoTotal', fmt(k.saldoTotal));
+    setTxt('kpiSaldoTotalSub','Saldo total · Banco Inter (atual)');
+
+    // Banner base
+    const elBase=document.getElementById('kpiBaseInfo');
+    if(elBase){
+      elBase.innerHTML='📅 <strong style="color:var(--t1)">Mês base dos cálculos:</strong> '+(k.mesAnterior||'—')+
+        ' <span style="color:var(--t3)">(mês passado fechado)</span> · '+
+        '<strong style="color:var(--t1)">MRR e Retirada Sócios:</strong> '+(k.mesAtual||'—')+
+        ' <span style="color:var(--t3)">(mês atual)</span>';
+    }
+
+    // Custo do cliente médio
+    setTxt('kpiCustoClienteVal', fmt(k.custoClienteMedio).replace('&nbsp;',' '));
+    setTxt('kpiCustoClienteSub', 'Custo total: '+fmt(k.custoClienteTotal).replace('&nbsp;',' ')+' / '+(k.custoClienteNum||0)+' clientes ('+(k.mesAnterior||'')+')');
+
+    // Retirada Sócios
+    setTxt('kpiRetiradaSociosVal', fmt(k.retiradaSocios).replace('&nbsp;',' '));
+    setTxt('kpiRetiradaSociosSub', 'Total a pagar · '+(k.mesAtual||''));
+
+    // Fluxo de caixa mês anterior
+    const cor = k.fluxoCaixaMesAnterior>=0?'var(--green)':'var(--red)';
+    const elFC = document.getElementById('kpiFluxoCaixaVal');
+    if(elFC){
+      elFC.innerHTML = fmt(k.fluxoCaixaMesAnterior);
+      elFC.style.color = cor;
+    }
+    setTxt('kpiFluxoCaixaSub', 'Receita − Despesa de '+(k.mesAnterior||''));
+
+    // Crescimento 2025 vs 2026
+    if(k.crescimentoPct!==null){
+      const cresc = k.crescimentoPct;
+      const corC = cresc>=0?'var(--green)':'var(--red)';
+      const elC = document.getElementById('kpiCrescimentoVal');
+      if(elC){
+        elC.innerHTML = (cresc>=0?'+':'')+cresc.toFixed(1).replace('.',',')+'%';
+        elC.style.color = corC;
+      }
+      setTxt('kpiCrescimentoSub','2026 vs 2025 · acumulado até '+(k.mesAnterior||''));
+    }
+  }
 
   // --- Atualizar CUSTO X CLIENTE (Lucratividade por cliente) ---
   if(data.custoCliente){
