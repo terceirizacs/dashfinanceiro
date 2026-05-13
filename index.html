@@ -1040,7 +1040,7 @@ function processarDadosAPI(data){
     // Custo do cliente — % média
     const pctMedio = k.custoClientePctMedio;
     setTxt('kpiCustoClienteVal', (pctMedio!=null?pctMedio.toFixed(1).replace('.',',')+'%':'—'));
-    setTxt('kpiCustoClienteSub', 'Média de '+(k.custoClienteNum||0)+' clientes · '+(k.mesAnterior||''));
+    setTxt('kpiCustoClienteSub', 'Média de '+(k.custoClienteNum||0)+' clientes · base: '+(k.custoClienteMesUsado||k.mesAnterior||''));
 
     // Retirada Sócios
     setTxt('kpiRetiradaSociosVal', fmt(k.retiradaSocios).replace('&nbsp;',' '));
@@ -1233,11 +1233,25 @@ function processarDadosAPI(data){
     receita2025Data=data.receita2025.totalReceita;
   }
 
-  // --- Atualizar gráficos com dados novos ---
-  if(data.custoCliente){
-    var meses=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
-    receita2026Data=meses.map(function(m){
-      return data.custoCliente[m]?data.custoCliente[m].total.receita:0;
+  // --- Atualizar Receita 2026 do gráfico (Realizado até mês anterior + Projeção total) ---
+  // Realizado: Controle Financeiro (faturamento por mês), só até mês anterior (abril)
+  // Projeção: Projeção Receita e Despesas 2 (totalReceita)
+  var mesAtIdx = data.kpis ? data.kpis.mesAtualIdx : new Date().getMonth();
+  var mesAntIdx = data.kpis ? data.kpis.mesAnteriorIdx : (mesAtIdx-1<0?11:mesAtIdx-1);
+
+  if(data.projecao2026 && Array.isArray(data.projecao2026.totalReceita)){
+    projecao2026Data = data.projecao2026.totalReceita.slice();
+  }
+  if(data.controleFinanceiro && Array.isArray(data.controleFinanceiro.meses)){
+    var realizadoArr = new Array(12).fill(null);
+    data.controleFinanceiro.meses.forEach(function(m, idx){
+      if(idx <= mesAntIdx && m.faturamento > 0) realizadoArr[idx] = m.faturamento;
+    });
+    receita2026Data = realizadoArr;
+  } else if(data.projecao2026 && Array.isArray(data.projecao2026.totalReceita)){
+    // Fallback: usa projeção até mês anterior como realizado
+    receita2026Data = data.projecao2026.totalReceita.map(function(v, idx){
+      return idx <= mesAntIdx ? v : null;
     });
   }
 
@@ -1684,6 +1698,7 @@ function processarDadosAPI(data){
 // Variáveis globais para dados dos gráficos (sobrescritas pela API)
 var receita2025Data=[0,4497,4497,5997,5997,11491,14488,14488,30485,30511,35482,44479];
 var receita2026Data=[50479,51315,60479,0,0,0,0,0,0,0,0,0];
+var projecao2026Data=[0,0,0,0,0,0,0,0,0,0,0,0];
 
 function doLogin(){
   const v=document.getElementById('pwdInput').value;
@@ -2010,7 +2025,7 @@ function initCharts(mesesFiltro){
         datasets:[
           {label:'2025 Realizado',data:receita2025Data,borderColor:t3,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:t3,tension:.3},
           {label:'2026 Realizado',data:receita2026Data.map(function(v){return v||null}),borderColor:accent,backgroundColor:'rgba(139,124,247,.1)',borderWidth:3,pointRadius:4,pointBackgroundColor:accent,fill:true,tension:.3},
-          {label:'2026 Projeção',data:[44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479],borderColor:accent,borderDash:[5,5],backgroundColor:'transparent',borderWidth:1,pointRadius:0,tension:0}
+          {label:'2026 Projeção',data:projecao2026Data,borderColor:accent,borderDash:[5,5],backgroundColor:'transparent',borderWidth:1,pointRadius:0,tension:0}
         ]
       },
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t2,font:{family:"'JetBrains Mono'",size:11}}}},scales:{x:{ticks:tickOpt(t3),grid:gridOpt},y:{ticks:{...tickOpt(t3),callback:v=>'R$'+Math.round(v/1000)+'k'},grid:gridOpt}}}
