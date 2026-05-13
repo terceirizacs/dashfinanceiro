@@ -345,9 +345,9 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
         <div class="kpi-s" id="kpiSubRecSub">Mês anterior · base de análise</div>
       </div>
       <div class="kpi c-teal">
-        <div class="kpi-l">Reserva (média)</div>
-        <div class="kpi-v teal" id="kpiReservaD30">R$&nbsp;—</div>
-        <div class="kpi-s" id="kpiReservaD30Sub">Média dos meses fechados</div>
+        <div class="kpi-l">Subtotal Despesas <span id="kpiSubDespLabel">(—)</span></div>
+        <div class="kpi-v teal" id="kpiSubDesp">R$&nbsp;—</div>
+        <div class="kpi-s" id="kpiSubDespSub">Mês anterior · despesa projetada</div>
       </div>
       <div class="kpi c-green">
         <div class="kpi-l">Saldo Total (Inter)</div>
@@ -1019,9 +1019,10 @@ function processarDadosAPI(data){
     set('kpiSubRec', fmt(k.subtotalReceitas));
     setTxt('kpiSubRecSub','Mês anterior · receita projetada');
 
-    // Reserva média
-    set('kpiReservaD30', fmt(k.reservaMedia));
-    setTxt('kpiReservaD30Sub','Média de '+(k.reservaMesesCalculados||0)+' meses fechados (até '+(k.mesAnterior||'')+')');
+    // Subtotal Despesas (mês anterior)
+    setTxt('kpiSubDespLabel','('+(k.mesAnterior||'')+')');
+    set('kpiSubDesp', fmt(k.subtotalDespesas));
+    setTxt('kpiSubDespSub','Mês anterior · despesa projetada');
 
     // Saldo Total Inter
     set('kpiSaldoTotal', fmt(k.saldoTotal));
@@ -1036,22 +1037,23 @@ function processarDadosAPI(data){
         ' <span style="color:var(--t3)">(mês atual)</span>';
     }
 
-    // Custo do cliente médio
-    setTxt('kpiCustoClienteVal', fmt(k.custoClienteMedio).replace('&nbsp;',' '));
-    setTxt('kpiCustoClienteSub', 'Custo total: '+fmt(k.custoClienteTotal).replace('&nbsp;',' ')+' / '+(k.custoClienteNum||0)+' clientes ('+(k.mesAnterior||'')+')');
+    // Custo do cliente — % média
+    const pctMedio = k.custoClientePctMedio;
+    setTxt('kpiCustoClienteVal', (pctMedio!=null?pctMedio.toFixed(1).replace('.',',')+'%':'—'));
+    setTxt('kpiCustoClienteSub', 'Média de '+(k.custoClienteNum||0)+' clientes · '+(k.mesAnterior||''));
 
     // Retirada Sócios
     setTxt('kpiRetiradaSociosVal', fmt(k.retiradaSocios).replace('&nbsp;',' '));
     setTxt('kpiRetiradaSociosSub', 'Total a pagar · '+(k.mesAtual||''));
 
-    // Fluxo de caixa mês anterior
-    const cor = k.fluxoCaixaMesAnterior>=0?'var(--green)':'var(--red)';
+    // Fluxo de caixa — % que está sobrando no caixa (mês anterior)
+    const corFC = (k.fluxoCaixaPct||0)>=0?'var(--green)':'var(--red)';
     const elFC = document.getElementById('kpiFluxoCaixaVal');
     if(elFC){
-      elFC.innerHTML = fmt(k.fluxoCaixaMesAnterior);
-      elFC.style.color = cor;
+      elFC.innerHTML = (k.fluxoCaixaPct!=null?(k.fluxoCaixaPct>0?'+':'')+k.fluxoCaixaPct.toFixed(1).replace('.',',')+'%':'—');
+      elFC.style.color = corFC;
     }
-    setTxt('kpiFluxoCaixaSub', 'Receita − Despesa de '+(k.mesAnterior||''));
+    setTxt('kpiFluxoCaixaSub', '(Receita − Despesa) / Receita · '+(k.mesAnterior||''));
 
     // Crescimento 2025 vs 2026
     if(k.crescimentoPct!==null){
