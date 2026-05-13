@@ -112,6 +112,13 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
 .kpi-v.teal{color:var(--teal)}
 .kpi-v.orange{color:var(--orange)}
 .kpi-v.pink{color:var(--pink)}
+/* Ocultar valores (modo banco) */
+body.hide-values .money-val{position:relative;color:transparent !important;user-select:none}
+body.hide-values .money-val::after{content:"R$ ●●●●";position:absolute;inset:0;display:flex;align-items:center;justify-content:inherit;color:var(--t1);letter-spacing:2px;font-family:'JetBrains Mono',monospace;font-weight:600}
+body.hide-values .kpi-v.money-val::after{font-size:inherit;justify-content:flex-start}
+body.hide-values .money-val.reveal{color:inherit !important;user-select:auto}
+body.hide-values .money-val.reveal::after{display:none}
+.money-val{cursor:pointer}
 .kpi-v.red{color:var(--red)}
 .kpi-v.gold{color:var(--gold)}
 .kpi-s{font-size:12px;color:var(--t3);margin-top:8px;font-family:'JetBrains Mono'}
@@ -287,6 +294,7 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
     </div>
     <div class="hdr-r">
       <div class="date-badge" id="dateBadge">12/03/2026 --:--</div>
+      <button id="btnHidValues" class="theme-btn" onclick="toggleHideValues()" title="Ocultar/exibir valores monetários" style="font-size:18px;width:42px;cursor:pointer">👁️</button>
       <div class="theme-toggle">
         <button class="theme-btn" onclick="setTheme('light');document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">&#9728;&#65039;</button>
         <button class="theme-btn active" onclick="setTheme('dark');document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">&#127769;</button>
@@ -1711,6 +1719,7 @@ function doLogin(){
       document.getElementById('wrap').style.display='block';
       initCharts();
       updateClientTable();
+      setTimeout(applyMoneyValMarkers, 200);
     });
   }else{
     document.getElementById('pwdError').style.display='block';
@@ -1720,6 +1729,47 @@ function doLogin(){
 }
 
 function setTheme(t){document.documentElement.setAttribute('data-theme',t);setTimeout(()=>initCharts(),100)}
+
+// ===== Toggle de ocultar valores monetários (modo banco) =====
+function toggleHideValues(){
+  const isHidden = document.body.classList.toggle('hide-values');
+  localStorage.setItem('dashfin_hideValues', isHidden ? '1' : '0');
+  const btn = document.getElementById('btnHidValues');
+  if(btn) btn.textContent = isHidden ? '🙈' : '👁️';
+  applyMoneyValMarkers();
+}
+function applyMoneyValMarkers(){
+  // Marca elementos que contêm "R$" (ou % financeiro) como money-val
+  document.querySelectorAll('.kpi-v, .fin-val, .mono, .hbar-fill, .info-row .v, .donut-v, td').forEach(el=>{
+    const txt = (el.textContent || '').replace(/ /g,' ').trim();
+    const isMoney = txt.indexOf('R$')>=0;
+    const isPct   = /^[+-]?\d{1,3}([\.,]\d+)?\s*%$/.test(txt);
+    if(isMoney || isPct){
+      el.classList.add('money-val');
+      if(!el.dataset.mvBound){
+        el.dataset.mvBound = '1';
+        el.addEventListener('click', function(){
+          if(!document.body.classList.contains('hide-values')) return;
+          this.classList.toggle('reveal');
+          if(this.classList.contains('reveal')){
+            setTimeout(()=>this.classList.remove('reveal'), 4000);
+          }
+        });
+      }
+    }
+  });
+}
+// Restaura preferência ao carregar
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(localStorage.getItem('dashfin_hideValues')==='1'){
+    document.body.classList.add('hide-values');
+    const btn = document.getElementById('btnHidValues');
+    if(btn) btn.textContent = '🙈';
+  }
+  setTimeout(applyMoneyValMarkers, 500);
+});
+// Reaplica markers quando dados são atualizados
+const _origProcessar = typeof processarDadosAPI === 'function' ? processarDadosAPI : null;
 
 // Date badge
 const now=new Date();
