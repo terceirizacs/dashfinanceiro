@@ -1733,12 +1733,17 @@ function doLogin(){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('loadingOverlay').style.display='flex';
     carregarDadosAPI().then(function(data){
-      if(data) processarDadosAPI(data);
+      try { if(data) processarDadosAPI(data); }
+      catch(e){ console.error('Erro em processarDadosAPI:', e); }
+      try { initCharts(); } catch(e){ console.error('Erro em initCharts:', e); }
+      try { updateClientTable(); } catch(e){ console.error('Erro em updateClientTable:', e); }
+      try { setTimeout(applyMoneyValMarkers, 200); } catch(e){}
       document.getElementById('loadingOverlay').style.display='none';
       document.getElementById('wrap').style.display='block';
-      initCharts();
-      updateClientTable();
-      setTimeout(applyMoneyValMarkers, 200);
+    }).catch(function(e){
+      console.error('Erro ao carregar dashboard:', e);
+      document.getElementById('loadingOverlay').style.display='none';
+      document.getElementById('wrap').style.display='block';
     });
   }else{
     document.getElementById('pwdError').style.display='block';
