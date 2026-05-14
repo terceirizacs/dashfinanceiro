@@ -1740,9 +1740,11 @@ function processarDadosAPI(data){
 
 // Variáveis globais para dados dos gráficos (sobrescritas pela API)
 var receita2025Data=[0,4497,4497,5997,5997,11491,14488,14488,30485,30511,35482,44479];
-var receita2026Data=[50479,51315,60479,0,0,0,0,0,0,0,0,0];
-var projecao2026Data=[0,0,0,0,0,0,0,0,0,0,0,0];
-var recDespDesp=[0,0,0,0,0,0,0,0,0,0,0,0]; // Subtotal Despesas mensal (Projeção)
+// Valores reais da aba "Projeção Receita e Despesas - 2" linha SUBTOTAL RECEITAS
+var receita2026Data=[50557.30, 53858.22, 58476, 63603.97, 60272.40, 58473, 58473, 58473, 53473, 53473, 53473, 53473];
+var projecao2026Data=[50557.30, 53858.22, 58476, 63603.97, 60272.40, 58473, 58473, 58473, 53473, 53473, 53473, 53473];
+// Valores reais da aba "Projeção Receita e Despesas - 2" linha SUBTOTAL DESPESAS
+var recDespDesp=[19171.88, 19559.28, 26477.45, 28579.88, 31794.80, 0, 0, 0, 0, 0, 0, 0];
 
 function doLogin(){
   const v=document.getElementById('pwdInput').value;
@@ -2110,7 +2112,7 @@ function initCharts(mesesFiltro){
         labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
         datasets:[
           {label:'2025 Realizado',data:receita2025Data,borderColor:t3,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:t3,tension:.3},
-          {label:'2026 Realizado',data:receita2026Data.map(function(v){return v||null}),borderColor:accent,backgroundColor:'rgba(139,124,247,.1)',borderWidth:3,pointRadius:4,pointBackgroundColor:accent,fill:true,tension:.3},
+          {label:'2026 Realizado',data:(function(){var ant=new Date().getMonth()-1;return receita2026Data.map(function(v,idx){return idx<=ant?(v||null):null});})(),borderColor:accent,backgroundColor:'rgba(139,124,247,.1)',borderWidth:3,pointRadius:4,pointBackgroundColor:accent,fill:true,tension:.3},
           {label:'2026 Projeção',data:projecao2026Data,borderColor:accent,borderDash:[5,5],backgroundColor:'transparent',borderWidth:1,pointRadius:0,tension:0}
         ]
       },
@@ -2155,18 +2157,24 @@ function initCharts(mesesFiltro){
     document.getElementById('custoLegend').innerHTML=l.map((lb,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${c[i]}"></div>${lb}</div>`).join('');
   }
 
-  // Cash Flow
+  // Cash Flow — dinâmico até mês ANTERIOR (incluindo abril)
   const cf=document.getElementById('cashFlowChart');
   if(cf){
     if(charts.cf) charts.cf.destroy();
+    const _mesesCF=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const _antCF = new Date().getMonth() - 1;
+    const _qtCF = _antCF >= 0 ? _antCF + 1 : 0;
+    const _entradas = projecao2026Data.slice(0, _qtCF);
+    const _saidas = recDespDesp.slice(0, _qtCF).map(v => -Math.abs(v||0));
+    const _saldo = _entradas.map((r,i) => Math.round(r + _saidas[i]));
     charts.cf=new Chart(cf,{
       type:'bar',
       data:{
-        labels:['Janeiro','Fevereiro','Março'],
+        labels: _mesesCF.slice(0, _qtCF),
         datasets:[
-          {label:'Entradas',data:[47560,51375,28485],backgroundColor:green,borderRadius:6,barPercentage:.35},
-          {label:'Saídas',data:[-41964,-38131,-29442],backgroundColor:red,borderRadius:6,barPercentage:.35},
-          {label:'Saldo Final',data:[19453,32697,31741],type:'line',borderColor:accent,backgroundColor:'transparent',borderWidth:3,pointRadius:5,pointBackgroundColor:accent,tension:.3,yAxisID:'y'}
+          {label:'Entradas',data:_entradas,backgroundColor:green,borderRadius:6,barPercentage:.35},
+          {label:'Saídas',data:_saidas,backgroundColor:red,borderRadius:6,barPercentage:.35},
+          {label:'Saldo',data:_saldo,type:'line',borderColor:accent,backgroundColor:'transparent',borderWidth:3,pointRadius:5,pointBackgroundColor:accent,tension:.3,yAxisID:'y'}
         ]
       },
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t2,font:{family:"'JetBrains Mono'",size:11}}}},scales:{x:{ticks:tickOpt(t3),grid:{display:false}},y:{ticks:{...tickOpt(t3),callback:v=>{const a=Math.abs(v);return(v<0?'-':'')+'R$'+Math.round(a/1000)+'k'}},grid:gridOpt}}}
@@ -2193,10 +2201,11 @@ function initCharts(mesesFiltro){
   const epr=document.getElementById('execProjRealChart');
   if(epr){
     if(charts.epr) charts.epr.destroy();
-    const projMensal = (projecao2026Data && projecao2026Data.some(v=>v>0)) ? projecao2026Data : [44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479];
-    const realMensal=receita2026Data.map(function(v){return v||null});
-    const despProj=[18040,20140,19690,19701,19540,19698,19540,19540,19540,20138,19540,20540];
-    const despReal=[41964,38131,29442,null,null,null,null,null,null,null,null,null];
+    const projMensal = projecao2026Data.slice();
+    const realMensal = receita2026Data.map(function(v){return v||null});
+    const despProj = recDespDesp.slice();
+    const _antEPR = new Date().getMonth() - 1;
+    const despReal = recDespDesp.map(function(v, idx){ return idx <= _antEPR ? v : null; });
     charts.epr=new Chart(epr,{
       type:'bar',
       data:{
@@ -2231,8 +2240,9 @@ function initCharts(mesesFiltro){
   if(edy){
     if(charts.edy) charts.edy.destroy();
     const desp2025=[0,4000,3750,6401,5860,11362,14919,14642,27550,28205,34584,34576];
-    const desp2026Real=[41964,38131,29442,null,null,null,null,null,null,null,null,null];
-    const desp2026Proj=[18040,20140,19690,19701,19540,19698,19540,19540,19540,20138,19540,20540];
+    const _antYoY = new Date().getMonth() - 1;
+    const desp2026Real = recDespDesp.map(function(v, idx){ return idx <= _antYoY ? v : null; });
+    const desp2026Proj = recDespDesp.slice();
     charts.edy=new Chart(edy,{
       type:'line',
       data:{
