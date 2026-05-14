@@ -642,25 +642,10 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
 
     <!-- KPIs Executivos -->
     <div class="kpis">
-      <div class="kpi c-accent">
-        <div class="kpi-l">Lucro Projetado 2026 <span class="help-icon">?<span class="help-tip">Calculado a partir da aba "Projeção Receita e Despesas - 2". Lucro = Subtotal Receitas − Total Despesas projetadas para o ano todo.</span></span></div>
-        <div class="kpi-v accent" id="execLucroProj">R$&nbsp;—</div>
-        <div class="kpi-s" id="execMargemProj">Carregando...</div>
-      </div>
-      <div class="kpi c-green">
-        <div class="kpi-l">Realizado vs Projetado <span class="help-icon">?<span class="help-tip">Compara a receita real acumulada (Controle Financeiro) com a receita projetada (Projeção 2026) para o mesmo período. Positivo = acima do plano.</span></span></div>
-        <div class="kpi-v green" id="execDesvio">—</div>
-        <div class="kpi-s" id="execDesvioSub">Carregando...</div>
-      </div>
       <div class="kpi c-gold">
         <div class="kpi-l">Passivo com Sócios <span class="tooltip" data-tip="Total que a empresa ainda deve aos sócios (distribuição + prolabore pendentes)">?</span></div>
         <div class="kpi-v gold" id="execPassivo">R$&nbsp;16.055</div>
         <div class="kpi-s">Março — pendente de pagamento</div>
-      </div>
-      <div class="kpi c-red">
-        <div class="kpi-l">Custo Creator / Receita <span class="tooltip" data-tip="Quanto da receita é consumido por custos diretos de creators (mão de obra de conteúdo)">?</span></div>
-        <div class="kpi-v red" id="execCreatorPct">—</div>
-        <div class="kpi-s" id="execCreatorPctSub">—</div>
       </div>
       <div class="kpi c-orange">
         <div class="kpi-l">Custo por Cliente <span class="tooltip" data-tip="% média de custo sobre receita por cliente — mesmo dado da Visão Geral">?</span></div>
@@ -1269,18 +1254,26 @@ function processarDadosAPI(data){
   if(data.projecao2026 && Array.isArray(data.projecao2026.totalReceita)){
     projecao2026Data = data.projecao2026.totalReceita.slice();
   }
-  if(data.controleFinanceiro && Array.isArray(data.controleFinanceiro.meses)){
-    var realizadoArr = new Array(12).fill(null);
-    data.controleFinanceiro.meses.forEach(function(m, idx){
-      if(idx <= mesAntIdx && m.faturamento > 0) realizadoArr[idx] = m.faturamento;
-    });
-    receita2026Data = realizadoArr;
-  } else if(data.projecao2026 && Array.isArray(data.projecao2026.totalReceita)){
-    // Fallback: usa projeção até mês anterior como realizado
-    receita2026Data = data.projecao2026.totalReceita.map(function(v, idx){
-      return idx <= mesAntIdx ? v : null;
+  // RECEITA REALIZADA 2026: prioridade = data.recebimentos (aba Recebimentos), agrupado por mês
+  // Fallback: controleFinanceiro.meses → projecao2026
+  var realizadoArr = new Array(12).fill(null);
+  if(data.recebimentos && data.recebimentos.length){
+    data.recebimentos.forEach(function(r){
+      if(r.mesNum >= 1 && r.mesNum <= 12 && r.recebido > 0){
+        if(realizadoArr[r.mesNum-1] === null) realizadoArr[r.mesNum-1] = 0;
+        realizadoArr[r.mesNum-1] += r.recebido;
+      }
     });
   }
+  // Complementa com controleFinanceiro se algum mês ficou null
+  if(data.controleFinanceiro && Array.isArray(data.controleFinanceiro.meses)){
+    data.controleFinanceiro.meses.forEach(function(m, idx){
+      if(realizadoArr[idx] === null && m.faturamento > 0) realizadoArr[idx] = m.faturamento;
+    });
+  }
+  // Garante que meses futuros (> mês atual) fiquem null pra não distorcer
+  for(var iF = mesAtIdx + 1; iF < 12; iF++) realizadoArr[iF] = null;
+  receita2026Data = realizadoArr;
 
   // --- Atualizar Recebimentos ---
   if(data.recebimentos&&data.recebimentos.length>0){
