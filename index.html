@@ -659,8 +659,13 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);displ
       </div>
       <div class="kpi c-red">
         <div class="kpi-l">Custo Creator / Receita <span class="tooltip" data-tip="Quanto da receita é consumido por custos diretos de creators (mão de obra de conteúdo)">?</span></div>
-        <div class="kpi-v red" id="execCreatorPct">47,7%</div>
-        <div class="kpi-s">R$20.642 de R$30.485 (set/2025)</div>
+        <div class="kpi-v red" id="execCreatorPct">—</div>
+        <div class="kpi-s" id="execCreatorPctSub">—</div>
+      </div>
+      <div class="kpi c-orange">
+        <div class="kpi-l">Custo por Cliente <span class="tooltip" data-tip="% média de custo sobre receita por cliente — mesmo dado da Visão Geral">?</span></div>
+        <div class="kpi-v orange" id="execCustoClientePct">—</div>
+        <div class="kpi-s" id="execCustoClientePctSub">—</div>
       </div>
     </div>
 
@@ -1047,10 +1052,15 @@ function processarDadosAPI(data){
         ' <span style="color:var(--t3)">(mês atual)</span>';
     }
 
-    // Custo do cliente — % média
+    // Custo do cliente — % média (Visão Geral)
     const pctMedio = k.custoClientePctMedio;
-    setTxt('kpiCustoClienteVal', (pctMedio!=null?pctMedio.toFixed(1).replace('.',',')+'%':'—'));
-    setTxt('kpiCustoClienteSub', 'Média de '+(k.custoClienteNum||0)+' clientes · base: '+(k.custoClienteMesUsado||k.mesAnterior||''));
+    const pctTxt = (pctMedio!=null?pctMedio.toFixed(1).replace('.',',')+'%':'—');
+    const pctSub = 'Média de '+(k.custoClienteNum||0)+' clientes · base: '+(k.custoClienteMesUsado||k.mesAnterior||'');
+    setTxt('kpiCustoClienteVal', pctTxt);
+    setTxt('kpiCustoClienteSub', pctSub);
+    // Visão Executiva — espelha o mesmo dado
+    setTxt('execCustoClientePct', pctTxt);
+    setTxt('execCustoClientePctSub', pctSub);
 
     // Retirada Sócios
     setTxt('kpiRetiradaSociosVal', fmt(k.retiradaSocios).replace('&nbsp;',' '));
@@ -1137,15 +1147,7 @@ function processarDadosAPI(data){
         receitaAcum+=data.custoCliente[m].total.receita;
       }
     });
-    // Atualizar KPIs no DOM (só se encontrou dados válidos)
-    var kpis=document.querySelectorAll('#tab-geral .kpi');
-    if(kpis[0]&&mrrAtual>0){
-      kpis[0].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(mrrAtual).toLocaleString('pt-BR');
-      kpis[0].querySelector('.kpi-s').textContent=numContratos+' contratos ativos';
-    }
-    if(kpis[1]&&receitaAcum>0){
-      kpis[1].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(receitaAcum).toLocaleString('pt-BR');
-    }
+    // NÃO sobrescrever MRR / Subtotal Receitas — os valores corretos vêm de data.kpis (Projeção SUBTOTAL RECEITAS)
   }
 
   // --- Atualizar Fluxo de Caixa ---
@@ -1929,16 +1931,7 @@ function atualizarKPIsFiltrados(mesesSelecionados){
     }
   });
 
-  // Atualizar KPIs Visão Geral
-  var kpis=document.querySelectorAll('#tab-geral .kpi');
-  if(kpis[0]&&mrrUltimoMes>0){
-    kpis[0].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(mrrUltimoMes).toLocaleString('pt-BR');
-    kpis[0].querySelector('.kpi-s').textContent=numContratos+' contratos ativos';
-  }
-  if(kpis[1]&&receitaAcum>0){
-    kpis[1].querySelector('.kpi-v').innerHTML='R$&nbsp;'+Math.round(receitaAcum).toLocaleString('pt-BR');
-    kpis[1].querySelector('.kpi-s').innerHTML='Acumulado '+mesesSelecionados.length+' meses';
-  }
+  // MRR e Subtotal Receitas vêm de data.kpis (SUBTOTAL RECEITAS da Projeção) — não sobrescrever aqui
 
   // Atualizar Fluxo de Caixa KPIs
   var entradasTotal=0,saidasTotal=0;
