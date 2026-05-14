@@ -1279,12 +1279,15 @@ function processarDadosAPI(data){
   var mesAntIdx = data.kpis ? data.kpis.mesAnteriorIdx : (mesAtIdx-1<0?11:mesAtIdx-1);
 
   // GRÁFICO Evolução 2026: usa Projeção SUBTOTAL RECEITAS
-  // - "2026 Realizado" (linha sólida): SUBTOTAL RECEITAS de jan até mês ANTERIOR (abril)
-  // - "2026 Projeção" (linha tracejada): SUBTOTAL RECEITAS de TODOS os 12 meses
+  // Mês anterior calculado DIRETO no front (não depende do GAS)
+  const _hoje = new Date();
+  const _mesAtualBrowser = _hoje.getMonth(); // 0=jan, 4=mai
+  const _mesAntBrowser = _mesAtualBrowser - 1 < 0 ? 11 : _mesAtualBrowser - 1;
   if(data.projecao2026 && Array.isArray(data.projecao2026.totalReceita)){
     projecao2026Data = data.projecao2026.totalReceita.slice();
+    // "2026 Realizado" — SUBTOTAL RECEITAS até mês ANTERIOR (abril)
     receita2026Data = data.projecao2026.totalReceita.map(function(v, idx){
-      return idx <= mesAntIdx ? v : null;
+      return idx <= _mesAntBrowser ? v : null;
     });
   }
 
