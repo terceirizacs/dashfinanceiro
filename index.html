@@ -1290,6 +1290,13 @@ function processarDadosAPI(data){
       return idx <= _mesAntBrowser ? v : null;
     });
   }
+  // Despesas mensais (Projeção SUBTOTAL DESPESAS) — vem do GAS via data.kpis._despesasProj (se existir)
+  // ou da soma manual de data.projecao2026.totalDespesa
+  if(data.kpis && Array.isArray(data.kpis._despesasProj)){
+    recDespDesp = data.kpis._despesasProj.slice();
+  } else if(data.projecao2026 && Array.isArray(data.projecao2026.totalDespesa)){
+    recDespDesp = data.projecao2026.totalDespesa.slice();
+  }
 
   // --- Atualizar Recebimentos ---
   if(data.recebimentos&&data.recebimentos.length>0){
@@ -1735,6 +1742,7 @@ function processarDadosAPI(data){
 var receita2025Data=[0,4497,4497,5997,5997,11491,14488,14488,30485,30511,35482,44479];
 var receita2026Data=[50479,51315,60479,0,0,0,0,0,0,0,0,0];
 var projecao2026Data=[0,0,0,0,0,0,0,0,0,0,0,0];
+var recDespDesp=[0,0,0,0,0,0,0,0,0,0,0,0]; // Subtotal Despesas mensal (Projeção)
 
 function doLogin(){
   const v=document.getElementById('pwdInput').value;
@@ -2110,17 +2118,23 @@ function initCharts(mesesFiltro){
     });
   }
 
-  // Rec vs Desp
+  // Rec vs Desp — dinâmico baseado em Projeção SUBTOTAL RECEITAS / DESPESAS, até mês ANTERIOR
   const rd=document.getElementById('recDesp');
   if(rd){
     if(charts.rd) charts.rd.destroy();
+    const _mesesNomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const _mesAntRD = new Date().getMonth() - 1; // só meses fechados (até mês anterior)
+    const _qtMeses = _mesAntRD >= 0 ? _mesAntRD + 1 : 0;
+    const _labels = _mesesNomes.slice(0, _qtMeses);
+    const _rec = (projecao2026Data && projecao2026Data.length) ? projecao2026Data.slice(0, _qtMeses) : [50479,51315,60479].slice(0, _qtMeses);
+    const _desp = (recDespDesp && recDespDesp.length) ? recDespDesp.slice(0, _qtMeses) : [41964,38131,29442].slice(0, _qtMeses);
     charts.rd=new Chart(rd,{
       type:'bar',
       data:{
-        labels:['Janeiro','Fevereiro','Março'],
+        labels: _labels,
         datasets:[
-          {label:'Receita',data:[50479,51315,60479],backgroundColor:green,borderRadius:6,barPercentage:.4},
-          {label:'Despesas',data:[41964,38131,29442],backgroundColor:red,borderRadius:6,barPercentage:.4}
+          {label:'Receita',data:_rec,backgroundColor:green,borderRadius:6,barPercentage:.4},
+          {label:'Despesas',data:_desp,backgroundColor:red,borderRadius:6,barPercentage:.4}
         ]
       },
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t2,font:{family:"'JetBrains Mono'",size:11}}}},scales:{x:{ticks:tickOpt(t3),grid:{display:false}},y:{ticks:{...tickOpt(t3),callback:v=>'R$'+Math.round(v/1000)+'k'},grid:gridOpt}}}
