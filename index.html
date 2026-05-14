@@ -2176,7 +2176,7 @@ function initCharts(mesesFiltro){
   const epr=document.getElementById('execProjRealChart');
   if(epr){
     if(charts.epr) charts.epr.destroy();
-    const projMensal=[44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479];
+    const projMensal = (projecao2026Data && projecao2026Data.some(v=>v>0)) ? projecao2026Data : [44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479,44479];
     const realMensal=receita2026Data.map(function(v){return v||null});
     const despProj=[18040,20140,19690,19701,19540,19698,19540,19540,19540,20138,19540,20540];
     const despReal=[41964,38131,29442,null,null,null,null,null,null,null,null,null];
