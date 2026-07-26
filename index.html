@@ -79,6 +79,12 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
 .tblwrap{overflow-x:auto}
 .st{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;font-family:'Inter'}
 .st.pend{background:rgba(248,113,113,.12);color:var(--red)}
+.st.ok{background:rgba(52,211,153,.12);color:var(--green)}
+.st.off{background:rgba(148,163,184,.12);color:var(--t2)}
+.ltv-sum{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.ltv-chip{flex:1;min-width:180px;background:var(--track-bg);border:1px solid var(--border);border-radius:14px;padding:14px 18px}
+.ltv-chip .lv{font-family:'JetBrains Mono';font-size:22px;font-weight:700;letter-spacing:-1px}
+.ltv-chip .ll{font-size:11.5px;color:var(--t3);margin-top:3px}
 .pill{padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;letter-spacing:.3px}
 .pill:hover{border-color:var(--bh);color:var(--t1)}
 .pill.active{background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(139,124,247,.3)}
@@ -359,6 +365,53 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
       </ol>
     </div>
 
+    <div class="sec">Vida de contrato e LTV por cliente · dados até 26/07/2026</div>
+    <div class="card">
+      <h3>Quanto tempo o creator fica e quanto ele deixa <span class="hq" data-h="ltv">?</span></h3>
+      <div class="d">Histórico completo 2025 + 2026, por cliente · <span class="src">📄 abas Receita e Despesas - 2025 + Recebimentos Terceiriza</span></div>
+      <div class="ltv-sum">
+        <div class="ltv-chip"><div class="lv mv">4,0 meses</div><div class="ll">vida média dos 11 contratos encerrados</div></div>
+        <div class="ltv-chip"><div class="lv mv">R$ 16.571</div><div class="ll">LTV médio de quem já saiu (total pago na vida)</div></div>
+        <div class="ltv-chip"><div class="lv mv">6,3 meses</div><div class="ll">vida média dos 10 ativos — e contando</div></div>
+        <div class="ltv-chip"><div class="lv mv">R$ 43.406</div><div class="ll">quanto os ativos já pagaram, em média</div></div>
+      </div>
+      <div class="tblwrap">
+        <table class="top-table">
+          <tr><th>Cliente</th><th>Início</th><th>Fim</th><th>Meses</th><th>Total pago</th><th>Ticket médio</th><th>Status</th></tr>
+          <tr><td>Andrea Vermont</td><td>set/25</td><td>—</td><td>11</td><td class="mv">R$ 175.967</td><td class="mv">R$ 15.997</td><td><span class="st ok">ATIVO</span></td></tr>
+          <tr><td>Bruno (Arkes)</td><td>fev/25</td><td>—</td><td>17</td><td class="mv">R$ 105.182</td><td class="mv">R$ 6.187</td><td><span class="st ok">ATIVO</span></td></tr>
+          <tr><td>Dra. Gessica</td><td>jun/25</td><td>—</td><td>14</td><td class="mv">R$ 48.958</td><td class="mv">R$ 3.497</td><td><span class="st ok">ATIVO</span></td></tr>
+          <tr><td>Rafaela Bueno</td><td>dez/25</td><td>abr/26</td><td>5</td><td class="mv">R$ 38.122</td><td class="mv">R$ 7.624</td><td><span class="st off">encerrado</span></td></tr>
+          <tr><td>Arlene Imob</td><td>out/25</td><td>jul/26</td><td>10</td><td class="mv">R$ 29.970</td><td class="mv">R$ 2.997</td><td><span class="st off">encerrado</span></td></tr>
+          <tr><td>Tay Training</td><td>mai/26</td><td>—</td><td>3</td><td class="mv">R$ 26.991</td><td class="mv">R$ 8.997</td><td><span class="st ok">ATIVO</span></td></tr>
+          <tr><td>CSM Academy</td><td>mar/26</td><td>ago/26</td><td>5</td><td class="mv">R$ 25.000</td><td class="mv">R$ 5.000</td><td><span class="st ok">ATIVO (6 meses)</span></td></tr>
+          <tr><td>Lucas Arrial</td><td>mai/26</td><td>jun/26</td><td>2</td><td class="mv">R$ 19.793</td><td class="mv">R$ 9.896</td><td><span class="st off">encerrado</span></td></tr>
+          <tr><td>Kelem</td><td>jan/26</td><td>mar/26</td><td>3</td><td class="mv">R$ 18.122</td><td class="mv">R$ 6.041</td><td><span class="st off">fim do prazo</span></td></tr>
+          <tr><td>Magp Treinamento</td><td>mar/26</td><td>—</td><td>4</td><td class="mv">R$ 15.988</td><td class="mv">R$ 3.997</td><td><span class="st ok">ATIVO</span></td></tr>
+          <tr><td>Mercado E-Commerce</td><td>mar/26</td><td>—</td><td>4</td><td class="mv">R$ 15.988</td><td class="mv">R$ 3.997</td><td><span class="st ok">ATIVO</span></td></tr>
+          <tr><td>César Matsumoto</td><td>nov/25</td><td>fev/26</td><td>4</td><td class="mv">R$ 15.824</td><td class="mv">R$ 3.956</td><td><span class="st off">encerrado</span></td></tr>
+          <tr><td>Dra. Investidora</td><td>dez/25</td><td>abr/26</td><td>5</td><td class="mv">R$ 14.985</td><td class="mv">R$ 2.997</td><td><span class="st off">encerrado</span></td></tr>
+          <tr><td>Tia do Inglês</td><td>abr/26</td><td>—</td><td>3</td><td class="mv">R$ 11.991</td><td class="mv">R$ 3.997</td><td><span class="st ok">ATIVO</span></td></tr>
+          <tr><td>Francês Ativo</td><td>abr/26</td><td>jun/26</td><td>3</td><td class="mv">R$ 11.991</td><td class="mv">R$ 3.997</td><td><span class="st off">encerrado</span></td></tr>
+          <tr><td>Gabriel Becker</td><td>jun/25</td><td>nov/25</td><td>6</td><td class="mv">R$ 11.982</td><td class="mv">R$ 1.997</td><td><span class="st off">encerrado</span></td></tr>
+          <tr><td>Acelera Concursos</td><td>fev/26</td><td>abr/26</td><td>2</td><td class="mv">R$ 10.000</td><td class="mv">R$ 5.000</td><td><span class="st off">consultoria</span></td></tr>
+          <tr><td>Kenia Redoma</td><td>jul/25</td><td>set/25</td><td>3</td><td class="mv">R$ 8.991</td><td class="mv">R$ 2.997</td><td><span class="st off">encerrado</span></td></tr>
+          <tr><td>Boost (Leo Simão)</td><td>jul/26</td><td>—</td><td>1</td><td class="mv">R$ 3.997</td><td class="mv">R$ 3.997</td><td><span class="st ok">ATIVO</span></td></tr>
+          <tr><td>Psimama</td><td>jul/26</td><td>—</td><td>1</td><td class="mv">R$ 3.997</td><td class="mv">R$ 3.997</td><td><span class="st ok">ATIVO</span></td></tr>
+          <tr><td>Ana Claudia</td><td>fev/26</td><td>fev/26</td><td>1</td><td class="mv">R$ 2.500</td><td class="mv">R$ 2.500</td><td><span class="st off">pgto único</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card par" style="margin-top:20px">
+      <h3>💭 Para pensar sobre o LTV dos creators</h3>
+      <p><b>1. Um contrato novo não vale "R$ 48 mil/ano" — vale ~R$ 16 mil até provar o contrário.</b> O creator que saiu ficou em média 4 meses e deixou R$ 16.571. É esse número que deve entrar na conta na hora de dar desconto, investir em captação ou aceitar cliente fora do perfil. Cada mês extra de permanência vale, no ticket médio atual, +R$ 5–6 mil de LTV por cliente.</p>
+      <p><b>2. O "vale da morte" é do 2º ao 5º mês.</b> Dos 11 encerrados, 9 saíram com 5 meses ou menos. Quem passa do 6º mês tende a ficar muito: Bruno está há 17 meses (R$ 105 mil), Andrea há 11 (R$ 176 mil), Gessica há 14 (R$ 49 mil) — os três "veteranos" respondem por mais da metade de tudo que a empresa já faturou. Tradução prática: o LTV se decide nos <b>primeiros 90 dias</b>. É aí que o creator precisa VER resultado (relatório mensal de valor entregue, número de alunos recuperados, reembolso evitado) — não no 6º mês, quando a decisão de sair já foi tomada.</p>
+      <p><b>3. Ticket baixo não compra lealdade.</b> Os contratos de ~R$ 3.000 (César, Dra. Investidora, Kenia, Arlene) saíram na mesma velocidade dos caros — e alguns davam prejuízo operacional. Já Rafaela e Lucas pagavam R$ 8–10 mil e também saíram rápido, mas deixaram R$ 38 mil e R$ 20 mil em poucos meses. Conclusão: preço menor não retém, só reduz o LTV. Reforça a tese do ticket mínimo de R$ 4.500–5.000.</p>
+      <p><b>4. Nem todo encerramento é churn.</b> Kelem (contrato de 3 meses), Acelera e Ana Claudia (consultorias pontuais) terminaram no prazo combinado. O churn "real" de contratos recorrentes é um pouco melhor do que o número bruto sugere — mas ainda assim, 6 saídas não planejadas em 6 meses é o principal freio de crescimento da empresa hoje.</p>
+      <p style="color:var(--t3);font-size:12.5px">Metodologia: meses = meses com pagamento recebido; total pago = soma de tudo que o cliente pagou desde o início (2025 + 2026, regime de caixa). Snapshot calculado em 26/07/2026 — peça atualização quando quiser recalcular.</p>
+    </div>
+
     <div class="sec">Tabela anual consolidada</div>
     <div class="card">
       <h3>Todos os meses de 2026 <span class="hq" data-h="anual">?</span></h3>
@@ -404,6 +457,7 @@ lucrocli:'Para cada cliente: receita do mês − custos diretos (ferramentas, m�
 pend:'Linhas da aba Recebimentos com VALOR PREVISTO, sem VALOR RECEBIDO e com DATA DE VENCIMENTO já passada.<br><br>📄 Fonte: aba <b>Recebimentos Terceiriza</b>.',
 yoy:'Receita mensal de 2026 (operacional, desta análise) contra a receita mensal de 2025 (linha TOTAL de receita da aba histórica).<br><br>📄 Fonte: abas <b>Receita e Despesas - 2025</b> + <b>Recebimentos Terceiriza</b>.',
 anual:'Consolidado mês a mês: receita e despesas operacionais, lucro, margem, retiradas, aportes de CDB e saldo de caixa no fim do mês.<br><br>📄 Fonte: todas as abas — Recebimentos, Pagamentos, Fluxos de caixa INTER/NUBANK.',
+ltv:'<b>LTV (Lifetime Value)</b> = tudo que o cliente pagou do primeiro ao último mês.<br><br><b>Meses</b> = meses em que houve pagamento recebido, juntando 2025 (aba histórica) e 2026 (aba Recebimentos).<br><br>Encerramentos por fim de prazo (Kelem, consultorias) estão marcados — não são churn de verdade.<br><br>📄 Fonte: abas <b>Receita e Despesas - 2025</b> + <b>Recebimentos Terceiriza</b>. Snapshot de 26/07/2026.',
 kcaixa:'Todo o dinheiro da empresa agora: saldo disponível no Inter (célula F3 da aba Fluxo INTER) + CDB (F2) + saldo do Nubank (F1 da aba Fluxo NUBANK).<br><br>📄 Fonte: abas <b>Fluxo de caixa - INTER / NUBANK</b>.',
 kmrr:'Receita recorrente garantida por contrato neste mês. Detalhe completo na aba 👥 Clientes.<br><br>📄 Fonte: aba <b>Projeção Receita e Despesas - 2</b> (linhas CONTRATO).',
 krec:'Dinheiro de clientes que entrou no caixa no último mês fechado. Não conta transferência interna nem reembolso.<br><br>📄 Fonte: aba <b>Recebimentos Terceiriza</b>.',
