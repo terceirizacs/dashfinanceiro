@@ -414,13 +414,14 @@ kinter:'Saldo disponível em conta no Inter, sem contar o CDB.<br><br>📄 Fonte
 kcdb:'Total aplicado no CDB. É reserva da empresa, não despesa.<br><br>📄 Fonte: aba <b>Fluxo de caixa - INTER</b>, célula F2 (INVESTIMENTO CDB).',
 knubank:'Saldo atual da conta Nubank (usada principalmente para o cartão).<br><br>📄 Fonte: aba <b>Fluxo de caixa - NUBANK</b>, célula F1 (SALDO ATUAL).',
 kburn:'Média dos últimos 3 meses fechados: despesa operacional + retiradas dos sócios. É o quanto sai do caixa num mês típico.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
-kreserva:'Quanto sobra DENTRO da empresa num mês típico, depois de pagar tudo e distribuir aos sócios: lucro operacional − distribuição de lucros, na média dos últimos 3 meses fechados.<br><br>É esse valor que vira crescimento de caixa + CDB. Se ficar negativo, as retiradas estão comendo a reserva.<br><br>📄 Fonte: abas <b>Recebimentos + Pagamentos</b>.',
+kreserva:'Quanto sobra DENTRO da empresa num mês típico, depois de pagar tudo e distribuir aos sócios: lucro operacional − distribuição de lucros, na média dos últimos 3 meses fechados.<br><br>O <b>% da receita</b> mostra quanto de cada real faturado fica guardado: ex. 6% = a cada R$ 100 que entram, R$ 6 ficam na empresa (caixa + CDB). Referência saudável: 15–20%.<br><br>Se ficar negativo, as retiradas estão comendo a reserva.<br><br>📄 Fonte: abas <b>Recebimentos + Pagamentos</b>.',
 socev:'Soma de tudo que cada sócio recebeu no mês: distribuição de lucros + pró-labore + reembolso de despesas + prestação de serviços (Thiago).<br><br>O gráfico vai de <b>janeiro até o mês seguinte ao atual</b>: meses passados mostram o que foi pago de verdade (aba Pagamentos); o último mês, em tom mais claro, mostra o que está <b>definido</b> na aba Distribuição Sócios (se o bloco ainda não foi criado, fica vazio).<br><br>Pedro não entra — é equipe, não sócio.<br><br>📄 Fonte: abas <b>Pagamentos Terceiriza</b> + <b>Distribuição Sócios</b>.',
 socplano:'O bloco de cada mês na aba Distribuição Sócios tem um resumo por sócio: JÁ PAGO, PROLABORE, A PAGAR e FALTA. TOTAL definido = soma de tudo.<br><br>"Pago do definido" compara o que já saiu com o que foi combinado no mês.<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>, colunas I–N do resumo mensal.',
 ksocdef:'Total combinado para os sócios neste mês (TOTAL A PAGAR de cada um, somado).<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>, resumo do bloco do mês.',
 ksocpago:'Quanto já saiu do caixa para os sócios neste mês (pagamentos efetivados).<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
 ksocfalta:'O que ainda falta pagar do valor definido no mês (colunas A PAGAR + FALTA de cada sócio).<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>.',
-ksocnext:'Valor já definido para o próximo mês na planilha. Se o bloco do mês ainda não foi criado, aparece como "não lançado".<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>.'
+ksocnext:'Valor já definido para o próximo mês na planilha. Se o bloco do mês ainda não foi criado, aparece como "não lançado".<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>.',
+socpct:'Quanto do faturamento da empresa vira saque dos sócios.<br><br><b>Número grande</b>: soma de todos os saques do ano ÷ toda a receita operacional do ano (até o mês fechado).<br><b>Número pequeno</b>: o mesmo cálculo só do último mês fechado.<br><br>Ex.: 55% significa que a cada R$ 100 que entram, R$ 55 vão para os sócios. O hover do gráfico abaixo mostra esse % mês a mês.<br><br>📄 Fonte: abas <b>Pagamentos</b> ÷ <b>Recebimentos Terceiriza</b>.'
 };
 var _HQT=null;
 function hqTip(){if(!_HQT){_HQT=document.createElement('div');_HQT.style.cssText='position:fixed;z-index:99999;pointer-events:none;background:rgba(15,15,25,.97);color:#f1f5f9;border:1px solid rgba(139,124,247,.35);border-radius:12px;padding:12px 16px;font-size:12.5px;line-height:1.6;max-width:320px;box-shadow:0 12px 40px rgba(0,0,0,.5);opacity:0;transition:opacity .15s';document.body.appendChild(_HQT)}return _HQT}
@@ -597,15 +598,16 @@ function renderCmp(){
 
 function renderCaixa(){
   const k=D.kpis, p=PAL(), mf=D.mesFechadoIdx;
-  let res=0,nR=0;
-  for(let m=mf;m>mf-3&&m>=0;m--){res+=D.lucroOp[m]-D.distLucros[m];nR++}
+  let res=0,recR=0,nR=0;
+  for(let m=mf;m>mf-3&&m>=0;m--){res+=D.lucroOp[m]-D.distLucros[m];recR+=D.receitaOp[m];nR++}
   const reservaMedia=nR?res/nR:0;
+  const reservaPct=recR>0?res/recR*100:0;
   let h='';
   h+=kpiCard(p.accent,'Banco Inter (disponível)','kinter',fmt(D.saldos.interDisp),'conta principal');
   h+=kpiCard(p.teal,'CDB (investido)','kcdb',fmt(D.saldos.cdb),'abr 20k · mai 10k · jun 10k · jul 10k');
   h+=kpiCard(p.sky,'Nubank','knubank',fmt(D.saldos.nubank),'conta secundária');
   h+=kpiCard(p.orange,'Queima média mensal','kburn',fmt(k.burn3),'só operação: '+fmt(k.burnOp3)+'/mês');
-  h+=kpiCard(reservaMedia>=0?p.green:p.red,'Reserva média mensal','kreserva',fmt(reservaMedia),'lucro − retiradas (média 3 meses)',reservaMedia>=0?'pos':'neg');
+  h+=kpiCard(reservaMedia>=0?p.green:p.red,'Reserva média mensal','kreserva',fmt(reservaMedia),'<b class="'+(reservaPct>=0?'pos':'neg')+'">'+fmtPct(reservaPct)+' da receita</b> · lucro − retiradas (média 3m)',reservaMedia>=0?'pos':'neg');
   el('caixaRow').innerHTML=h;
 }
 
@@ -630,6 +632,14 @@ function renderSocios(){
   h+=kpiCard(p.gold,'Falta pagar em '+MESES[ma],'ksocfalta',pl?fmt(faltando):'—','a pagar + falta (todos os sócios)');
   h+=kpiCard(p.sky,'Definido p/ '+MESES[(ma+1)%12],'ksocnext',plNext?fmt(defNext):'Não lançado',plNext?'já planejado na planilha':'bloco de '+MESES_FULL[(ma+1)%12]+' ainda não existe');
   h+=kpiCard(p.pink,'Média de saque mensal','socev',fmt(media),'média dos meses realizados · '+delta(totMes[totMes.length-2]||0,totMes[0]||0).replace('vs mês ant.','desde jan'));
+  // % da receita que vira saque (acumulado até o mês fechado)
+  const mfS=D.mesFechadoIdx;
+  let saqAc=0,recAc=0;
+  for(let m=0;m<=mfS;m++){saqAc+=SOC_ORD.reduce((s,so)=>s+(D.socioMes[so][m]||0),0);recAc+=D.receitaOp[m]}
+  const pctAno=recAc>0?saqAc/recAc*100:0;
+  const saqMf=SOC_ORD.reduce((s,so)=>s+(D.socioMes[so][mfS]||0),0);
+  const pctMf=D.receitaOp[mfS]>0?saqMf/D.receitaOp[mfS]*100:0;
+  h+=kpiCard(p.orange,'Saques ÷ receita','socpct',fmtPct(pctAno),'do faturamento do ano vira saque · '+MESES[mfS]+': <b>'+fmtPct(pctMf)+'</b>');
   el('socKpis').innerHTML=h;
   // tabelas de plano
   fillPlano('socPlano1','socPlanoTitle1',ma,pl);
@@ -855,7 +865,14 @@ function initCharts(){
   mkChart('chSocios',{type:'bar',data:{labels:lbSoc,datasets:[
     socData('Pamela',p.accent),socData('Phellipe',p.teal),socData('Thiago',p.gold)
   ]},options:(()=>{const o=baseOpts();o.scales.x.stacked=true;o.scales.y.stacked=true;
-    o.plugins.tooltip.callbacks.footer=items=>{let s=0;items.forEach(i=>s+=i.parsed.y||0);return 'Total: '+fmt(s)+(items.length&&items[0].dataIndex>ma?' (definido, ainda não pago)':'')};return o})()});
+    o.plugins.tooltip.callbacks.footer=items=>{
+      let s=0;items.forEach(i=>s+=i.parsed.y||0);
+      if(!items.length)return 'Total: '+fmt(s);
+      const di=items[0].dataIndex;
+      if(di>ma)return 'Total: '+fmt(s)+' (definido, ainda não pago)';
+      const rec=D.receitaOp[di]||0;
+      return 'Total: '+fmt(s)+(rec>0?' · '+fmtPct(s/rec*100)+' da receita do mês':'');
+    };return o})()});
 }
 
 function drawCat(){
