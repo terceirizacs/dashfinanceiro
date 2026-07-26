@@ -146,6 +146,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     <button class="tab-btn active" onclick="switchTab('geral',this)">📊 Visão Geral</button>
     <button class="tab-btn" onclick="switchTab('caixa',this)">💰 Caixa &amp; Despesas</button>
     <button class="tab-btn" onclick="switchTab('clientes',this)">👥 Clientes</button>
+    <button class="tab-btn" onclick="switchTab('socios',this)">🤝 Sócios</button>
     <button class="tab-btn" onclick="switchTab('parecer',this)">🧠 Parecer do CFO</button>
   </nav>
 
@@ -206,7 +207,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     <div class="pillrow" id="mchipsCat"></div>
     <div class="card">
       <h3>Categorias no mês <span class="hq" data-h="cat">?</span></h3>
-      <div class="d">Cada pagamento é classificado automaticamente pelo fornecedor/descrição · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
+      <div class="d">O número ao lado de cada barra é o % que a categoria representa do faturamento do mês · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
       <div class="chart-box"><canvas id="chCat"></canvas></div>
     </div>
 
@@ -267,6 +268,40 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
       <h3>Previsto e ainda não recebido <span class="hq" data-h="pend">?</span></h3>
       <div class="d">Linhas com valor previsto, sem data de recebimento e com vencimento já passado · <span class="src">📄 aba Recebimentos Terceiriza</span></div>
       <div class="tblwrap" id="pendTable"></div>
+    </div>
+  </div>
+
+  <!-- ================= SÓCIOS ================= -->
+  <div class="tab-content" id="tab-socios">
+    <div class="sec">Saques do mês atual <span id="socRef" style="text-transform:none;letter-spacing:0"></span></div>
+    <div class="kpis" id="socKpis"></div>
+
+    <div class="sec">Evolução dos saques</div>
+    <div class="card">
+      <h3>Saques mensais por sócio <span class="hq" data-h="socev">?</span></h3>
+      <div class="d">Tudo que foi pago aos sócios: distribuição de lucros + pró-labore + reembolsos + serviços · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
+      <div class="chart-box"><canvas id="chSocios"></canvas></div>
+    </div>
+
+    <div class="sec">Plano de distribuição — mês atual e próximo</div>
+    <div class="g2">
+      <div class="card">
+        <h3 id="socPlanoTitle1">—</h3>
+        <div class="d">O que está definido, o que já foi pago e o que falta · <span class="src">📄 aba Distribuição Sócios (resumo do bloco mensal)</span></div>
+        <div class="tblwrap" id="socPlano1"></div>
+      </div>
+      <div class="card">
+        <h3 id="socPlanoTitle2">—</h3>
+        <div class="d">Planejamento do próximo mês · <span class="src">📄 aba Distribuição Sócios</span></div>
+        <div class="tblwrap" id="socPlano2"></div>
+      </div>
+    </div>
+
+    <div class="sec">Histórico definido × pago</div>
+    <div class="card">
+      <h3>Todos os meses lançados na planilha <span class="hq" data-h="socplano">?</span></h3>
+      <div class="d">Total definido por sócio em cada mês e quanto do definido já foi quitado · <span class="src">📄 aba Distribuição Sócios</span></div>
+      <div class="tblwrap" id="socHist"></div>
     </div>
   </div>
 
@@ -347,7 +382,7 @@ const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','
 const MESES_FULL=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 /* Snapshot embutido (26/07/2026) — usado se a API não responder */
-const FALLBACK={"geradoEm":"26/07/2026","mesFechadoIdx":5,"receitaOp":[50557.3,53860.92,58476.0,69601.0,69269.0,67680.0,44482.0,0.0,0.0,0.0,0.0,0.0],"receitaPrev":[50557.3,53814.83,58476.0,69600.97,69269.0,67680.0,68593.97,59473.0,54473.0,54473.0,54473.0,54473.0],"recFinanceira":[0.0,1.34,0.84,0.0,0.0,0.0,0.06,0.0,0.0,0.0,0.0,0.0],"despOp":[15338.55,16159.28,22077.45,22348.45,21445.46,26616.02,22167.95,0.0,0.0,0.0,0.0,0.0],"despPrevOp":[15338.55,16159.28,22077.45,22348.45,21445.46,26616.02,27279.62,5511.67,4800.0,4800.0,4800.0,4800.0],"despFixa":[8169.02,9863.69,11047.05,10897.05,10897.05,15131.72,7685.38,0.0,0.0,0.0,0.0,0.0],"despVar":[7169.53,6295.59,11030.4,11451.4,10548.41,11484.3,14482.57,0.0,0.0,0.0,0.0,0.0],"distLucros":[28625.29,24710.89,31011.04,29745.49,25753.9,44745.45,10507.71,0.0,0.0,0.0,0.0,0.0],"invCDB":[0.0,0.0,0.0,20000.0,10000.0,10000.0,10000.0,0.0,0.0,0.0,0.0,0.0],"lucroOp":[35218.75,37701.64,36398.55,47252.55,47823.54,41063.98,22314.05,0.0,0.0,0.0,0.0,0.0],"margemOp":[69.7,70.0,62.2,67.9,69.0,60.7,50.2,0,0,0,0,0],"saldoFimMes":[23346.4,36849.83,42750.18,60769.24,83350.88,80181.41,91987.81,91987.81,91987.81,91987.81,91987.81,91987.81],"catMes":{"Serviços Thiago (sócio)":[1500.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Equipe CS":[5000.0,6500.0,7000.0,7000.0,7000.0,11500.0,7500.0,0.0,0.0,0.0,0.0,0.0],"Contabilidade & Jurídico":[300.0,300.0,1161.67,1011.67,1011.67,1451.67,300.0,0.0,0.0,0.0,0.0,0.0],"Marketing & Eventos":[343.0,343.0,1149.04,343.0,343.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Cartão de crédito (ferramentas/var.)":[765.65,2739.09,5058.8,4400.59,3536.34,3377.45,4335.3,0.0,0.0,0.0,0.0,0.0],"Pró-labore sócios":[2869.02,3063.69,2885.38,2885.38,2885.38,2885.38,2885.38,0.0,0.0,0.0,0.0,0.0],"Impostos":[2835.72,3123.5,3781.78,5900.97,5988.74,7106.85,6922.9,0.0,0.0,0.0,0.0,0.0],"Reembolso sócios":[1725.16,90.0,1040.78,806.84,680.33,0.0,224.37,0.0,0.0,0.0,0.0,0.0],"Ferramentas & Infra":[0.0,0.0,0.0,0.0,0.0,294.67,0.0,0.0,0.0,0.0,0.0,0.0]},"recPorClienteMes":{"Bruno (Arkes)":[5997.0,5997.0,5997.0,11994.0,5997.0,6207.0,0.0,0.0,0.0,0.0,0.0,0.0],"Dra. Gessica":[3497.0,3497.0,3497.0,3497.0,3497.0,3497.0,3497.0,0.0,0.0,0.0,0.0,0.0],"Andrea Vermont":[15997.0,15997.0,15997.0,15997.0,15997.0,15997.0,15997.0,0.0,0.0,0.0,0.0,0.0],"Arlene Imob":[2997.0,2997.0,2997.0,2997.0,2997.0,2997.0,2997.0,0.0,0.0,0.0,0.0,0.0],"César Matsumoto":[4997.0,832.83,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Dra. Investidora":[2997.0,2997.0,2997.0,2997.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Rafaela Bueno":[7997.0,7999.7,7997.0,6131.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Kelem":[6078.3,6043.39,6000.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Acelera Concursos":[0.0,5000.0,0.0,5000.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Ana Claudia":[0.0,2500.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"CSM Academy":[0.0,0.0,5000.0,5000.0,5000.0,5000.0,5000.0,0.0,0.0,0.0,0.0,0.0],"Magp Treinamento":[0.0,0.0,3997.0,3997.0,3997.0,3997.0,0.0,0.0,0.0,0.0,0.0,0.0],"Mercado E-Commerce":[0.0,0.0,3997.0,3997.0,3997.0,3997.0,0.0,0.0,0.0,0.0,0.0,0.0],"Tia do Inglês":[0.0,0.0,0.0,3997.0,3997.0,3997.0,0.0,0.0,0.0,0.0,0.0,0.0],"Francês Ativo":[0.0,0.0,0.0,3997.0,3997.0,3997.0,0.0,0.0,0.0,0.0,0.0,0.0],"Lucas Arrial":[0.0,0.0,0.0,0.0,10796.0,8997.0,0.0,0.0,0.0,0.0,0.0,0.0],"Tay Training":[0.0,0.0,0.0,0.0,8997.0,8997.0,8997.0,0.0,0.0,0.0,0.0,0.0],"Boost (Leo Simão)":[0.0,0.0,0.0,0.0,0.0,0.0,3997.0,0.0,0.0,0.0,0.0,0.0],"Psimama":[0.0,0.0,0.0,0.0,0.0,0.0,3997.0,0.0,0.0,0.0,0.0,0.0]},"mrr":[25491.0,25491.0,33485.0,37482.0,46479.0,46479.0,54473.0,54473.0,54473.0,54473.0,54473.0,54473.0],"nContratos":[3,3,5,6,7,7,9,9,9,9,9,9],"ticketMedio":[8497.0,8497.0,6697.0,6247.0,6639.86,6639.86,6052.56,6052.56,6052.56,6052.56,6052.56,6052.56],"projRec":[50557.3,53858.22,58476.0,63603.97,69269.4,67470.0,68593.97,59473.0,54473.0,54473.0,54473.0,54473.0],"projDesp":[19171.88,19559.28,26477.45,28579.88,33640.79667,42693.26333,39155.64833,31753.67,31542.0,32140.8,31542.0,32542.0],"rec25":[0.0,4497.0,4497.0,5997.0,5997.0,11491.0,14488.0,14488.0,30485.0,30511.3,35482.0,44479.0],"desp25":[0.0,4000.0,3750.0,6400.98,5859.79,11361.53,14919.31,14642.48,27550.27,28204.54,34583.96,34575.48],"saldos":{"interDisp":41743.04,"cdb":50000.0,"nubank":244.77,"total":91987.81},"custoCliente":{"0":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":3110.24,"lucro":2886.76},{"cliente":"Dra. Gessica","receita":3497.0,"custo":947.5,"lucro":2549.5},{"cliente":"Andrea Vermont","receita":15997.0,"custo":7804.74,"lucro":8192.26},{"cliente":"Arlene Imob","receita":2997.0,"custo":915.59,"lucro":2081.41},{"cliente":"César Matsumoto","receita":4997.0,"custo":1473.81,"lucro":3523.19},{"cliente":"Dra. Investidora","receita":2997.0,"custo":1354.96,"lucro":1642.04},{"cliente":"Rafaela Bueno","receita":7997.0,"custo":1504.03,"lucro":6492.97},{"cliente":"Kelem","receita":6000.0,"custo":1092.27,"lucro":4907.73}],"1":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":3159.32,"lucro":2837.68},{"cliente":"Dra. Gessica","receita":3497.0,"custo":904.75,"lucro":2592.25},{"cliente":"Andrea Vermont","receita":15997.0,"custo":8181.1,"lucro":7815.9},{"cliente":"Arlene Imob","receita":2997.0,"custo":869.54,"lucro":2127.46},{"cliente":"César Matsumoto","receita":832.83,"custo":1141.8,"lucro":-308.97},{"cliente":"Dra. Investidora","receita":2997.0,"custo":1513.41,"lucro":1483.59},{"cliente":"Rafaela Bueno","receita":7997.0,"custo":1855.41,"lucro":6141.59},{"cliente":"Acelera Concursos","receita":5000.0,"custo":995.6,"lucro":4004.4},{"cliente":"Kelem","receita":6000.0,"custo":1066.03,"lucro":4933.97}],"2":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":3049.29,"lucro":2947.71},{"cliente":"Dra. Gessica","receita":3497.0,"custo":1350.33,"lucro":2146.67},{"cliente":"Andrea Vermont","receita":15997.0,"custo":8359.2,"lucro":7637.8},{"cliente":"Arlene Imob","receita":2997.0,"custo":1312.25,"lucro":1684.75},{"cliente":"Dra. Investidora","receita":2997.0,"custo":1553.44,"lucro":1443.56},{"cliente":"Rafaela Bueno","receita":7997.0,"custo":2615.53,"lucro":5381.47},{"cliente":"Acelera Concursos","receita":5000.0,"custo":964.82,"lucro":4035.18},{"cliente":"CSM Academy","receita":5000.0,"custo":2035.3,"lucro":2964.7},{"cliente":"Kelem","receita":6000.0,"custo":1040.99,"lucro":4959.01},{"cliente":"Magp Treinamento","receita":3997.0,"custo":1791.74,"lucro":2205.26},{"cliente":"Mercado E-Commerce","receita":3997.0,"custo":1791.74,"lucro":2205.26}],"3":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":3081.49,"lucro":2915.51},{"cliente":"Dra. Gessica","receita":3497.0,"custo":1469.71,"lucro":2027.29},{"cliente":"Andrea Vermont","receita":15997.0,"custo":7929.58,"lucro":8067.42},{"cliente":"Arlene Imob","receita":2997.0,"custo":1427.96,"lucro":1569.04},{"cliente":"Dra. Investidora","receita":2997.0,"custo":1745.81,"lucro":1251.19},{"cliente":"Rafaela Bueno","receita":6130.97,"custo":1897.22,"lucro":4233.75},{"cliente":"CSM Academy","receita":5000.0,"custo":1928.56,"lucro":3071.44},{"cliente":"Magp Treinamento","receita":3997.0,"custo":1905.45,"lucro":2091.55},{"cliente":"Tia do Inglês","receita":3997.0,"custo":1880.64,"lucro":2116.36},{"cliente":"Mercado E-Commerce","receita":3997.0,"custo":1935.62,"lucro":2061.38},{"cliente":"Francês Ativo","receita":3997.0,"custo":1880.64,"lucro":2116.36}],"4":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":3331.68,"lucro":2665.32},{"cliente":"Dra. Gessica","receita":3497.0,"custo":1946.45,"lucro":1550.55},{"cliente":"Andrea Vermont","receita":15997.0,"custo":7600.85,"lucro":8396.15},{"cliente":"Arlene Imob","receita":2997.0,"custo":1921.51,"lucro":1075.49},{"cliente":"CSM Academy","receita":5000.0,"custo":2022.06,"lucro":2977.94},{"cliente":"Magp Treinamento","receita":3997.0,"custo":1951.09,"lucro":2045.91},{"cliente":"Tia do Inglês","receita":3997.0,"custo":1824.23,"lucro":2172.77},{"cliente":"Mercado E-Commerce","receita":3997.0,"custo":1954.99,"lucro":2042.01},{"cliente":"Francês Ativo","receita":3997.0,"custo":1845.24,"lucro":2151.76},{"cliente":"Lucas Arrial","receita":10796.0,"custo":3650.08,"lucro":7145.92},{"cliente":"Tay Training","receita":8997.0,"custo":3107.04,"lucro":5889.96}],"5":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":5139.68,"lucro":857.32},{"cliente":"Dra. Gessica","receita":3497.0,"custo":4822.47,"lucro":-1325.47},{"cliente":"Andrea Vermont","receita":15997.0,"custo":5446.16,"lucro":10550.84},{"cliente":"Arlene Imob","receita":2997.0,"custo":3099.89,"lucro":-102.89},{"cliente":"CSM Academy","receita":5000.0,"custo":2626.71,"lucro":2373.29},{"cliente":"Magp Treinamento","receita":3997.0,"custo":3024.64,"lucro":972.36},{"cliente":"Tia do Inglês","receita":3997.0,"custo":1995.89,"lucro":2001.11},{"cliente":"Mercado E-Commerce","receita":3997.0,"custo":2969.46,"lucro":1027.54},{"cliente":"Francês Ativo","receita":3997.0,"custo":3094.61,"lucro":902.39},{"cliente":"Lucas Arrial","receita":10796.0,"custo":3542.57,"lucro":7253.43},{"cliente":"Tay Training","receita":8997.0,"custo":3987.46,"lucro":5009.54}]},"kpis":{"burn3":56884.92,"burnOp3":23469.98,"runwayMeses":1.6,"clientesAtivosJul":["Bruno (Arkes)","Dra. Gessica","Andrea Vermont","Magp Treinamento","Mercado E-Commerce","Tia do Inglês","Tay Training","Boost (Leo Simão)","Psimama"]},"pendencias":[{"cliente":"Tia do Ingles (William Alves)","previsto":3997.0,"vencimento":"25/07/2026","mes":6}],"mesAtualIdx":6,"v":3,"atualizadoEm":"2026-07-26 (snapshot embutido)"};
+const FALLBACK={"geradoEm":"26/07/2026","mesFechadoIdx":5,"receitaOp":[50557.3,53860.92,58476.0,69601.0,69269.0,67680.0,44482.0,0.0,0.0,0.0,0.0,0.0],"receitaPrev":[50557.3,53814.83,58476.0,69600.97,69269.0,67680.0,68593.97,59473.0,54473.0,54473.0,54473.0,54473.0],"recFinanceira":[0.0,1.34,0.84,0.0,0.0,0.0,0.06,0.0,0.0,0.0,0.0,0.0],"despOp":[15338.55,16159.28,22077.45,22348.45,21445.46,26616.02,22167.95,0.0,0.0,0.0,0.0,0.0],"despPrevOp":[15338.55,16159.28,22077.45,22348.45,21445.46,26616.02,27279.62,5511.67,4800.0,4800.0,4800.0,4800.0],"despFixa":[8169.02,9863.69,11047.05,10897.05,10897.05,15131.72,7685.38,0.0,0.0,0.0,0.0,0.0],"despVar":[7169.53,6295.59,11030.4,11451.4,10548.41,11484.3,14482.57,0.0,0.0,0.0,0.0,0.0],"distLucros":[28625.29,24710.89,31011.04,29745.49,25753.9,44745.45,10507.71,0.0,0.0,0.0,0.0,0.0],"invCDB":[0.0,0.0,0.0,20000.0,10000.0,10000.0,10000.0,0.0,0.0,0.0,0.0,0.0],"lucroOp":[35218.75,37701.64,36398.55,47252.55,47823.54,41063.98,22314.05,0.0,0.0,0.0,0.0,0.0],"margemOp":[69.7,70.0,62.2,67.9,69.0,60.7,50.2,0,0,0,0,0],"saldoFimMes":[23346.4,36849.83,42750.18,60769.24,83350.88,80181.41,91987.81,91987.81,91987.81,91987.81,91987.81,91987.81],"catMes":{"Serviços Thiago (sócio)":[1500.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Equipe CS":[5000.0,6500.0,7000.0,7000.0,7000.0,11500.0,7500.0,0.0,0.0,0.0,0.0,0.0],"Contabilidade & Jurídico":[300.0,300.0,1161.67,1011.67,1011.67,1451.67,300.0,0.0,0.0,0.0,0.0,0.0],"Marketing & Eventos":[343.0,343.0,1149.04,343.0,343.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Cartão de crédito (ferramentas/var.)":[765.65,2739.09,5058.8,4400.59,3536.34,3377.45,4335.3,0.0,0.0,0.0,0.0,0.0],"Pró-labore sócios":[2869.02,3063.69,2885.38,2885.38,2885.38,2885.38,2885.38,0.0,0.0,0.0,0.0,0.0],"Impostos":[2835.72,3123.5,3781.78,5900.97,5988.74,7106.85,6922.9,0.0,0.0,0.0,0.0,0.0],"Reembolso sócios":[1725.16,90.0,1040.78,806.84,680.33,0.0,224.37,0.0,0.0,0.0,0.0,0.0],"Ferramentas & Infra":[0.0,0.0,0.0,0.0,0.0,294.67,0.0,0.0,0.0,0.0,0.0,0.0]},"recPorClienteMes":{"Bruno (Arkes)":[5997.0,5997.0,5997.0,11994.0,5997.0,6207.0,0.0,0.0,0.0,0.0,0.0,0.0],"Dra. Gessica":[3497.0,3497.0,3497.0,3497.0,3497.0,3497.0,3497.0,0.0,0.0,0.0,0.0,0.0],"Andrea Vermont":[15997.0,15997.0,15997.0,15997.0,15997.0,15997.0,15997.0,0.0,0.0,0.0,0.0,0.0],"Arlene Imob":[2997.0,2997.0,2997.0,2997.0,2997.0,2997.0,2997.0,0.0,0.0,0.0,0.0,0.0],"César Matsumoto":[4997.0,832.83,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Dra. Investidora":[2997.0,2997.0,2997.0,2997.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Rafaela Bueno":[7997.0,7999.7,7997.0,6131.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Kelem":[6078.3,6043.39,6000.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Acelera Concursos":[0.0,5000.0,0.0,5000.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Ana Claudia":[0.0,2500.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"CSM Academy":[0.0,0.0,5000.0,5000.0,5000.0,5000.0,5000.0,0.0,0.0,0.0,0.0,0.0],"Magp Treinamento":[0.0,0.0,3997.0,3997.0,3997.0,3997.0,0.0,0.0,0.0,0.0,0.0,0.0],"Mercado E-Commerce":[0.0,0.0,3997.0,3997.0,3997.0,3997.0,0.0,0.0,0.0,0.0,0.0,0.0],"Tia do Inglês":[0.0,0.0,0.0,3997.0,3997.0,3997.0,0.0,0.0,0.0,0.0,0.0,0.0],"Francês Ativo":[0.0,0.0,0.0,3997.0,3997.0,3997.0,0.0,0.0,0.0,0.0,0.0,0.0],"Lucas Arrial":[0.0,0.0,0.0,0.0,10796.0,8997.0,0.0,0.0,0.0,0.0,0.0,0.0],"Tay Training":[0.0,0.0,0.0,0.0,8997.0,8997.0,8997.0,0.0,0.0,0.0,0.0,0.0],"Boost (Leo Simão)":[0.0,0.0,0.0,0.0,0.0,0.0,3997.0,0.0,0.0,0.0,0.0,0.0],"Psimama":[0.0,0.0,0.0,0.0,0.0,0.0,3997.0,0.0,0.0,0.0,0.0,0.0]},"mrr":[25491.0,25491.0,33485.0,37482.0,46479.0,46479.0,54473.0,54473.0,54473.0,54473.0,54473.0,54473.0],"nContratos":[3,3,5,6,7,7,9,9,9,9,9,9],"ticketMedio":[8497.0,8497.0,6697.0,6247.0,6639.86,6639.86,6052.56,6052.56,6052.56,6052.56,6052.56,6052.56],"projRec":[50557.3,53858.22,58476.0,63603.97,69269.4,67470.0,68593.97,59473.0,54473.0,54473.0,54473.0,54473.0],"projDesp":[19171.88,19559.28,26477.45,28579.88,33640.79667,42693.26333,39155.64833,31753.67,31542.0,32140.8,31542.0,32542.0],"rec25":[0.0,4497.0,4497.0,5997.0,5997.0,11491.0,14488.0,14488.0,30485.0,30511.3,35482.0,44479.0],"desp25":[0.0,4000.0,3750.0,6400.98,5859.79,11361.53,14919.31,14642.48,27550.27,28204.54,34583.96,34575.48],"saldos":{"interDisp":41743.04,"cdb":50000.0,"nubank":244.77,"total":91987.81},"custoCliente":{"0":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":3110.24,"lucro":2886.76},{"cliente":"Dra. Gessica","receita":3497.0,"custo":947.5,"lucro":2549.5},{"cliente":"Andrea Vermont","receita":15997.0,"custo":7804.74,"lucro":8192.26},{"cliente":"Arlene Imob","receita":2997.0,"custo":915.59,"lucro":2081.41},{"cliente":"César Matsumoto","receita":4997.0,"custo":1473.81,"lucro":3523.19},{"cliente":"Dra. Investidora","receita":2997.0,"custo":1354.96,"lucro":1642.04},{"cliente":"Rafaela Bueno","receita":7997.0,"custo":1504.03,"lucro":6492.97},{"cliente":"Kelem","receita":6000.0,"custo":1092.27,"lucro":4907.73}],"1":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":3159.32,"lucro":2837.68},{"cliente":"Dra. Gessica","receita":3497.0,"custo":904.75,"lucro":2592.25},{"cliente":"Andrea Vermont","receita":15997.0,"custo":8181.1,"lucro":7815.9},{"cliente":"Arlene Imob","receita":2997.0,"custo":869.54,"lucro":2127.46},{"cliente":"César Matsumoto","receita":832.83,"custo":1141.8,"lucro":-308.97},{"cliente":"Dra. Investidora","receita":2997.0,"custo":1513.41,"lucro":1483.59},{"cliente":"Rafaela Bueno","receita":7997.0,"custo":1855.41,"lucro":6141.59},{"cliente":"Acelera Concursos","receita":5000.0,"custo":995.6,"lucro":4004.4},{"cliente":"Kelem","receita":6000.0,"custo":1066.03,"lucro":4933.97}],"2":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":3049.29,"lucro":2947.71},{"cliente":"Dra. Gessica","receita":3497.0,"custo":1350.33,"lucro":2146.67},{"cliente":"Andrea Vermont","receita":15997.0,"custo":8359.2,"lucro":7637.8},{"cliente":"Arlene Imob","receita":2997.0,"custo":1312.25,"lucro":1684.75},{"cliente":"Dra. Investidora","receita":2997.0,"custo":1553.44,"lucro":1443.56},{"cliente":"Rafaela Bueno","receita":7997.0,"custo":2615.53,"lucro":5381.47},{"cliente":"Acelera Concursos","receita":5000.0,"custo":964.82,"lucro":4035.18},{"cliente":"CSM Academy","receita":5000.0,"custo":2035.3,"lucro":2964.7},{"cliente":"Kelem","receita":6000.0,"custo":1040.99,"lucro":4959.01},{"cliente":"Magp Treinamento","receita":3997.0,"custo":1791.74,"lucro":2205.26},{"cliente":"Mercado E-Commerce","receita":3997.0,"custo":1791.74,"lucro":2205.26}],"3":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":3081.49,"lucro":2915.51},{"cliente":"Dra. Gessica","receita":3497.0,"custo":1469.71,"lucro":2027.29},{"cliente":"Andrea Vermont","receita":15997.0,"custo":7929.58,"lucro":8067.42},{"cliente":"Arlene Imob","receita":2997.0,"custo":1427.96,"lucro":1569.04},{"cliente":"Dra. Investidora","receita":2997.0,"custo":1745.81,"lucro":1251.19},{"cliente":"Rafaela Bueno","receita":6130.97,"custo":1897.22,"lucro":4233.75},{"cliente":"CSM Academy","receita":5000.0,"custo":1928.56,"lucro":3071.44},{"cliente":"Magp Treinamento","receita":3997.0,"custo":1905.45,"lucro":2091.55},{"cliente":"Tia do Inglês","receita":3997.0,"custo":1880.64,"lucro":2116.36},{"cliente":"Mercado E-Commerce","receita":3997.0,"custo":1935.62,"lucro":2061.38},{"cliente":"Francês Ativo","receita":3997.0,"custo":1880.64,"lucro":2116.36}],"4":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":3331.68,"lucro":2665.32},{"cliente":"Dra. Gessica","receita":3497.0,"custo":1946.45,"lucro":1550.55},{"cliente":"Andrea Vermont","receita":15997.0,"custo":7600.85,"lucro":8396.15},{"cliente":"Arlene Imob","receita":2997.0,"custo":1921.51,"lucro":1075.49},{"cliente":"CSM Academy","receita":5000.0,"custo":2022.06,"lucro":2977.94},{"cliente":"Magp Treinamento","receita":3997.0,"custo":1951.09,"lucro":2045.91},{"cliente":"Tia do Inglês","receita":3997.0,"custo":1824.23,"lucro":2172.77},{"cliente":"Mercado E-Commerce","receita":3997.0,"custo":1954.99,"lucro":2042.01},{"cliente":"Francês Ativo","receita":3997.0,"custo":1845.24,"lucro":2151.76},{"cliente":"Lucas Arrial","receita":10796.0,"custo":3650.08,"lucro":7145.92},{"cliente":"Tay Training","receita":8997.0,"custo":3107.04,"lucro":5889.96}],"5":[{"cliente":"Bruno (Arkes)","receita":5997.0,"custo":5139.68,"lucro":857.32},{"cliente":"Dra. Gessica","receita":3497.0,"custo":4822.47,"lucro":-1325.47},{"cliente":"Andrea Vermont","receita":15997.0,"custo":5446.16,"lucro":10550.84},{"cliente":"Arlene Imob","receita":2997.0,"custo":3099.89,"lucro":-102.89},{"cliente":"CSM Academy","receita":5000.0,"custo":2626.71,"lucro":2373.29},{"cliente":"Magp Treinamento","receita":3997.0,"custo":3024.64,"lucro":972.36},{"cliente":"Tia do Inglês","receita":3997.0,"custo":1995.89,"lucro":2001.11},{"cliente":"Mercado E-Commerce","receita":3997.0,"custo":2969.46,"lucro":1027.54},{"cliente":"Francês Ativo","receita":3997.0,"custo":3094.61,"lucro":902.39},{"cliente":"Lucas Arrial","receita":10796.0,"custo":3542.57,"lucro":7253.43},{"cliente":"Tay Training","receita":8997.0,"custo":3987.46,"lucro":5009.54}]},"kpis":{"burn3":56884.92,"burnOp3":23469.98,"runwayMeses":1.6,"clientesAtivosJul":["Bruno (Arkes)","Dra. Gessica","Andrea Vermont","Magp Treinamento","Mercado E-Commerce","Tia do Inglês","Tay Training","Boost (Leo Simão)","Psimama"]},"pendencias":[{"cliente":"Tia do Ingles (William Alves)","previsto":3997.0,"vencimento":"25/07/2026","mes":6}],"mesAtualIdx":6,"v":3,"atualizadoEm":"2026-07-26 (snapshot embutido)","socioMes":{"Pamela":[15465.65,12187.29,15707.99,13870.36,10848.39,14277.54,6862.96,0.0,0.0,0.0,0.0,0.0],"Phellipe":[13920.49,12277.29,14829.21,13335.52,10440.06,17276.04,4088.83,0.0,0.0,0.0,0.0,0.0],"Thiago":[5333.33,3400.0,4400.0,6231.83,8031.16,16077.25,2665.67,0.0,0.0,0.0,0.0,0.0]},"distPlano":{"0":{"Pamela":{"jaPago":12479.47,"prolabore":1351.02,"aPagar":-0.0,"falta":0.0,"total":13830.49},"Phellipe":{"jaPago":12312.49,"prolabore":1518.0,"aPagar":-0.0,"falta":0.0,"total":13830.49},"Thiago":{"jaPago":3833.33,"prolabore":0.0,"aPagar":0.0,"falta":0.0,"total":3833.33},"Pedro":{"jaPago":0.0,"prolabore":0.0,"aPagar":5000.0,"falta":0.0,"total":5000.0}},"1":{"Pamela":{"jaPago":10744.6,"prolabore":1442.69,"aPagar":2127.41,"falta":0.0,"total":14314.7},"Phellipe":{"jaPago":10566.29,"prolabore":1621.0,"aPagar":2127.41,"falta":0.0,"total":14314.7},"Thiago":{"jaPago":3400.0,"prolabore":0.0,"aPagar":0.0,"falta":0.0,"total":3400.0}},"2":{"Pamela":{"jaPago":13305.52,"prolabore":1442.69,"aPagar":2832.33,"falta":0.0,"total":17580.54},"Phellipe":{"jaPago":13305.52,"prolabore":1442.69,"aPagar":2832.33,"falta":0.0,"total":17580.54},"Thiago":{"jaPago":4400.0,"prolabore":0.0,"aPagar":1332.33,"falta":0.0,"total":5732.33}},"3":{"Pamela":{"jaPago":11756.83,"prolabore":1442.69,"aPagar":1998.5,"falta":0.0,"total":15198.02},"Phellipe":{"jaPago":11756.83,"prolabore":1442.69,"aPagar":1998.5,"falta":0.0,"total":15198.02},"Thiago":{"jaPago":6231.83,"prolabore":0.0,"aPagar":1998.5,"falta":0.0,"total":8230.33}},"4":{"Pamela":{"jaPago":8861.37,"prolabore":1442.69,"aPagar":4164.17,"falta":0.0,"total":14468.23},"Phellipe":{"jaPago":8861.37,"prolabore":1442.69,"aPagar":4164.17,"falta":0.0,"total":14468.23},"Thiago":{"jaPago":8031.16,"prolabore":0.0,"aPagar":4164.18,"falta":0.0,"total":12195.34}},"5":{"Pamela":{"jaPago":12834.85,"prolabore":1442.69,"aPagar":2998.5,"falta":0.0,"total":17276.04},"Phellipe":{"jaPago":15833.35,"prolabore":1442.69,"aPagar":-0.0,"falta":0.0,"total":17276.04},"Thiago":{"jaPago":16077.25,"prolabore":0.0,"aPagar":-0.01,"falta":0.0,"total":16077.24}},"6":{"Pamela":{"jaPago":5420.27,"prolabore":1442.69,"aPagar":4282.34,"falta":4152.4,"total":15297.69},"Phellipe":{"jaPago":2421.77,"prolabore":1442.69,"aPagar":4282.34,"falta":4152.4,"total":12299.19},"Thiago":{"jaPago":2665.67,"prolabore":0.0,"aPagar":4282.33,"falta":4152.4,"total":11100.4}}}};
 
 let D=null, usandoLive=false, charts={}, mesSelCat=5, mesSelCli=5;
 
@@ -359,7 +394,7 @@ cmp:'Compara o último mês fechado com o mês anterior e com o mesmo mês de 20
 saldo:'Saldo no fim de cada mês = linha <b>SALDO FINAL</b> da aba Fluxo de caixa INTER + a mesma linha da aba NUBANK + o total já aportado no CDB até aquele mês.<br><br>📄 Fonte: abas <b>Fluxo de caixa - INTER</b> e <b>Fluxo de caixa - NUBANK</b>.',
 fixvar:'<b>Fixas</b>: gastos que existem todo mês independente de quantos clientes (equipe, pró-labore, contabilidade, ferramentas).<br><b>Variáveis</b>: crescem com a operação (impostos, cartão, marketing, reembolsos).<br><br>A classificação é feita pelo nome do fornecedor/descrição de cada linha.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
 top5:'Soma de janeiro até hoje, por categoria. Distribuição de lucros e CDB ficam de fora — aqui é só o custo de rodar a empresa.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
-cat:'Cada linha de pagamento é classificada automaticamente: Pedro/Dani/Marcos/Joara → Equipe CS · INSS/DAS/Prefeitura → Impostos · Prados/Eutika/INPI → Contabilidade &amp; Jurídico · fatura Nubank → Cartão de crédito, etc.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b> (colunas FORNECEDOR + Descrição).',
+cat:'Cada linha de pagamento é classificada automaticamente: Pedro/Dani/Marcos/Joara → Equipe CS · INSS/DAS/Prefeitura → Impostos · Prados/Eutika/INPI → Contabilidade &amp; Jurídico · fatura Nubank → Cartão de crédito, etc.<br><br>A <b>% ao lado da barra</b> = gasto da categoria ÷ faturamento (receita operacional) do mês escolhido. Ex.: Equipe CS em 15% significa que a cada R$ 100 que entram, R$ 15 pagam a equipe.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b> (FORNECEDOR + Descrição) ÷ aba <b>Recebimentos</b>.',
 dist:'<b>Distribuição de lucros</b>: linhas com "Distribuição" na descrição — retirada dos sócios, não é custo.<br><b>CDB</b>: linhas "INVESTIMENTO CDB" — dinheiro que continua sendo da empresa, só rendendo.<br><br>A coluna "Retirada ÷ lucro" mostra quanto do lucro do mês foi distribuído — acima de 100% significa que saiu mais do que o mês gerou.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
 mrr:'MRR (Monthly Recurring Revenue) = soma dos contratos com cobrança mensal recorrente. Entram as linhas marcadas <b>CONTRATO</b> na aba de Projeção (+ contratos novos como Boost e Psimama). Consultorias com prazo (ex.: CSM 6 meses) ficam de fora.<br><br>📄 Fonte: aba <b>Projeção Receita e Despesas - 2</b>.',
 ticket:'Ticket médio = MRR do mês ÷ número de contratos ativos. Se cai, os contratos novos estão entrando menores que os antigos.<br><br>📄 Fonte: aba <b>Projeção Receita e Despesas - 2</b>.',
@@ -378,7 +413,14 @@ krunway:'Quantos meses o caixa aguenta se a receita zerar hoje.<br><br><b>Cenár
 kinter:'Saldo disponível em conta no Inter, sem contar o CDB.<br><br>📄 Fonte: aba <b>Fluxo de caixa - INTER</b>, célula F3 (SALDO DISPONÍVEL).',
 kcdb:'Total aplicado no CDB. É reserva da empresa, não despesa.<br><br>📄 Fonte: aba <b>Fluxo de caixa - INTER</b>, célula F2 (INVESTIMENTO CDB).',
 knubank:'Saldo atual da conta Nubank (usada principalmente para o cartão).<br><br>📄 Fonte: aba <b>Fluxo de caixa - NUBANK</b>, célula F1 (SALDO ATUAL).',
-kburn:'Média dos últimos 3 meses fechados: despesa operacional + retiradas dos sócios. É o quanto sai do caixa num mês típico.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.'
+kburn:'Média dos últimos 3 meses fechados: despesa operacional + retiradas dos sócios. É o quanto sai do caixa num mês típico.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
+kreserva:'Quanto sobra DENTRO da empresa num mês típico, depois de pagar tudo e distribuir aos sócios: lucro operacional − distribuição de lucros, na média dos últimos 3 meses fechados.<br><br>É esse valor que vira crescimento de caixa + CDB. Se ficar negativo, as retiradas estão comendo a reserva.<br><br>📄 Fonte: abas <b>Recebimentos + Pagamentos</b>.',
+socev:'Soma de tudo que cada sócio recebeu no mês: distribuição de lucros + pró-labore + reembolso de despesas + prestação de serviços (Thiago).<br><br>Pedro não entra — é equipe, não sócio.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b> (VALOR PAGO, filtrado por fornecedor).',
+socplano:'O bloco de cada mês na aba Distribuição Sócios tem um resumo por sócio: JÁ PAGO, PROLABORE, A PAGAR e FALTA. TOTAL definido = soma de tudo.<br><br>"Pago do definido" compara o que já saiu com o que foi combinado no mês.<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>, colunas I–N do resumo mensal.',
+ksocdef:'Total combinado para os sócios neste mês (TOTAL A PAGAR de cada um, somado).<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>, resumo do bloco do mês.',
+ksocpago:'Quanto já saiu do caixa para os sócios neste mês (pagamentos efetivados).<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
+ksocfalta:'O que ainda falta pagar do valor definido no mês (colunas A PAGAR + FALTA de cada sócio).<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>.',
+ksocnext:'Valor já definido para o próximo mês na planilha. Se o bloco do mês ainda não foi criado, aparece como "não lançado".<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>.'
 };
 var _HQT=null;
 function hqTip(){if(!_HQT){_HQT=document.createElement('div');_HQT.style.cssText='position:fixed;z-index:99999;pointer-events:none;background:rgba(15,15,25,.97);color:#f1f5f9;border:1px solid rgba(139,124,247,.35);border-radius:12px;padding:12px 16px;font-size:12.5px;line-height:1.6;max-width:320px;box-shadow:0 12px 40px rgba(0,0,0,.5);opacity:0;transition:opacity .15s';document.body.appendChild(_HQT)}return _HQT}
@@ -406,6 +448,8 @@ function normData(d){
   d.rec25=d.rec25||z(); d.desp25=d.desp25||z(); d.projRec=d.projRec||z();
   d.catMes=d.catMes||{}; d.recPorClienteMes=d.recPorClienteMes||{};
   d.custoCliente=d.custoCliente||{}; d.pendencias=d.pendencias||[];
+  d.socioMes=d.socioMes||{Pamela:z(),Phellipe:z(),Thiago:z()};
+  d.distPlano=d.distPlano||{};
   d.mesAtualIdx=(typeof d.mesAtualIdx==='number')?d.mesAtualIdx:6;
   d.mesFechadoIdx=(typeof d.mesFechadoIdx==='number')?d.mesFechadoIdx:Math.max(0,d.mesAtualIdx-1);
   d.lucroOp=d.receitaOp.map((v,i)=>v-d.despOp[i]);
@@ -477,7 +521,7 @@ function render(){
   el('badgeUpdated').textContent=usandoLive?('Atualizado: '+(D.atualizadoEm||'')):'Snapshot 26/07/2026';
   el('kpiRef').textContent='· mês fechado: '+MESES_FULL[mf]+' · atual: '+MESES_FULL[ma]+' (parcial)';
   renderKpis(); renderAlerts(); renderCmp(); renderCaixa(); renderDist();
-  renderMchips(); renderPend(); renderLucroCliTable(); renderAnual();
+  renderMchips(); renderPend(); renderLucroCliTable(); renderAnual(); renderSocios();
   el('parCaixa').textContent=fmt(D.saldos.total);
   el('parConc').textContent=fmtPct(D.mrr[ma]?15997/D.mrr[ma]*100:29);
   initCharts();
@@ -552,13 +596,68 @@ function renderCmp(){
 }
 
 function renderCaixa(){
-  const k=D.kpis, p=PAL();
+  const k=D.kpis, p=PAL(), mf=D.mesFechadoIdx;
+  let res=0,nR=0;
+  for(let m=mf;m>mf-3&&m>=0;m--){res+=D.lucroOp[m]-D.distLucros[m];nR++}
+  const reservaMedia=nR?res/nR:0;
   let h='';
   h+=kpiCard(p.accent,'Banco Inter (disponível)','kinter',fmt(D.saldos.interDisp),'conta principal');
   h+=kpiCard(p.teal,'CDB (investido)','kcdb',fmt(D.saldos.cdb),'abr 20k · mai 10k · jun 10k · jul 10k');
   h+=kpiCard(p.sky,'Nubank','knubank',fmt(D.saldos.nubank),'conta secundária');
   h+=kpiCard(p.orange,'Queima média mensal','kburn',fmt(k.burn3),'só operação: '+fmt(k.burnOp3)+'/mês');
+  h+=kpiCard(reservaMedia>=0?p.green:p.red,'Reserva média mensal','kreserva',fmt(reservaMedia),'lucro − retiradas (média 3 meses)',reservaMedia>=0?'pos':'neg');
   el('caixaRow').innerHTML=h;
+}
+
+/* ============ SÓCIOS ============ */
+const SOC_ORD=['Pamela','Phellipe','Thiago'];
+function planoMes(m){return D.distPlano[String(m)]||null}
+function renderSocios(){
+  const ma=D.mesAtualIdx, p=PAL();
+  el('socRef').textContent='· '+MESES_FULL[ma]+' e '+MESES_FULL[(ma+1)%12];
+  const pl=planoMes(ma), plNext=planoMes(ma+1);
+  const sacadoMes=SOC_ORD.reduce((s,so)=>s+(D.socioMes[so]?D.socioMes[so][ma]:0),0);
+  let definido=0,faltando=0;
+  if(pl){SOC_ORD.forEach(so=>{if(pl[so]){definido+=pl[so].total;faltando+=Math.max(0,pl[so].aPagar)+Math.max(0,pl[so].falta)}})}
+  let defNext=0;
+  if(plNext){Object.keys(plNext).forEach(so=>{defNext+=plNext[so].total})}
+  // média mensal de saques (meses com valor)
+  const totMes=[];for(let m=0;m<=ma;m++){const t=SOC_ORD.reduce((s,so)=>s+(D.socioMes[so][m]||0),0);if(t>0)totMes.push(t)}
+  const media=totMes.length?totMes.reduce((a,b)=>a+b,0)/totMes.length:0;
+  let h='';
+  h+=kpiCard(p.accent,'Definido p/ '+MESES[ma],'ksocdef',pl?fmt(definido):'—',pl?'total combinado entre os sócios':'bloco do mês não lançado');
+  h+=kpiCard(p.teal,'Já sacado em '+MESES[ma],'ksocpago',fmt(sacadoMes),pl&&definido?fmtPct(sacadoMes/definido*100)+' do definido':'pagamentos efetivados');
+  h+=kpiCard(p.gold,'Falta pagar em '+MESES[ma],'ksocfalta',pl?fmt(faltando):'—','a pagar + falta (todos os sócios)');
+  h+=kpiCard(p.sky,'Definido p/ '+MESES[(ma+1)%12],'ksocnext',plNext?fmt(defNext):'Não lançado',plNext?'já planejado na planilha':'bloco de '+MESES_FULL[(ma+1)%12]+' ainda não existe');
+  h+=kpiCard(p.pink,'Média de saque mensal','socev',fmt(media),'média dos meses realizados · '+delta(totMes[totMes.length-2]||0,totMes[0]||0).replace('vs mês ant.','desde jan'));
+  el('socKpis').innerHTML=h;
+  // tabelas de plano
+  fillPlano('socPlano1','socPlanoTitle1',ma,pl);
+  fillPlano('socPlano2','socPlanoTitle2',(ma+1)%12,plNext);
+  // histórico
+  let hh='<table class="top-table"><tr><th>Mês</th><th>Pamela</th><th>Phellipe</th><th>Thiago</th><th>Total definido</th><th>Pago do definido</th></tr>';
+  Object.keys(D.distPlano).map(Number).sort((a,b)=>a-b).forEach(m=>{
+    const pm=D.distPlano[String(m)];
+    let tot=0,pago=0;
+    SOC_ORD.forEach(so=>{if(pm[so]){tot+=pm[so].total;pago+=pm[so].jaPago+pm[so].prolabore}});
+    const pc=tot?pago/tot*100:0;
+    hh+='<tr><td>'+MESES_FULL[m]+'</td>'+SOC_ORD.map(so=>'<td class="mv">'+(pm[so]?fmt(pm[so].total):'—')+'</td>').join('')+
+      '<td class="mv">'+fmt(tot)+'</td><td><b class="'+(pc>=99?'pos':'warn')+'">'+fmtPct(pc)+'</b></td></tr>';
+  });
+  el('socHist').innerHTML=hh+'</table>';
+}
+function fillPlano(idTbl,idTitle,m,pl){
+  el(idTitle).innerHTML=MESES_FULL[m]+(m===D.mesAtualIdx?' (mês atual)':' (próximo mês)')+' <span class="hq" data-h="socplano">?</span>';
+  if(!pl){el(idTbl).innerHTML='<div style="color:var(--t3);font-size:13.5px;padding:12px 0">📭 O bloco de '+MESES_FULL[m]+' ainda não foi lançado na aba Distribuição Sócios. Assim que for criado, aparece aqui automaticamente.</div>';return}
+  let h='<table class="top-table"><tr><th>Sócio</th><th>Já pago</th><th>Pró-labore</th><th>A pagar</th><th>Falta</th><th>Total definido</th></tr>';
+  let tj=0,tp=0,ta=0,tf=0,tt=0;
+  Object.keys(pl).forEach(so=>{
+    const x=pl[so];tj+=x.jaPago;tp+=x.prolabore;ta+=Math.max(0,x.aPagar);tf+=Math.max(0,x.falta);tt+=x.total;
+    h+='<tr><td>'+so+'</td><td class="mv">'+fmt(x.jaPago)+'</td><td class="mv">'+fmt(x.prolabore)+'</td>'+
+      '<td class="mv '+(x.aPagar>0.5?'warn':'')+'">'+fmt(Math.max(0,x.aPagar))+'</td><td class="mv '+(x.falta>0.5?'neg':'')+'">'+fmt(Math.max(0,x.falta))+'</td><td class="mv">'+fmt(x.total)+'</td></tr>';
+  });
+  h+='<tr class="tot"><td>Total</td><td class="mv">'+fmt(tj)+'</td><td class="mv">'+fmt(tp)+'</td><td class="mv">'+fmt(ta)+'</td><td class="mv">'+fmt(tf)+'</td><td class="mv">'+fmt(tt)+'</td></tr>';
+  el(idTbl).innerHTML=h+'</table>';
 }
 
 function renderDist(){
@@ -669,13 +768,25 @@ function mesesAte(idx){return MESES.slice(0,idx+1).map((m,i)=>i===D.mesAtualIdx?
 const margemLabels={
   id:'margemLabels',
   afterDatasetsDraw(chart){
-    if(chart.canvas.id!=='chLucro')return;
     const p=PAL(),ctx=chart.ctx;
-    ctx.save();ctx.font='600 11px JetBrains Mono';ctx.fillStyle=p.t2;ctx.textAlign='center';
-    chart.getDatasetMeta(0).data.forEach((bar,i)=>{
-      if(D.receitaOp[i]>0)ctx.fillText(fmtPct(D.margemOp[i]),bar.x,bar.y-6);
-    });
-    ctx.restore();
+    if(chart.canvas.id==='chLucro'){
+      ctx.save();ctx.font='600 11px JetBrains Mono';ctx.fillStyle=p.t2;ctx.textAlign='center';
+      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+        if(D.receitaOp[i]>0)ctx.fillText(fmtPct(D.margemOp[i]),bar.x,bar.y-6);
+      });
+      ctx.restore();
+    }
+    if(chart.canvas.id==='chCat'){
+      const fat=D.receitaOp[mesSelCat]||0;
+      if(fat>0){
+        ctx.save();ctx.font='600 11px JetBrains Mono';ctx.fillStyle=p.t2;ctx.textAlign='left';ctx.textBaseline='middle';
+        const ds=chart.data.datasets[0].data;
+        chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+          ctx.fillText(fmtPct(ds[i]/fat*100),bar.x+8,bar.y);
+        });
+        ctx.restore();
+      }
+    }
   }
 };
 if(window.Chart)Chart.register(margemLabels);
@@ -728,14 +839,25 @@ function initCharts(){
     {label:'2026',data:D.receitaOp.map((v,i)=>i<=ma?v:null),borderColor:p.accent,backgroundColor:p.accent,borderWidth:2.5,pointRadius:4,tension:.3},
     {label:'2025',data:D.rec25,borderColor:p.gold,backgroundColor:p.gold,borderWidth:2,pointRadius:3,tension:.3}
   ]},options:baseOpts()});
+
+  mkChart('chSocios',{type:'bar',data:{labels:lb,datasets:[
+    {label:'Pamela',data:D.socioMes.Pamela.slice(0,ma+1),backgroundColor:p.accent,borderRadius:6,maxBarThickness:34},
+    {label:'Phellipe',data:D.socioMes.Phellipe.slice(0,ma+1),backgroundColor:p.teal,borderRadius:6,maxBarThickness:34},
+    {label:'Thiago',data:D.socioMes.Thiago.slice(0,ma+1),backgroundColor:p.gold,borderRadius:6,maxBarThickness:34}
+  ]},options:(()=>{const o=baseOpts();o.scales.x.stacked=true;o.scales.y.stacked=true;
+    o.plugins.tooltip.callbacks.footer=items=>{let s=0;items.forEach(i=>s+=i.parsed.y||0);return 'Total: '+fmt(s)};return o})()});
 }
 
 function drawCat(){
   const p=PAL();
   const items=Object.entries(D.catMes).map(([c,v])=>[c,v[mesSelCat]]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const fat=D.receitaOp[mesSelCat]||0;
+  const o=hbarOpts();
+  o.plugins.tooltip.callbacks.label=c=>' '+fmt(c.parsed.x)+(fat>0?' · '+fmtPct(c.parsed.x/fat*100)+' do faturamento':'');
+  o.layout={padding:{right:56}};
   mkChart('chCat',{type:'bar',data:{labels:items.map(i=>i[0]),datasets:[
     {label:'Despesa em '+MESES_FULL[mesSelCat],data:items.map(i=>i[1]),backgroundColor:p.orange,borderRadius:6,maxBarThickness:24}
-  ]},options:hbarOpts()});
+  ]},options:o});
 }
 function drawCli(){
   const p=PAL();
