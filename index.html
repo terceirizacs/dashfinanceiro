@@ -542,7 +542,7 @@ async function boot(){
     const resp=await fetch(API_URL,{signal:ctl.signal});
     clearTimeout(t);
     const j=await resp.json();
-    if(j&&j.v===3&&!j.erro){dados=j;usandoLive=true}
+    if(j&&j.v>=3&&!j.erro){dados=j;usandoLive=true}
   }catch(e){console.warn('API indisponível, usando snapshot:',e)}
   if(!dados){dados=FALLBACK;usandoLive=false}
   D=normData(dados);
