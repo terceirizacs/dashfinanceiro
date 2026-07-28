@@ -111,6 +111,27 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
 .login-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
 .login-error{color:var(--red);font-size:13px;margin-top:8px;display:none}
 .loading-overlay{position:fixed;inset:0;background:var(--bg);z-index:9998;display:none;align-items:center;justify-content:center;flex-direction:column;gap:24px}
+/* ---- Modal "base de cálculo" (2 cliques em um cartão) ---- */
+[data-drill]{cursor:zoom-in}
+.drill-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);z-index:10000;display:none;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow-y:auto}
+.drill-ov.open{display:flex}
+.drill-md{background:var(--card);border:1px solid var(--border);border-radius:18px;max-width:960px;width:100%;padding:24px 26px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+.drill-md h2{font-size:17px;color:var(--t1);margin-bottom:4px}
+.drill-md .drill-sub{font-size:12.5px;color:var(--t3);margin-bottom:14px;line-height:1.6}
+.drill-md .drill-close{float:right;border:1px solid var(--border);background:none;color:var(--t2);border-radius:10px;padding:6px 14px;cursor:pointer;font-size:13px}
+.drill-md .drill-close:hover{color:var(--t1);border-color:var(--bh)}
+.drill-months{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.drill-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.drill-tbl th{text-align:left;padding:7px 10px;color:var(--t3);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.drill-tbl td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--t2)}
+.drill-tbl td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.drill-tbl tr.out td{opacity:.45;text-decoration:line-through}
+.drill-tbl tr.out td.motivo{text-decoration:none;opacity:.7;font-size:11.5px}
+.drill-tbl tr.sum td{font-weight:700;color:var(--t1);border-top:2px solid var(--bh);background:rgba(139,124,247,.06)}
+.drill-tbl tr.sub td{font-weight:600;color:var(--t2);font-size:12px}
+.drill-note{margin-top:12px;font-size:12px;color:var(--t3);line-height:1.7;border-left:3px solid var(--accent);padding-left:12px}
+.drill-linha{color:var(--t3);font-size:11px;white-space:nowrap}
+.drill-wrap{overflow-x:auto}
 .loading-spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-size:16px;color:var(--t2)}
@@ -165,19 +186,19 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     <div class="ins-g" id="alertList"></div>
 
     <div class="sec">Evolução mensal</div>
-    <div class="card">
+    <div class="card" data-drill="rec">
       <h3>Receita × Despesa operacional <span class="hq" data-h="recdesp">?</span></h3>
       <div class="d">Quanto entrou de clientes e quanto custou rodar a operação, mês a mês · <span class="src">📄 abas Recebimentos + Pagamentos</span></div>
       <div class="chart-box"><canvas id="chRecDesp"></canvas></div>
     </div>
-    <div class="card" style="margin-top:20px">
+    <div class="card" data-drill="lucro" style="margin-top:20px">
       <h3>Lucro operacional e margem <span class="hq" data-h="lucro">?</span></h3>
       <div class="d">Receita menos despesa operacional; a % sobre cada barra é a margem · <span class="src">📄 abas Recebimentos + Pagamentos</span></div>
       <div class="chart-box"><canvas id="chLucro"></canvas></div>
     </div>
 
     <div class="sec">Comparativo de fechamento</div>
-    <div class="card">
+    <div class="card" data-drill="lucro">
       <h3>Mês fechado vs mês anterior vs mesmo mês de 2025 <span class="hq" data-h="cmp">?</span></h3>
       <div class="d" id="cmpRef"></div>
       <div class="tblwrap" id="cmpTable"></div>
@@ -190,19 +211,19 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     <div class="kpis" id="caixaRow"></div>
 
     <div class="sec">Evolução do caixa</div>
-    <div class="card">
+    <div class="card" data-drill="caixa">
       <h3>Saldo total no fim de cada mês <span class="hq" data-h="saldo">?</span></h3>
       <div class="d">Bancos + CDB acumulado · <span class="src">📄 linha SALDO FINAL das abas Fluxo de caixa INTER e NUBANK</span></div>
       <div class="chart-box"><canvas id="chSaldo"></canvas></div>
     </div>
 
     <div class="g2" style="margin-top:20px">
-      <div class="card">
+      <div class="card" data-drill="desp">
         <h3>Fixas × Variáveis <span class="hq" data-h="fixvar">?</span></h3>
         <div class="d">Despesa operacional por tipo · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
         <div class="chart-box"><canvas id="chFixVar"></canvas></div>
       </div>
-      <div class="card">
+      <div class="card" data-drill="desp">
         <h3>Top 5 despesas do ano <span class="hq" data-h="top5">?</span></h3>
         <div class="d">Categorias com maior gasto acumulado em 2026 · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
         <div class="chart-box"><canvas id="chTopDesp"></canvas></div>
@@ -211,14 +232,14 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
 
     <div class="sec">Despesas por categoria</div>
     <div class="pillrow" id="mchipsCat"></div>
-    <div class="card">
+    <div class="card" data-drill="desp" data-drill-mes="cat">
       <h3>Categorias no mês <span class="hq" data-h="cat">?</span></h3>
       <div class="d">O número ao lado de cada barra é o % que a categoria representa do faturamento do mês · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
       <div class="chart-box"><canvas id="chCat"></canvas></div>
     </div>
 
     <div class="sec">Saídas não-operacionais</div>
-    <div class="card">
+    <div class="card" data-drill="dist">
       <h3>Distribuição de lucros e CDB <span class="hq" data-h="dist">?</span></h3>
       <div class="d">Retiradas dos sócios e aportes em investimento — ficam FORA da despesa operacional · <span class="src">📄 aba Pagamentos Terceiriza (descrição "Distribuição" / "CDB")</span></div>
       <div class="tblwrap" id="distTable"></div>
@@ -228,19 +249,19 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
   <!-- ================= CLIENTES ================= -->
   <div class="tab-content" id="tab-clientes">
     <div class="sec">Receita recorrente</div>
-    <div class="card">
+    <div class="card" data-drill="mrr">
       <h3>MRR — evolução no ano <span class="hq" data-h="mrr">?</span></h3>
-      <div class="d">Contratos mensais ativos; tracejado = projeção dos próximos meses · <span class="src">📄 aba Projeção Receita e Despesas - 2 (linhas CONTRATO)</span></div>
+      <div class="d">Receita recorrente realmente recebida por contrato; tracejado = mês atual (parcial) · <span class="src">📄 abas Fluxo de caixa INTER/NUBANK (bloco RECEITA)s CONTRATO)</span></div>
       <div class="chart-box"><canvas id="chMrr"></canvas></div>
     </div>
 
     <div class="g2" style="margin-top:20px">
-      <div class="card">
+      <div class="card" data-drill="mrr">
         <h3>Ticket médio <span class="hq" data-h="ticket">?</span></h3>
-        <div class="d">MRR ÷ contratos ativos · <span class="src">📄 aba Projeção Receita e Despesas - 2</span></div>
+        <div class="d">MRR ÷ contratos com valor recebido no mês · <span class="src">📄 abas Fluxo de caixa INTER/NUBANK (bloco RECEITA)</span></div>
         <div class="chart-box"><canvas id="chTicket"></canvas></div>
       </div>
-      <div class="card">
+      <div class="card" data-drill="rec">
         <h3>Realizado × Projetado <span class="hq" data-h="realproj">?</span></h3>
         <div class="d">O que entrou no caixa vs o planejado · <span class="src">📄 abas Recebimentos + Projeção (SUBTOTAL RECEITAS)</span></div>
         <div class="chart-box"><canvas id="chRealProj"></canvas></div>
@@ -249,7 +270,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
 
     <div class="sec">Receita por cliente</div>
     <div class="pillrow" id="mchipsCli"></div>
-    <div class="card">
+    <div class="card" data-drill="rec" data-drill-mes="cli">
       <h3>Quanto cada cliente pagou no mês <span class="hq" data-h="cli">?</span></h3>
       <div class="d">Valores efetivamente recebidos (regime de caixa) · <span class="src">📄 aba Recebimentos Terceiriza (VALOR RECEBIDO)</span></div>
       <div class="chart-box" style="height:380px"><canvas id="chCli"></canvas></div>
@@ -270,7 +291,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     </div>
 
     <div class="sec">Cobranças vencidas</div>
-    <div class="card">
+    <div class="card" data-drill="rec">
       <h3>Previsto e ainda não recebido <span class="hq" data-h="pend">?</span></h3>
       <div class="d">Linhas com valor previsto, sem data de recebimento e com vencimento já passado · <span class="src">📄 aba Recebimentos Terceiriza</span></div>
       <div class="tblwrap" id="pendTable"></div>
@@ -283,7 +304,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     <div class="kpis" id="socKpis"></div>
 
     <div class="sec">Evolução dos saques</div>
-    <div class="card">
+    <div class="card" data-drill="soc">
       <h3>Saques mensais por sócio — de janeiro ao próximo mês <span class="hq" data-h="socev">?</span></h3>
       <div class="d">Meses passados = pago de verdade · último mês (tom claro, "plano") = valor definido na planilha · <span class="src">📄 abas Pagamentos Terceiriza + Distribuição Sócios</span></div>
       <div class="chart-box"><canvas id="chSocios"></canvas></div>
@@ -324,7 +345,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     </div>
 
     <div class="sec">Comparativo anual</div>
-    <div class="card">
+    <div class="card" data-drill="rec">
       <h3>Receita mensal — 2025 × 2026 <span class="hq" data-h="yoy">?</span></h3>
       <div class="d">Crescimento ano contra ano · <span class="src">📄 abas Receita e Despesas - 2025 + Recebimentos 2026</span></div>
       <div class="chart-box"><canvas id="chYoY"></canvas></div>
@@ -421,9 +442,21 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
   </div>
 
   <div class="footer">
-    Fonte: planilha "Controle Financeiro Terceiriza CS — OFICIAL" (Google Sheets) via Apps Script<br>
+    Fonte: planilha "Dashboard Controle_Financeiro_Terceiriza CS" (Google Sheets) via Apps Script<br>
     Receita/despesa <b>operacional</b> = caixa realizado, excluindo transferências entre contas, reembolsos, aportes de CDB e distribuição de lucros<br>
+    🔍 <b>Dê 2 cliques em qualquer cartão</b> para abrir a base de cálculo (linhas da planilha que compõem o número) · passe o mouse no <b>?</b> para ver aba/coluna/linha<br>
     Terceiriza CS · Dashboard CFO
+  </div>
+</div>
+
+<!-- ============ MODAL BASE DE CÁLCULO ============ -->
+<div class="drill-ov" id="drillOv" onclick="if(event.target===this)closeDrill()">
+  <div class="drill-md">
+    <button class="drill-close" onclick="closeDrill()">✕ fechar</button>
+    <h2 id="drillTitle">—</h2>
+    <div class="drill-sub" id="drillSub">—</div>
+    <div class="drill-months" id="drillMonths"></div>
+    <div class="drill-wrap" id="drillBody"></div>
   </div>
 </div>
 
@@ -441,41 +474,41 @@ let D=null, usandoLive=false, charts={}, mesSelCat=5, mesSelCli=5;
 
 /* ============ HINTS ("?" com explicação + aba de origem) ============ */
 const HINTS={
-recdesp:'<b>Receita operacional</b>: tudo que clientes pagaram e caiu no caixa no mês (coluna VALOR RECEBIDO da aba <b>Recebimentos Terceiriza</b>). Não conta transferência entre contas, reembolso de notebook nem rendimento de banco.<br><br><b>Despesa operacional</b>: coluna VALOR PAGO da aba <b>Pagamentos Terceiriza</b>, excluindo distribuição de lucros e aportes no CDB (que não são custo de operação).',
-lucro:'Lucro operacional = receita operacional − despesa operacional do mês. A porcentagem sobre a barra é a <b>margem</b> (lucro ÷ receita).<br><br>É o que a operação gera antes de distribuir lucro aos sócios.<br><br>📄 Fonte: abas <b>Recebimentos</b> e <b>Pagamentos Terceiriza</b>.',
-cmp:'Compara o último mês fechado com o mês anterior e com o mesmo mês de 2025.<br><br>📄 Fonte 2026: abas <b>Recebimentos/Pagamentos</b>. Fonte 2025: aba <b>Receita e Despesas - 2025</b> (linhas TOTAL).',
-saldo:'Saldo no fim de cada mês = linha <b>SALDO FINAL</b> da aba Fluxo de caixa INTER + a mesma linha da aba NUBANK + o total já aportado no CDB até aquele mês.<br><br>📄 Fonte: abas <b>Fluxo de caixa - INTER</b> e <b>Fluxo de caixa - NUBANK</b>.',
-fixvar:'<b>Fixas</b>: gastos que existem todo mês independente de quantos clientes (equipe, pró-labore, contabilidade, ferramentas).<br><b>Variáveis</b>: crescem com a operação (impostos, cartão, marketing, reembolsos).<br><br>A classificação é feita pelo nome do fornecedor/descrição de cada linha.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
-top5:'Soma de janeiro até hoje, por categoria. Distribuição de lucros e CDB ficam de fora — aqui é só o custo de rodar a empresa.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
-cat:'Cada linha de pagamento é classificada automaticamente: Pedro/Dani/Marcos/Joara → Equipe CS · INSS/DAS/Prefeitura → Impostos · Prados/Eutika/INPI → Contabilidade &amp; Jurídico · fatura Nubank → Cartão de crédito, etc.<br><br>A <b>% ao lado da barra</b> = gasto da categoria ÷ faturamento (receita operacional) do mês escolhido. Ex.: Equipe CS em 15% significa que a cada R$ 100 que entram, R$ 15 pagam a equipe.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b> (FORNECEDOR + Descrição) ÷ aba <b>Recebimentos</b>.',
-dist:'<b>Distribuição de lucros</b>: linhas com "Distribuição" na descrição — retirada dos sócios, não é custo.<br><b>CDB</b>: linhas "INVESTIMENTO CDB" — dinheiro que continua sendo da empresa, só rendendo.<br><br>A coluna "Retirada ÷ lucro" mostra quanto do lucro do mês foi distribuído — acima de 100% significa que saiu mais do que o mês gerou.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
-mrr:'MRR (Monthly Recurring Revenue) = soma dos contratos com cobrança mensal recorrente. Entram as linhas marcadas <b>CONTRATO</b> na aba de Projeção (+ contratos novos como Boost e Psimama). Consultorias com prazo (ex.: CSM 6 meses) ficam de fora.<br><br>📄 Fonte: aba <b>Projeção Receita e Despesas - 2</b>.',
-ticket:'Ticket médio = MRR do mês ÷ número de contratos ativos. Se cai, os contratos novos estão entrando menores que os antigos.<br><br>📄 Fonte: aba <b>Projeção Receita e Despesas - 2</b>.',
-realproj:'<b>Realizado</b>: o que de fato caiu no caixa (aba Recebimentos).<br><b>Projetado</b>: linha SUBTOTAL RECEITAS da aba de Projeção.<br><br>Diferenças normais: parcela paga adiantada/atrasada muda o mês do realizado.<br><br>📄 Fonte: abas <b>Recebimentos</b> + <b>Projeção Receita e Despesas - 2</b>.',
-cli:'Valores efetivamente recebidos de cada cliente no mês escolhido (regime de caixa). Se um cliente pagou duas parcelas no mesmo mês (ex.: Bruno em abril), as duas aparecem aqui.<br><br>📄 Fonte: aba <b>Recebimentos Terceiriza</b>, coluna VALOR RECEBIDO.',
-lucrocli:'Para cada cliente: receita do mês − custos diretos (ferramentas, mão de obra por cliente, impostos proporcionais, custo fixo rateado).<br><br>O custo é a soma das colunas de custo do bloco mensal da aba <b>CUSTO X CLIENTE</b> — a leitura é dinâmica porque as colunas mudam de posição a cada mês.<br><br>📄 Fonte: aba <b>CUSTO X CLIENTE</b> (último mês com bloco preenchido).',
-pend:'Linhas da aba Recebimentos com VALOR PREVISTO, sem VALOR RECEBIDO e com DATA DE VENCIMENTO já passada.<br><br>📄 Fonte: aba <b>Recebimentos Terceiriza</b>.',
-yoy:'Receita mensal de 2026 (operacional, desta análise) contra a receita mensal de 2025 (linha TOTAL de receita da aba histórica).<br><br>📄 Fonte: abas <b>Receita e Despesas - 2025</b> + <b>Recebimentos Terceiriza</b>.',
-anual:'Consolidado mês a mês: receita e despesas operacionais, lucro, margem, retiradas, aportes de CDB e saldo de caixa no fim do mês.<br><br>📄 Fonte: todas as abas — Recebimentos, Pagamentos, Fluxos de caixa INTER/NUBANK.',
-ltv:'<b>LTV (Lifetime Value)</b> = tudo que o cliente pagou do primeiro ao último mês.<br><br><b>Meses</b> = meses em que houve pagamento recebido, juntando 2025 (aba histórica) e 2026 (aba Recebimentos).<br><br>Encerramentos por fim de prazo (Kelem, consultorias) estão marcados — não são churn de verdade.<br><br>📄 Fonte: abas <b>Receita e Despesas - 2025</b> + <b>Recebimentos Terceiriza</b>. Snapshot de 26/07/2026.',
-kcaixa:'Todo o dinheiro da empresa agora: saldo disponível no Inter (célula F3 da aba Fluxo INTER) + CDB (F2) + saldo do Nubank (F1 da aba Fluxo NUBANK).<br><br>📄 Fonte: abas <b>Fluxo de caixa - INTER / NUBANK</b>.',
-kmrr:'Receita recorrente garantida por contrato neste mês. Detalhe completo na aba 👥 Clientes.<br><br>📄 Fonte: aba <b>Projeção Receita e Despesas - 2</b> (linhas CONTRATO).',
-krec:'Dinheiro de clientes que entrou no caixa no último mês fechado. Não conta transferência interna nem reembolso.<br><br>📄 Fonte: aba <b>Recebimentos Terceiriza</b>.',
-kdesp:'Custo de rodar a empresa no último mês fechado: equipe, impostos, ferramentas, pró-labore. NÃO inclui distribuição de lucros nem CDB.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
-klucro:'Receita menos despesa operacional do mês fechado. É o que sobrou antes de distribuir aos sócios.<br><br>📄 Fonte: abas <b>Recebimentos + Pagamentos</b>.',
-krunway:'Quantos meses o caixa aguenta se a receita zerar hoje.<br><br><b>Cenário 1 (número grande)</b>: pagando só a operação.<br><b>Cenário 2</b>: mantendo também as retiradas dos sócios no ritmo dos últimos 3 meses.<br><br>📄 Fonte: caixa (abas de Fluxo) ÷ média de gastos (aba Pagamentos).',
-kinter:'Saldo disponível em conta no Inter, sem contar o CDB.<br><br>📄 Fonte: aba <b>Fluxo de caixa - INTER</b>, célula F3 (SALDO DISPONÍVEL).',
-kcdb:'Total aplicado no CDB. É reserva da empresa, não despesa.<br><br>📄 Fonte: aba <b>Fluxo de caixa - INTER</b>, célula F2 (INVESTIMENTO CDB).',
-knubank:'Saldo atual da conta Nubank (usada principalmente para o cartão).<br><br>📄 Fonte: aba <b>Fluxo de caixa - NUBANK</b>, célula F1 (SALDO ATUAL).',
-kburn:'Média dos últimos 3 meses fechados: despesa operacional + retiradas dos sócios. É o quanto sai do caixa num mês típico.<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
-kreserva:'Quanto sobra DENTRO da empresa num mês típico, depois de pagar tudo e distribuir aos sócios: lucro operacional − distribuição de lucros, na média dos últimos 3 meses fechados.<br><br>O <b>% da receita</b> mostra quanto de cada real faturado fica guardado: ex. 6% = a cada R$ 100 que entram, R$ 6 ficam na empresa (caixa + CDB). Referência saudável: 15–20%.<br><br>Se ficar negativo, as retiradas estão comendo a reserva.<br><br>📄 Fonte: abas <b>Recebimentos + Pagamentos</b>.',
-socev:'Soma de tudo que cada sócio recebeu no mês: distribuição de lucros + pró-labore + reembolso de despesas + prestação de serviços (Thiago).<br><br>O gráfico vai de <b>janeiro até o mês seguinte ao atual</b>: meses passados mostram o que foi pago de verdade (aba Pagamentos); o último mês, em tom mais claro, mostra o que está <b>definido</b> na aba Distribuição Sócios (se o bloco ainda não foi criado, fica vazio).<br><br>Pedro não entra — é equipe, não sócio.<br><br>📄 Fonte: abas <b>Pagamentos Terceiriza</b> + <b>Distribuição Sócios</b>.',
-socplano:'O bloco de cada mês na aba Distribuição Sócios tem um resumo por sócio: JÁ PAGO, PROLABORE, A PAGAR e FALTA. TOTAL definido = soma de tudo.<br><br>"Pago do definido" compara o que já saiu com o que foi combinado no mês.<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>, colunas I–N do resumo mensal.',
-ksocdef:'Total combinado para os sócios neste mês (TOTAL A PAGAR de cada um, somado).<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>, resumo do bloco do mês.',
-ksocpago:'Quanto já saiu do caixa para os sócios neste mês (pagamentos efetivados).<br><br>📄 Fonte: aba <b>Pagamentos Terceiriza</b>.',
-ksocfalta:'O que ainda falta pagar do valor definido no mês (colunas A PAGAR + FALTA de cada sócio).<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>.',
-ksocnext:'Valor já definido para o próximo mês na planilha. Se o bloco do mês ainda não foi criado, aparece como "não lançado".<br><br>📄 Fonte: aba <b>Distribuição Sócios</b>.',
-socpct:'Quanto do faturamento da empresa vira saque dos sócios.<br><br><b>Número grande</b>: soma de todos os saques do ano ÷ toda a receita operacional do ano (até o mês fechado).<br><b>Número pequeno</b>: o mesmo cálculo só do último mês fechado.<br><br>Ex.: 55% significa que a cada R$ 100 que entram, R$ 55 vão para os sócios. O hover do gráfico abaixo mostra esse % mês a mês.<br><br>📄 Fonte: abas <b>Pagamentos</b> ÷ <b>Recebimentos Terceiriza</b>.'
+recdesp:'<b>RECEITA OPERACIONAL</b> = soma da coluna <b>G (VALOR RECEBIDO)</b> da aba <b>Recebimentos Terceiriza</b>, filtrando a coluna A pelo mês. Dados começam na linha 3 (linha 2 é o cabeçalho).<br><br><b>Ficam FORA da receita</b> (mas aparecem na base de cálculo): linhas cujo Nome Cliente (col. C) ou Descrição (col. D) contém "Transferencia" (dinheiro trocando de conta própria), "Reembolso" (ex.: reembolso do notebook da Pamela) ou "Rendimento" (juros de banco).<br><br><b>DESPESA OPERACIONAL</b> = soma da coluna <b>G (VALOR PAGO)</b> da aba <b>Pagamentos Terceiriza</b> (dados a partir da linha 2), excluindo "Distribuição de lucros", "INVESTIMENTO CDB" e "Transferencia".<br><br>🔍 <b>2 cliques no cartão</b> = lista linha a linha o que entrou e o que foi excluído.',
+lucro:'Lucro operacional = receita operacional − despesa operacional do mês (ver "?" do gráfico acima para as colunas exatas). A % sobre a barra é a margem (lucro ÷ receita).<br><br>⚠️ É o lucro <b>antes</b> da distribuição aos sócios — a distribuição é uso do lucro, não custo. Por isso este número é maior que o "lucro de caixa" (o que sobrou na conta), que desconta as retiradas.<br><br>📄 Abas <b>Recebimentos</b> (col. G) e <b>Pagamentos Terceiriza</b> (col. G).<br><br>🔍 2 cliques = base de cálculo com a conta armada.',
+cmp:'Compara o último mês fechado com o mês anterior e com o mesmo mês de 2025.<br><br>📄 2026: abas <b>Recebimentos/Pagamentos Terceiriza</b> (coluna G, regras operacionais). 2025: aba <b>Receita e Despesas - 2025</b>, linhas <b>TOTAL</b> (receita e custos), colunas B a M = jan a dez.',
+saldo:'Saldo no fim de cada mês = linha <b>SALDO FINAL</b> da aba <b>Fluxo de caixa - INTER</b> (colunas D a O = jan a dez) + linha SALDO FINAL da aba <b>Fluxo de caixa - NUBANK</b> + o total aportado no CDB até aquele mês (linhas "INVESTIMENTO CDB" da aba Pagamentos, acumulado).',
+fixvar:'<b>Fixas</b>: existem todo mês independente do nº de clientes (equipe, pró-labore, contabilidade, ferramentas).<br><b>Variáveis</b>: crescem com a operação (impostos, cartão, marketing, reembolsos).<br><br>A classificação é automática pelo texto das colunas C (FORNECEDOR) e D (Descrição) de cada linha da aba <b>Pagamentos Terceiriza</b>.<br><br>🔍 2 cliques = cada linha com sua categoria e tipo.',
+top5:'Soma de janeiro até hoje por categoria, só despesa operacional (coluna G da aba <b>Pagamentos Terceiriza</b>). Distribuição de lucros, CDB e transferências ficam de fora.',
+cat:'Cada linha de pagamento é classificada pelo texto das colunas C/D: Pedro/Dani/Marcos/Joara → Equipe CS · INSS/Imposto/Prefeitura → Impostos · Prados/Eutika/INPI → Contabilidade &amp; Jurídico · "Cartão de crédito" → Cartão · MLabs/edição/tráfego → Marketing, etc. O que não casa com nenhuma regra vira "Outras despesas".<br><br>% ao lado da barra = gasto da categoria ÷ receita operacional do mês.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G (VALOR PAGO).<br><br>🔍 2 cliques = as linhas de cada categoria.',
+dist:'<b>Distribuição de lucros</b>: linhas da aba Pagamentos com "Distribuição" na descrição — é retirada dos sócios, não custo da operação.<br><b>CDB</b>: linhas "INVESTIMENTO CDB" — dinheiro que continua da empresa, rendendo.<br><br>"Retirada ÷ lucro" = distribuição do mês ÷ lucro operacional do mês.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G.<br><br>🔍 2 cliques = cada retirada com linha da planilha.',
+mrr:'MRR = receita recorrente <b>realmente recebida</b> por contrato no mês.<br><br>📄 Fonte: blocos <b>RECEITA</b> das abas <b>Fluxo de caixa - INTER</b> e <b>Fluxo de caixa - NUBANK</b> (colunas D a O = jan a dez), somando as linhas de contrato. Ficam fora: "Transferencia entre contas", "Reembolso" e "Rendimento".<br><br>⚠️ A aba de Projeção NÃO é usada aqui (ela é estimativa) — só no card "Realizado × Projetado".<br><br>Nº de contratos = linhas de cliente com valor &gt; 0 no mês. Tracejado no gráfico = mês atual, ainda parcial.<br><br>🔍 2 cliques = cada contrato com aba e linha.',
+ticket:'Ticket médio = MRR do mês ÷ nº de contratos com valor recebido no mês. Se cai, os contratos novos estão entrando menores que os antigos.<br><br>📄 Fonte: blocos RECEITA das abas <b>Fluxo de caixa INTER/NUBANK</b> (mesma base do MRR).',
+realproj:'<b>Realizado</b>: receita operacional (aba <b>Recebimentos</b>, col. G, sem transferência/reembolso/rendimento).<br><b>Projetado</b>: linha <b>SUBTOTAL RECEITAS</b> da aba <b>Projeção Receita e Despesas - 2</b> (colunas C a N) — este é o ÚNICO lugar do dash que usa a aba de Projeção.<br><br>Diferenças são normais: parcela adiantada/atrasada muda o mês do realizado.',
+cli:'Coluna <b>G (VALOR RECEBIDO)</b> da aba <b>Recebimentos Terceiriza</b>, agrupada por cliente (col. C + D), no mês escolhido. Regime de caixa: se o cliente pagou 2 parcelas no mês, somam as duas.<br><br>🔍 2 cliques = as linhas exatas da planilha.',
+lucrocli:'Para cada cliente: receita do mês − custos diretos.<br><br>📄 Aba <b>CUSTO X CLIENTE</b>, bloco do mês: coluna CLIENTE, coluna seguinte = parcela (receita) e a soma das colunas de custo até a coluna anterior ao SUBTOTAL. A leitura é dinâmica porque o layout do bloco muda de posição a cada mês.',
+pend:'Linhas da aba <b>Recebimentos Terceiriza</b> com VALOR PREVISTO (col. F) &gt; 0, VALOR RECEBIDO (col. G) = 0 e DATA DE VENCIMENTO (col. E) anterior a hoje.',
+yoy:'Receita mensal 2026 (operacional, col. G da aba Recebimentos, sem transferência/reembolso) × receita mensal 2025 (aba <b>Receita e Despesas - 2025</b>, linha TOTAL do bloco de receitas, colunas B a M).',
+anual:'Consolidado mês a mês: receita e despesa operacionais (abas Recebimentos/Pagamentos, col. G), lucro, margem, retiradas, CDB e saldo de fim de mês (linhas SALDO FINAL dos fluxos).',
+ltv:'<b>LTV</b> = tudo que o cliente pagou do primeiro ao último mês (2025: aba histórica · 2026: aba Recebimentos, col. G).<br><br><b>Meses</b> = meses com pagamento recebido. Encerramentos por fim de prazo (Kelem, consultorias) estão marcados — não são churn.',
+kcaixa:'Todo o dinheiro da empresa agora:<br>· Saldo disponível Inter = célula <b>F3</b> da aba <b>Fluxo de caixa - INTER</b><br>· CDB = célula <b>F2</b> da mesma aba<br>· Nubank = célula <b>F1</b> da aba <b>Fluxo de caixa - NUBANK</b><br><br>Essas células são alimentadas pela própria planilha (saldo bancário).<br><br>🔍 2 cliques = detalhe das 3 células.',
+kmrr:'Receita recorrente <b>recebida</b> no último mês fechado, por contrato.<br><br>📄 Blocos RECEITA das abas <b>Fluxo de caixa INTER/NUBANK</b> (valores reais — a aba de Projeção não é usada).<br><br>🔍 2 cliques = cada contrato com aba e linha.',
+krec:'Dinheiro de clientes que entrou no caixa no último mês fechado = soma da coluna <b>G (VALOR RECEBIDO)</b> da aba <b>Recebimentos Terceiriza</b> no mês.<br><br><b>NÃO entra</b>: transferência entre contas próprias, reembolso (ex.: notebook Pamela) e rendimento de banco. Por isso este número é MENOR que "todo o dinheiro que caiu no banco" — o extrato soma também transferências e reembolsos, que não são receita da empresa.<br><br>🔍 2 cliques = linha a linha, incluindo o que foi excluído e por quê.',
+kdesp:'Custo de rodar a empresa no último mês fechado = soma da coluna <b>G (VALOR PAGO)</b> da aba <b>Pagamentos Terceiriza</b> no mês, <b>excluindo</b>: distribuição de lucros, aporte no CDB e transferência entre contas.<br><br>Total de saídas do banco = este número + distribuição + transferências (+ CDB). O detalhe com essa conta completa abre com 2 cliques.',
+klucro:'Receita operacional − despesa operacional do mês fechado. É o que a operação gerou <b>antes</b> de distribuir aos sócios.<br><br>Se comparar com "quanto sobrou na conta", desconte também a distribuição de lucros (que não é custo, é uso do lucro).<br><br>🔍 2 cliques = a conta armada com os dois lados.',
+krunway:'Quantos meses o caixa aguenta se a receita zerar hoje.<br><br><b>Número grande</b>: caixa total ÷ despesa operacional média dos últimos 3 meses fechados.<br><b>Número menor</b>: idem, incluindo também as retiradas dos sócios.<br><br>📄 Caixa: células F1/F2/F3 dos fluxos · gastos: aba Pagamentos.',
+kinter:'Saldo disponível em conta no Inter, sem contar o CDB.<br><br>📄 Aba <b>Fluxo de caixa - INTER</b>, célula <b>F3</b> (SALDO DISPONÍVEL).',
+kcdb:'Total aplicado no CDB. É reserva da empresa, não despesa.<br><br>📄 Aba <b>Fluxo de caixa - INTER</b>, célula <b>F2</b> (INVESTIMENTO CDB).',
+knubank:'Saldo atual da conta Nubank (usada principalmente para o cartão).<br><br>📄 Aba <b>Fluxo de caixa - NUBANK</b>, célula <b>F1</b> (SALDO ATUAL).',
+kburn:'Média dos últimos 3 meses fechados: despesa operacional + retiradas dos sócios (coluna G da aba <b>Pagamentos Terceiriza</b>, sem CDB e sem transferências). É quanto sai do caixa num mês típico.',
+kreserva:'Quanto sobra DENTRO da empresa num mês típico: lucro operacional − distribuição de lucros, média dos últimos 3 meses fechados.<br><br>O % mostra quanto de cada real faturado fica guardado.',
+socev:'Soma de tudo que cada sócio recebeu no mês: distribuição de lucros + pró-labore + reembolso de despesas + prestação de serviços (Thiago).<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G — linhas cuja descrição contém "Distribuição", "Prolabore", "Reembolso" ou "Tiago Gladstone", atribuídas ao sócio pelo nome na linha. O último mês do gráfico (tom claro) vem do plano da aba Distribuição Sócios.<br><br>🔍 2 cliques = cada pagamento com linha da planilha.',
+socplano:'O bloco de cada mês na aba <b>Distribuição Sócios</b> tem um resumo por sócio nas colunas <b>I a N</b>: I = nome, J = JÁ PAGO, K = PROLABORE, L = A PAGAR, M = FALTA, N = TOTAL definido.<br><br>"Pago do definido" compara o que já saiu com o que foi combinado no mês.',
+ksocdef:'Total combinado para os sócios neste mês = soma da coluna <b>N (TOTAL)</b> do resumo do bloco mensal.<br><br>📄 Aba <b>Distribuição Sócios</b>, colunas I–N.',
+ksocpago:'Quanto já saiu do caixa para os sócios neste mês (pagamentos efetivados).<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G (linhas de distribuição/pró-labore/reembolso por sócio).',
+ksocfalta:'O que ainda falta pagar do definido no mês = colunas <b>L (A PAGAR) + M (FALTA)</b> de cada sócio no resumo do bloco.<br><br>📄 Aba <b>Distribuição Sócios</b>.',
+ksocnext:'Valor já definido para o próximo mês (coluna N do resumo do bloco). Se o bloco ainda não foi criado na planilha, aparece "não lançado".<br><br>📄 Aba <b>Distribuição Sócios</b>.',
+socpct:'Quanto do faturamento vira saque dos sócios.<br><br><b>Número grande</b>: todos os saques do ano ÷ receita operacional do ano (até o mês fechado).<br><b>Número pequeno</b>: o mesmo cálculo só do último mês fechado.<br><br>📄 Abas Pagamentos (saques) e Recebimentos (receita), coluna G.'
 };
 var _HQT=null;
 function hqTip(){if(!_HQT){_HQT=document.createElement('div');_HQT.style.cssText='position:fixed;z-index:99999;pointer-events:none;background:rgba(15,15,25,.97);color:#f1f5f9;border:1px solid rgba(139,124,247,.35);border-radius:12px;padding:12px 16px;font-size:12.5px;line-height:1.6;max-width:320px;box-shadow:0 12px 40px rgba(0,0,0,.5);opacity:0;transition:opacity .15s';document.body.appendChild(_HQT)}return _HQT}
@@ -488,6 +521,7 @@ function hq(key){return '<span class="hq" data-h="'+key+'">?</span>'}
 
 /* ============ HELPERS ============ */
 const fmt=v=>'R$ '+(Math.round(v)).toLocaleString('pt-BR');
+const fmt2=v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtK=v=>{const a=Math.abs(v);if(a>=1000)return 'R$ '+(v/1000).toLocaleString('pt-BR',{maximumFractionDigits:0})+'k';return 'R$ '+Math.round(v)};
 const fmtPct=v=>v.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
 const el=id=>document.getElementById(id);
@@ -503,6 +537,7 @@ function normData(d){
   d.rec25=d.rec25||z(); d.desp25=d.desp25||z(); d.projRec=d.projRec||z();
   d.catMes=d.catMes||{}; d.recPorClienteMes=d.recPorClienteMes||{};
   d.custoCliente=d.custoCliente||{}; d.pendencias=d.pendencias||[];
+  d.detRec=d.detRec||[]; d.detPag=d.detPag||[]; d.mrrDet=d.mrrDet||[];
   d.socioMes=d.socioMes||{Pamela:z(),Phellipe:z(),Thiago:z()};
   d.distPlano=d.distPlano||{};
   d.mesAtualIdx=(typeof d.mesAtualIdx==='number')?d.mesAtualIdx:6;
@@ -520,6 +555,150 @@ function normData(d){
   d.kpis.runwayMeses=d.kpis.burn3?cx/d.kpis.burn3:0;
   d.kpis.runwayOpMeses=d.kpis.burnOp3?cx/d.kpis.burnOp3:0;
   return d;
+}
+
+/* ============ BASE DE CÁLCULO (2 cliques) ============ */
+let drillKey=null, drillMes=null;
+const MOTIVO_REC={transf:'transferência entre contas próprias — não é receita',reembolso:'reembolso — devolução de despesa, não é receita',financeira:'rendimento financeiro — não é receita de cliente'};
+const MOTIVO_PAG={dist:'distribuição de lucros — retirada dos sócios, não é custo da operação',inv:'aporte no CDB — investimento, o dinheiro continua da empresa',transf:'transferência entre contas próprias'};
+function openDrill(key,mes){
+  if(!D)return;
+  drillKey=key;
+  drillMes=(typeof mes==='number')?mes:D.mesFechadoIdx;
+  renderDrill();
+  el('drillOv').classList.add('open');
+}
+function closeDrill(){el('drillOv').classList.remove('open')}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrill()});
+document.addEventListener('dblclick',function(e){
+  const c=e.target.closest('[data-drill]');
+  if(!c)return;
+  let mes;
+  if(c.dataset.drillMes==='cat')mes=mesSelCat;
+  else if(c.dataset.drillMes==='cli')mes=mesSelCli;
+  openDrill(c.dataset.drill,mes);
+});
+function setDrillMes(m){drillMes=m;renderDrill()}
+function drillMonthPills(){
+  let h='';
+  for(let m=0;m<=D.mesAtualIdx;m++){
+    h+='<button class="pill'+(m===drillMes?' active':'')+'" onclick="setDrillMes('+m+')">'+MESES[m]+(m===D.mesAtualIdx?'*':'')+'</button>';
+  }
+  return h+'<span class="pillnote">* mês em andamento</span>';
+}
+function semDet(){
+  return '<div class="drill-note">⚠️ O detalhe linha a linha vem da versão 5 do Apps Script. Atualize o script na planilha e recarregue o dash (botão ↻) para ver a memória de cálculo.</div>';
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function renderDrill(){
+  const m=drillMes, MF=MESES_FULL[m];
+  let title='',sub='',body='',pills=true;
+  if(drillKey==='rec'){
+    title='Base de cálculo — Receita operacional de '+MF;
+    sub='📄 Aba <b>Recebimentos Terceiriza</b> · coluna A = mês · C = Nome Cliente · D = Descrição · F = VALOR PREVISTO · <b>G = VALOR RECEBIDO (é o que soma)</b>. "Linha" = linha real da planilha.';
+    const rows=D.detRec.filter(r=>r.m===m);
+    if(!rows.length){body=semDet()}
+    else{
+      const inc=rows.filter(r=>r.t==='cliente'), exc=rows.filter(r=>r.t!=='cliente');
+      const tot=inc.reduce((s,r)=>s+r.v,0), totExc=exc.reduce((s,r)=>s+r.v,0);
+      let h='<table class="drill-tbl"><tr><th>Linha</th><th>Cliente (col. C)</th><th>Descrição (col. D)</th><th style="text-align:right">Previsto (F)</th><th style="text-align:right">Recebido (G)</th><th>Entra?</th></tr>';
+      inc.forEach(r=>{h+='<tr><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.c)+'</td><td>'+esc(r.d)+'</td><td class="num mv">'+fmt2(r.p)+'</td><td class="num mv">'+fmt2(r.v)+'</td><td>✔ sim</td></tr>'});
+      h+='<tr class="sum"><td colspan="4">RECEITA OPERACIONAL (soma dos ✔) — número do dash</td><td class="num mv">'+fmt2(tot)+'</td><td></td></tr>';
+      exc.forEach(r=>{h+='<tr class="out"><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.c)+'</td><td>'+esc(r.d)+'</td><td class="num mv">'+fmt2(r.p)+'</td><td class="num mv">'+fmt2(r.v)+'</td><td class="motivo">✘ '+(MOTIVO_REC[r.t]||r.t)+'</td></tr>'});
+      if(exc.length)h+='<tr class="sub"><td colspan="4">Total que caiu no banco no mês (✔ + ✘, tudo que está lançado na planilha)</td><td class="num mv">'+fmt2(tot+totExc)+'</td><td></td></tr>';
+      h+='</table>';
+      h+='<div class="drill-note">💡 <b>Para conferir com o extrato bancário:</b> o extrato soma TUDO que entrou (inclusive transferências entre as próprias contas, reembolsos e rendimentos). O dash conta como receita só o que veio de cliente. Se o extrato mostrar um valor maior que o "Total que caiu no banco" acima, existe entrada no banco que ainda não foi lançada na aba Recebimentos.</div>';
+      body=h;
+    }
+  }else if(drillKey==='desp'){
+    title='Base de cálculo — Despesa operacional de '+MF;
+    sub='📄 Aba <b>Pagamentos Terceiriza</b> · coluna A = mês · C = FORNECEDOR · D = Descrição · F = VALOR PREVISTO · <b>G = VALOR PAGO (é o que soma)</b>. Categoria e fixa/variável são definidas pelo texto de C/D.';
+    const rows=D.detPag.filter(r=>r.m===m);
+    if(!rows.length){body=semDet()}
+    else{
+      const inc=rows.filter(r=>r.nat==='op'), exc=rows.filter(r=>r.nat!=='op'&&r.nat!=='inv'), cdb=rows.filter(r=>r.nat==='inv');
+      const tot=inc.reduce((s,r)=>s+r.v,0);
+      const totDist=rows.filter(r=>r.nat==='dist').reduce((s,r)=>s+r.v,0);
+      const totTransf=rows.filter(r=>r.nat==='transf').reduce((s,r)=>s+r.v,0);
+      const totCdb=cdb.reduce((s,r)=>s+r.v,0);
+      let h='<table class="drill-tbl"><tr><th>Linha</th><th>Fornecedor (col. C)</th><th>Descrição (col. D)</th><th>Categoria</th><th>Tipo</th><th style="text-align:right">Pago (G)</th></tr>';
+      inc.forEach(r=>{h+='<tr><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.f)+'</td><td>'+esc(r.d)+'</td><td>'+esc(r.cat)+'</td><td>'+(r.fv==='fixa'?'fixa':'variável')+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
+      h+='<tr class="sum"><td colspan="5">DESPESA OPERACIONAL (soma) — número do dash</td><td class="num mv">'+fmt2(tot)+'</td></tr>';
+      exc.concat(cdb).forEach(r=>{h+='<tr class="out"><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.f)+'</td><td>'+esc(r.d)+'</td><td colspan="2" class="motivo">✘ '+(MOTIVO_PAG[r.nat]||r.nat)+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
+      h+='<tr class="sub"><td colspan="5">+ Distribuição de lucros '+ (totTransf? '+ transferências ':'') +'= <b>saídas do banco sem CDB</b></td><td class="num mv">'+fmt2(tot+totDist+totTransf)+'</td></tr>';
+      if(totCdb)h+='<tr class="sub"><td colspan="5">+ Aporte CDB = <b>total de saídas do banco no mês</b></td><td class="num mv">'+fmt2(tot+totDist+totTransf+totCdb)+'</td></tr>';
+      h+='</table>';
+      h+='<div class="drill-note">💡 <b>Para conferir com o extrato:</b> o total de saídas do banco = despesa operacional + distribuição de lucros + transferências + CDB. O dash mostra como "despesa" só o custo de rodar a operação; retirada de sócio e CDB não são custo.</div>';
+      body=h;
+    }
+  }else if(drillKey==='lucro'){
+    title='Base de cálculo — Lucro operacional de '+MF;
+    sub='Lucro operacional = receita operacional − despesa operacional. Fontes: abas <b>Recebimentos</b> e <b>Pagamentos Terceiriza</b>, coluna G.';
+    const rec=D.receitaOp[m]||0, desp=D.despOp[m]||0, dist=D.distLucros[m]||0, cdbV=D.invCDB[m]||0;
+    let h='<table class="drill-tbl">';
+    h+='<tr><td>Receita operacional de '+MF+' <span class="drill-linha">(aba Recebimentos, col. G, sem transferência/reembolso/rendimento)</span></td><td class="num mv">'+fmt2(rec)+'</td></tr>';
+    h+='<tr><td>− Despesa operacional <span class="drill-linha">(aba Pagamentos, col. G, sem distribuição/CDB/transferência)</span></td><td class="num mv">− '+fmt2(desp)+'</td></tr>';
+    h+='<tr class="sum"><td>= LUCRO OPERACIONAL — número do dash · margem '+fmtPct(rec>0?(rec-desp)/rec*100:0)+'</td><td class="num mv">'+fmt2(rec-desp)+'</td></tr>';
+    h+='<tr class="sub"><td>− Distribuição de lucros aos sócios <span class="drill-linha">(uso do lucro, não custo)</span></td><td class="num mv">− '+fmt2(dist)+'</td></tr>';
+    h+='<tr class="sub"><td>= Sobra de caixa da operação no mês (antes do CDB)</td><td class="num mv">'+fmt2(rec-desp-dist)+'</td></tr>';
+    if(cdbV)h+='<tr class="sub"><td>− Aporte no CDB <span class="drill-linha">(continua sendo dinheiro da empresa)</span></td><td class="num mv">− '+fmt2(cdbV)+'</td></tr>';
+    h+='</table>';
+    h+='<div class="drill-note">💡 Se o financeiro calcula "lucro do mês" como <i>tudo que entrou − tudo que saiu do banco</i>, o resultado inclui as retiradas dos sócios e dá um número bem menor. Os dois estão certos — medem coisas diferentes: o dash mede o resultado da OPERAÇÃO; a conta do extrato mede a variação do caixa.<br><br>Veja as linhas de cada lado: <button class="pill" onclick="openDrill(\'rec\','+m+')">entradas de '+MESES[m]+'</button> <button class="pill" onclick="openDrill(\'desp\','+m+')">saídas de '+MESES[m]+'</button></div>';
+    body=h;
+  }else if(drillKey==='dist'){
+    title='Base de cálculo — Distribuição de lucros e CDB de '+MF;
+    sub='📄 Aba <b>Pagamentos Terceiriza</b>, coluna G — linhas com "Distribuição" (retiradas) e "INVESTIMENTO CDB" (aportes).';
+    const rows=D.detPag.filter(r=>r.m===m&&(r.nat==='dist'||r.nat==='inv'));
+    if(!rows.length){body=D.detPag.length?'<div class="drill-note">Nenhuma distribuição ou aporte de CDB lançado em '+MF+'.</div>':semDet()}
+    else{
+      let h='<table class="drill-tbl"><tr><th>Linha</th><th>Fornecedor (col. C)</th><th>Descrição (col. D)</th><th>Tipo</th><th style="text-align:right">Pago (G)</th></tr>';
+      rows.forEach(r=>{h+='<tr><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.f)+'</td><td>'+esc(r.d)+'</td><td>'+(r.nat==='dist'?'Distribuição':'CDB')+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
+      h+='<tr class="sum"><td colspan="4">Distribuição de lucros</td><td class="num mv">'+fmt2(rows.filter(r=>r.nat==='dist').reduce((s,r)=>s+r.v,0))+'</td></tr>';
+      h+='<tr class="sum"><td colspan="4">Aporte CDB</td><td class="num mv">'+fmt2(rows.filter(r=>r.nat==='inv').reduce((s,r)=>s+r.v,0))+'</td></tr></table>';
+      body=h;
+    }
+  }else if(drillKey==='soc'){
+    title='Base de cálculo — Saques dos sócios em '+MF;
+    sub='📄 Aba <b>Pagamentos Terceiriza</b>, coluna G — linhas de Distribuição, Pró-labore, Reembolso e prestação de serviço (Thiago), atribuídas ao sócio pelo nome.';
+    const rows=D.detPag.filter(r=>r.m===m&&r.s);
+    if(!rows.length){body=D.detPag.length?'<div class="drill-note">Nenhum saque lançado em '+MF+'.</div>':semDet()}
+    else{
+      let h='<table class="drill-tbl"><tr><th>Linha</th><th>Sócio</th><th>Descrição (col. D)</th><th style="text-align:right">Pago (G)</th></tr>';
+      rows.forEach(r=>{h+='<tr><td class="drill-linha">L'+r.l+'</td><td>'+r.s+'</td><td>'+esc(r.d)+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
+      ['Pamela','Phellipe','Thiago'].forEach(so=>{
+        const t=rows.filter(r=>r.s===so).reduce((s,r)=>s+r.v,0);
+        if(t)h+='<tr class="sub"><td colspan="3">Total '+so+'</td><td class="num mv">'+fmt2(t)+'</td></tr>';
+      });
+      h+='<tr class="sum"><td colspan="3">Total sacado no mês</td><td class="num mv">'+fmt2(rows.reduce((s,r)=>s+r.v,0))+'</td></tr></table>';
+      body=h;
+    }
+  }else if(drillKey==='mrr'){
+    title='Base de cálculo — MRR de '+MF;
+    sub='📄 Blocos <b>RECEITA</b> das abas <b>Fluxo de caixa - INTER</b> e <b>Fluxo de caixa - NUBANK</b> · colunas D a O = jan a dez · valores REALMENTE recebidos por contrato (a aba de Projeção não é usada). Fora: transferências, reembolsos e rendimentos.';
+    const rows=D.mrrDet.filter(r=>r.m===m);
+    if(!rows.length){body=D.mrrDet.length?'<div class="drill-note">Nenhum valor de contrato lançado no bloco RECEITA dos fluxos em '+MF+'.</div>':semDet()}
+    else{
+      let h='<table class="drill-tbl"><tr><th>Aba</th><th>Linha</th><th>Contrato (col. A)</th><th>Cliente (col. B)</th><th style="text-align:right">Recebido no mês</th></tr>';
+      rows.forEach(r=>{h+='<tr><td>Fluxo '+r.aba+'</td><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.n)+'</td><td>'+esc(r.c)+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
+      h+='<tr class="sum"><td colspan="4">MRR de '+MF+' · '+(D.nContratos[m]||0)+' contratos — número do dash</td><td class="num mv">'+fmt2(rows.reduce((s,r)=>s+r.v,0))+'</td></tr></table>';
+      h+='<div class="drill-note">💡 Nº de contratos = linhas de cliente com valor &gt; 0 no mês. Se um contrato pago não aparece aqui, a célula do mês dele está vazia no bloco RECEITA da aba de fluxo.</div>';
+      body=h;
+    }
+  }else if(drillKey==='caixa'){
+    pills=false;
+    title='Base de cálculo — Caixa total hoje';
+    sub='Células lidas ao vivo na planilha (alimentadas pelos saldos bancários):';
+    let h='<table class="drill-tbl"><tr><th>Conta</th><th>Aba</th><th>Célula</th><th style="text-align:right">Valor</th></tr>';
+    h+='<tr><td>Inter — saldo disponível</td><td>Fluxo de caixa - INTER</td><td class="drill-linha">F3 (SALDO DISPONÍVEL)</td><td class="num mv">'+fmt2(D.saldos.interDisp)+'</td></tr>';
+    h+='<tr><td>Inter — CDB investido</td><td>Fluxo de caixa - INTER</td><td class="drill-linha">F2 (INVESTIMENTO CDB)</td><td class="num mv">'+fmt2(D.saldos.cdb)+'</td></tr>';
+    h+='<tr><td>Nubank — saldo atual</td><td>Fluxo de caixa - NUBANK</td><td class="drill-linha">F1 (SALDO ATUAL)</td><td class="num mv">'+fmt2(D.saldos.nubank)+'</td></tr>';
+    h+='<tr class="sum"><td colspan="3">CAIXA TOTAL — número do dash</td><td class="num mv">'+fmt2(D.saldos.total)+'</td></tr></table>';
+    body=h;
+  }
+  el('drillTitle').innerHTML=title;
+  el('drillSub').innerHTML=sub;
+  el('drillMonths').innerHTML=pills?drillMonthPills():'';
+  el('drillBody').innerHTML=body;
 }
 
 /* ============ LOGIN / BOOT ============ */
@@ -578,12 +757,12 @@ function render(){
   renderKpis(); renderAlerts(); renderCmp(); renderCaixa(); renderDist();
   renderMchips(); renderPend(); renderLucroCliTable(); renderAnual(); renderSocios();
   el('parCaixa').textContent=fmt(D.saldos.total);
-  el('parConc').textContent=fmtPct(D.mrr[ma]?15997/D.mrr[ma]*100:29);
+  el('parConc').textContent=fmtPct(D.mrr[D.mesFechadoIdx]?15997/D.mrr[D.mesFechadoIdx]*100:29);
   initCharts();
 }
 
-function kpiCard(color,title,hkey,val,sub,cls){
-  return '<div class="kpi"><div class="kpi-bar" style="background:'+color+'"></div>'+
+function kpiCard(color,title,hkey,val,sub,cls,drill){
+  return '<div class="kpi"'+(drill?' data-drill="'+drill+'" title="2 cliques: base de cálculo"':'')+'><div class="kpi-bar" style="background:'+color+'"></div>'+
     '<div class="kpi-l">'+title+hq(hkey)+'</div>'+
     '<div class="kpi-v mv '+(cls||'')+'">'+val+'</div><div class="kpi-s">'+sub+'</div></div>';
 }
@@ -595,14 +774,14 @@ function delta(cur,prev){
 function renderKpis(){
   const mf=D.mesFechadoIdx, ma=D.mesAtualIdx, k=D.kpis, p=PAL();
   let h='';
-  h+=kpiCard(p.accent,'Caixa total hoje','kcaixa',fmt(D.saldos.total),'Inter '+fmtK(D.saldos.interDisp)+' · CDB '+fmtK(D.saldos.cdb)+' · Nu '+fmtK(D.saldos.nubank));
-  h+=kpiCard(p.teal,'MRR — recorrente','kmrr',fmt(D.mrr[ma]),(D.nContratos[ma]||0)+' contratos · '+delta(D.mrr[ma],D.mrr[mf]));
-  h+=kpiCard(p.sky,'Receita '+MESES[mf],'krec',fmt(D.receitaOp[mf]),delta(D.receitaOp[mf],D.receitaOp[mf-1]));
-  h+=kpiCard(p.orange,'Despesa op. '+MESES[mf],'kdesp',fmt(D.despOp[mf]),delta(D.despOp[mf],D.despOp[mf-1]));
-  h+=kpiCard(D.lucroOp[mf]>=0?p.green:p.red,'Lucro op. '+MESES[mf],'klucro',fmt(D.lucroOp[mf]),'margem de '+fmtPct(D.margemOp[mf]),D.lucroOp[mf]>=0?'pos':'neg');
+  h+=kpiCard(p.accent,'Caixa total hoje','kcaixa',fmt(D.saldos.total),'Inter '+fmtK(D.saldos.interDisp)+' · CDB '+fmtK(D.saldos.cdb)+' · Nu '+fmtK(D.saldos.nubank),'','caixa');
+  h+=kpiCard(p.teal,'MRR '+MESES[mf]+' — recorrente','kmrr',fmt(D.mrr[mf]),(D.nContratos[mf]||0)+' contratos · '+MESES[ma]+' (parcial): '+fmtK(D.mrr[ma]),'','mrr');
+  h+=kpiCard(p.sky,'Receita '+MESES[mf],'krec',fmt(D.receitaOp[mf]),delta(D.receitaOp[mf],D.receitaOp[mf-1]),'','rec');
+  h+=kpiCard(p.orange,'Despesa op. '+MESES[mf],'kdesp',fmt(D.despOp[mf]),delta(D.despOp[mf],D.despOp[mf-1]),'','desp');
+  h+=kpiCard(D.lucroOp[mf]>=0?p.green:p.red,'Lucro op. '+MESES[mf],'klucro',fmt(D.lucroOp[mf]),'margem de '+fmtPct(D.margemOp[mf]),D.lucroOp[mf]>=0?'pos':'neg','lucro');
   h+=kpiCard(k.runwayOpMeses>=3?p.green:p.gold,'Fôlego de caixa','krunway',
     k.runwayOpMeses.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses',
-    'só operação · '+k.runwayMeses.toLocaleString('pt-BR',{maximumFractionDigits:1})+'m com retiradas');
+    'só operação · '+k.runwayMeses.toLocaleString('pt-BR',{maximumFractionDigits:1})+'m com retiradas','','desp');
   el('kpiRow').innerHTML=h;
 }
 
@@ -624,7 +803,7 @@ function renderAlerts(){
     if(neg.length)A.push({cls:'w',t:'📉 '+neg.length+' cliente(s) deram prejuízo em '+MESES_FULL[keys[0]],s:neg.map(c=>c.cliente+' ('+fmt(c.lucro)+')').join(' · ')+' — renegociar preço ou escopo.'});
   }
   if(D.distLucros[mf]>D.lucroOp[mf])A.push({cls:'i',t:'💸 Retiradas de '+MESES[mf]+' ('+fmt(D.distLucros[mf])+') passaram do lucro do mês ('+fmt(D.lucroOp[mf])+')',s:'Tudo bem pontualmente, mas como rotina consome a reserva.'});
-  if(D.mrr[ma]>D.mrr[0])A.push({cls:'ok',t:'🚀 MRR cresceu '+fmtPct((D.mrr[ma]-D.mrr[0])/D.mrr[0]*100)+' no ano',s:fmt(D.mrr[0])+' em janeiro → '+fmt(D.mrr[ma])+' agora ('+(D.nContratos[ma]||0)+' contratos).'});
+  if(D.mrr[mf]>D.mrr[0])A.push({cls:'ok',t:'🚀 MRR cresceu '+fmtPct((D.mrr[mf]-D.mrr[0])/D.mrr[0]*100)+' no ano',s:fmt(D.mrr[0])+' em janeiro → '+fmt(D.mrr[mf])+' em '+MESES_FULL[mf]+' ('+(D.nContratos[mf]||0)+' contratos).'});
   el('alertList').innerHTML=A.map(a=>'<div class="ins '+a.cls+'"><div class="ins-t">'+a.t+'</div><div class="ins-p">'+a.s+'</div></div>').join('')||'<div class="ins ok"><div class="ins-t">✅ Nenhum alerta</div></div>';
 }
 
@@ -867,11 +1046,12 @@ function initCharts(){
     {label:'Lucro operacional',data:D.lucroOp.slice(0,ma+1),backgroundColor:D.lucroOp.slice(0,ma+1).map(v=>v>=0?p.green:p.red),borderRadius:6,maxBarThickness:38}
   ]},options:(()=>{const o=baseOpts();o.plugins.legend.display=false;return o})()});
 
-  const mrrReal=D.mrr.map((v,i)=>i<=ma?v:null);
-  const mrrProj=D.mrr.map((v,i)=>i>=ma?v:null);
+  const mfC=D.mesFechadoIdx;
+  const mrrReal=D.mrr.map((v,i)=>i<=mfC?v:null);
+  const mrrParcial=D.mrr.map((v,i)=>(i>=mfC&&i<=ma)?v:null);
   mkChart('chMrr',{type:'line',data:{labels:MESES,datasets:[
-    {label:'MRR',data:mrrReal,borderColor:p.accent,backgroundColor:p.accent,borderWidth:2.5,pointRadius:4,tension:.3},
-    {label:'MRR projetado',data:mrrProj,borderColor:p.a2,borderDash:[6,5],borderWidth:2,pointRadius:3,pointStyle:'rectRot',tension:.3}
+    {label:'MRR recebido',data:mrrReal,borderColor:p.accent,backgroundColor:p.accent,borderWidth:2.5,pointRadius:4,tension:.3},
+    {label:'Mês atual (parcial)',data:mrrParcial,borderColor:p.a2,borderDash:[6,5],borderWidth:2,pointRadius:3,pointStyle:'rectRot',tension:.3}
   ]},options:(()=>{const o=baseOpts();o.plugins.tooltip.callbacks.afterLabel=c=>' contratos: '+(D.nContratos[c.dataIndex]||'—');return o})()});
 
   mkChart('chSaldo',{type:'line',data:{labels:lb,datasets:[
