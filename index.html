@@ -244,6 +244,14 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
       <div class="d">Retiradas dos sócios e aportes em investimento — ficam FORA da despesa operacional · <span class="src">📄 aba Pagamentos Terceiriza (descrição "Distribuição" / "CDB")</span></div>
       <div class="tblwrap" id="distTable"></div>
     </div>
+
+    <div class="sec">Lucro líquido × distribuição</div>
+    <div class="card" data-drill="lucro">
+      <h3>Quanto a operação gerou × quanto foi distribuído <span class="hq" data-h="lucrodist">?</span></h3>
+      <div class="d">Barras = lucro operacional e distribuição aos sócios · linha = o que sobrou dentro da empresa · <span class="src">📄 abas Recebimentos + Pagamentos Terceiriza (col. G)</span></div>
+      <div class="chart-box"><canvas id="chLucroDist"></canvas></div>
+      <div class="d" id="lucroDistSum" style="margin-top:10px"></div>
+    </div>
   </div>
 
   <!-- ================= CLIENTES ================= -->
@@ -482,6 +490,7 @@ fixvar:'<b>Fixas</b>: existem todo mês independente do nº de clientes (equipe,
 top5:'Soma de janeiro até hoje por categoria, só despesa operacional (coluna G da aba <b>Pagamentos Terceiriza</b>). Distribuição de lucros, CDB e transferências ficam de fora.',
 cat:'Cada linha de pagamento é classificada pelo texto das colunas C/D: Pedro/Dani/Marcos/Joara → Equipe CS · INSS/Imposto/Prefeitura → Impostos · Prados/Eutika/INPI → Contabilidade &amp; Jurídico · "Cartão de crédito" → Cartão · MLabs/edição/tráfego → Marketing, etc. O que não casa com nenhuma regra vira "Outras despesas".<br><br>% ao lado da barra = gasto da categoria ÷ receita operacional do mês.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G (VALOR PAGO).<br><br>🔍 2 cliques = as linhas de cada categoria.',
 dist:'<b>Distribuição de lucros</b>: linhas da aba Pagamentos com "Distribuição" na descrição — é retirada dos sócios, não custo da operação.<br><b>CDB</b>: linhas "INVESTIMENTO CDB" — dinheiro que continua da empresa, rendendo.<br><br>"Retirada ÷ lucro" = distribuição do mês ÷ lucro operacional do mês.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G.<br><br>🔍 2 cliques = cada retirada com linha da planilha.',
+lucrodist:'Compara o que a operação gerou de lucro com o que foi distribuído aos sócios, mês a mês.<br><br><b>Lucro operacional</b> = receita − despesa operacional (abas Recebimentos/Pagamentos, coluna G).<br><b>Distribuição</b> = linhas com "Distribuição" na descrição da aba Pagamentos, coluna G.<br><b>Sobra na empresa (lucro líquido após distribuição)</b> = lucro − distribuição. Se a linha fica negativa, o mês distribuiu mais do que gerou e consumiu reserva.<br><br>🔍 2 cliques = a conta armada do mês, linha a linha.',
 mrr:'MRR = receita recorrente <b>realmente recebida</b> por contrato no mês.<br><br>📄 Fonte: blocos <b>RECEITA</b> das abas <b>Fluxo de caixa - INTER</b> e <b>Fluxo de caixa - NUBANK</b> (colunas D a O = jan a dez), somando as linhas de contrato. Ficam fora: "Transferencia entre contas", "Reembolso" e "Rendimento".<br><br>⚠️ A aba de Projeção NÃO é usada aqui (ela é estimativa) — só no card "Realizado × Projetado".<br><br>Nº de contratos = linhas de cliente com valor &gt; 0 no mês. Tracejado no gráfico = mês atual, ainda parcial.<br><br>🔍 2 cliques = cada contrato com aba e linha.',
 ticket:'Ticket médio = MRR do mês ÷ nº de contratos com valor recebido no mês. Se cai, os contratos novos estão entrando menores que os antigos.<br><br>📄 Fonte: blocos RECEITA das abas <b>Fluxo de caixa INTER/NUBANK</b> (mesma base do MRR).',
 realproj:'<b>Realizado</b>: receita operacional (aba <b>Recebimentos</b>, col. G, sem transferência/reembolso/rendimento).<br><b>Projetado</b>: linha <b>SUBTOTAL RECEITAS</b> da aba <b>Projeção Receita e Despesas - 2</b> (colunas C a N) — este é o ÚNICO lugar do dash que usa a aba de Projeção.<br><br>Diferenças são normais: parcela adiantada/atrasada muda o mês do realizado.',
@@ -754,7 +763,7 @@ function render(){
   const mf=D.mesFechadoIdx, ma=D.mesAtualIdx;
   el('badgeUpdated').textContent=usandoLive?('Atualizado: '+(D.atualizadoEm||'')):'Snapshot 26/07/2026';
   el('kpiRef').textContent='· mês fechado: '+MESES_FULL[mf]+' · atual: '+MESES_FULL[ma]+' (parcial)';
-  renderKpis(); renderAlerts(); renderCmp(); renderCaixa(); renderDist();
+  renderKpis(); renderAlerts(); renderCmp(); renderCaixa(); renderDist(); renderLucroDist();
   renderMchips(); renderPend(); renderLucroCliTable(); renderAnual(); renderSocios();
   el('parCaixa').textContent=fmt(D.saldos.total);
   el('parConc').textContent=fmtPct(D.mrr[D.mesFechadoIdx]?15997/D.mrr[D.mesFechadoIdx]*100:29);
@@ -917,6 +926,14 @@ function renderDist(){
   el('distTable').innerHTML=h;
 }
 
+function renderLucroDist(){
+  const mf=D.mesFechadoIdx;
+  let l=0,d=0;
+  for(let m=0;m<=mf;m++){l+=D.lucroOp[m];d+=D.distLucros[m]}
+  const sobra=l-d;
+  el('lucroDistSum').innerHTML='Acumulado jan–'+MESES[mf]+': a operação gerou <b class="mv">'+fmt(l)+'</b> de lucro · foi distribuído <b class="mv">'+fmt(d)+'</b> aos sócios ('+fmtPct(l>0?d/l*100:0)+' do lucro) · sobrou na empresa <b class="mv '+(sobra>=0?'pos':'neg')+'">'+fmt(sobra)+'</b>';
+}
+
 function renderMchips(){
   const build=(id,sel,setter)=>{
     let h='';
@@ -1062,6 +1079,12 @@ function initCharts(){
     {label:'Fixas',data:D.despFixa.slice(0,ma+1),backgroundColor:p.accent,borderRadius:6,maxBarThickness:34},
     {label:'Variáveis',data:D.despVar.slice(0,ma+1),backgroundColor:p.orange,borderRadius:6,maxBarThickness:34}
   ]},options:(()=>{const o=baseOpts();o.scales.x.stacked=true;o.scales.y.stacked=true;return o})()});
+
+  mkChart('chLucroDist',{type:'bar',data:{labels:lb,datasets:[
+    {label:'Lucro operacional',data:D.lucroOp.slice(0,ma+1),backgroundColor:p.green,borderRadius:6,maxBarThickness:28},
+    {label:'Distribuição aos sócios',data:D.distLucros.slice(0,ma+1),backgroundColor:p.pink,borderRadius:6,maxBarThickness:28},
+    {type:'line',label:'Sobra na empresa (lucro − distribuição)',data:D.lucroOp.slice(0,ma+1).map((v,i)=>v-D.distLucros[i]),borderColor:p.accent,backgroundColor:p.accent,borderWidth:2.5,pointRadius:4,tension:.3}
+  ]},options:baseOpts()});
 
   const cats=Object.entries(D.catMes).map(([c,v])=>[c,v.reduce((a,b)=>a+b,0)]).sort((a,b)=>b[1]-a[1]).slice(0,5);
   mkChart('chTopDesp',{type:'bar',data:{labels:cats.map(c=>c[0]),datasets:[
