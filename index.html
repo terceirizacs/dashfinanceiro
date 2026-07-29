@@ -186,7 +186,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     <div class="ins-g" id="alertList"></div>
 
     <div class="sec">Evolução mensal</div>
-    <div class="card" data-drill="rec">
+    <div class="card" data-drill="recdesp">
       <h3>Receita × Despesa operacional — previsto <span class="hq" data-h="recdesp">?</span></h3>
       <div class="d">O que está contratado para entrar e o custo previsto da operação, mês a mês (coluna F das duas abas) · <span class="src">📄 abas Recebimentos + Pagamentos (VALOR PREVISTO)</span></div>
       <div class="chart-box"><canvas id="chRecDesp"></canvas></div>
@@ -600,47 +600,58 @@ function semDet(){
   return '<div class="drill-note">⚠️ O detalhe linha a linha vem da versão 5 do Apps Script. Atualize o script na planilha e recarregue o dash (botão ↻) para ver a memória de cálculo.</div>';
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+const SUB_REC='📄 Aba <b>Recebimentos Terceiriza</b> · coluna A = mês · C = Nome Cliente · D = Descrição · F = VALOR PREVISTO · <b>G = VALOR RECEBIDO (é o que soma)</b>. "Linha" = linha real da planilha.';
+const SUB_DESP='📄 Aba <b>Pagamentos Terceiriza</b> · coluna A = mês · C = FORNECEDOR · D = Descrição · F = VALOR PREVISTO · <b>G = VALOR PAGO (é o que soma)</b>. Categoria e fixa/variável são definidas pelo texto de C/D.';
+function buildRecTable(m){
+  const rows=D.detRec.filter(r=>r.m===m);
+  if(!rows.length)return semDet();
+  const inc=rows.filter(r=>r.t==='cliente'), exc=rows.filter(r=>r.t!=='cliente');
+  const tot=inc.reduce((s,r)=>s+r.v,0), totExc=exc.reduce((s,r)=>s+r.v,0);
+  const totPrev=inc.reduce((s,r)=>s+r.p,0);
+  let h='<table class="drill-tbl"><tr><th>Linha</th><th>Cliente (col. C)</th><th>Descrição (col. D)</th><th style="text-align:right">Previsto (F)</th><th style="text-align:right">Recebido (G)</th><th>Entra?</th></tr>';
+  inc.forEach(r=>{h+='<tr><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.c)+'</td><td>'+esc(r.d)+'</td><td class="num mv">'+fmt2(r.p)+'</td><td class="num mv">'+fmt2(r.v)+'</td><td>✔ sim</td></tr>'});
+  h+='<tr class="sum"><td colspan="3">RECEITA OPERACIONAL (soma dos ✔) — previsto e recebido</td><td class="num mv">'+fmt2(totPrev)+'</td><td class="num mv">'+fmt2(tot)+'</td><td></td></tr>';
+  exc.forEach(r=>{h+='<tr class="out"><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.c)+'</td><td>'+esc(r.d)+'</td><td class="num mv">'+fmt2(r.p)+'</td><td class="num mv">'+fmt2(r.v)+'</td><td class="motivo">✘ '+(MOTIVO_REC[r.t]||r.t)+'</td></tr>'});
+  if(exc.length)h+='<tr class="sub"><td colspan="4">Total que caiu no banco no mês (✔ + ✘, tudo que está lançado na planilha)</td><td class="num mv">'+fmt2(tot+totExc)+'</td><td></td></tr>';
+  h+='</table>';
+  h+='<div class="drill-note">💡 <b>Para conferir com o extrato bancário:</b> o extrato soma TUDO que entrou (inclusive transferências entre as próprias contas, reembolsos e rendimentos). O dash conta como receita só o que veio de cliente. Se o extrato mostrar um valor maior que o "Total que caiu no banco" acima, existe entrada no banco que ainda não foi lançada na aba Recebimentos.</div>';
+  return h;
+}
+function buildDespTable(m){
+  const rows=D.detPag.filter(r=>r.m===m);
+  if(!rows.length)return semDet();
+  const inc=rows.filter(r=>r.nat==='op'), exc=rows.filter(r=>r.nat!=='op'&&r.nat!=='inv'), cdb=rows.filter(r=>r.nat==='inv');
+  const tot=inc.reduce((s,r)=>s+r.v,0);
+  const totPrev=inc.reduce((s,r)=>s+r.p,0);
+  const totDist=rows.filter(r=>r.nat==='dist').reduce((s,r)=>s+r.v,0);
+  const totTransf=rows.filter(r=>r.nat==='transf').reduce((s,r)=>s+r.v,0);
+  const totCdb=cdb.reduce((s,r)=>s+r.v,0);
+  let h='<table class="drill-tbl"><tr><th>Linha</th><th>Fornecedor (col. C)</th><th>Descrição (col. D)</th><th>Categoria</th><th>Tipo</th><th style="text-align:right">Previsto (F)</th><th style="text-align:right">Pago (G)</th></tr>';
+  inc.forEach(r=>{h+='<tr><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.f)+'</td><td>'+esc(r.d)+'</td><td>'+esc(r.cat)+'</td><td>'+(r.fv==='fixa'?'fixa':'variável')+'</td><td class="num mv">'+fmt2(r.p)+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
+  h+='<tr class="sum"><td colspan="5">DESPESA OPERACIONAL (soma) — previsto e pago</td><td class="num mv">'+fmt2(totPrev)+'</td><td class="num mv">'+fmt2(tot)+'</td></tr>';
+  exc.concat(cdb).forEach(r=>{h+='<tr class="out"><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.f)+'</td><td>'+esc(r.d)+'</td><td colspan="3" class="motivo">✘ '+(MOTIVO_PAG[r.nat]||r.nat)+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
+  h+='<tr class="sub"><td colspan="6">+ Distribuição de lucros '+(totTransf?'+ transferências ':'')+'= <b>saídas do banco sem CDB</b></td><td class="num mv">'+fmt2(tot+totDist+totTransf)+'</td></tr>';
+  if(totCdb)h+='<tr class="sub"><td colspan="6">+ Aporte CDB = <b>total de saídas do banco no mês</b></td><td class="num mv">'+fmt2(tot+totDist+totTransf+totCdb)+'</td></tr>';
+  h+='</table>';
+  h+='<div class="drill-note">💡 <b>Para conferir com o extrato:</b> o total de saídas do banco = despesa operacional + distribuição de lucros + transferências + CDB. O dash mostra como "despesa" só o custo de rodar a operação; retirada de sócio e CDB não são custo.</div>';
+  return h;
+}
 function renderDrill(){
   const m=drillMes, MF=MESES_FULL[m];
   let title='',sub='',body='',pills=true;
   if(drillKey==='rec'){
     title='Base de cálculo — Receita operacional de '+MF;
-    sub='📄 Aba <b>Recebimentos Terceiriza</b> · coluna A = mês · C = Nome Cliente · D = Descrição · F = VALOR PREVISTO · <b>G = VALOR RECEBIDO (é o que soma)</b>. "Linha" = linha real da planilha.';
-    const rows=D.detRec.filter(r=>r.m===m);
-    if(!rows.length){body=semDet()}
-    else{
-      const inc=rows.filter(r=>r.t==='cliente'), exc=rows.filter(r=>r.t!=='cliente');
-      const tot=inc.reduce((s,r)=>s+r.v,0), totExc=exc.reduce((s,r)=>s+r.v,0);
-      let h='<table class="drill-tbl"><tr><th>Linha</th><th>Cliente (col. C)</th><th>Descrição (col. D)</th><th style="text-align:right">Previsto (F)</th><th style="text-align:right">Recebido (G)</th><th>Entra?</th></tr>';
-      inc.forEach(r=>{h+='<tr><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.c)+'</td><td>'+esc(r.d)+'</td><td class="num mv">'+fmt2(r.p)+'</td><td class="num mv">'+fmt2(r.v)+'</td><td>✔ sim</td></tr>'});
-      h+='<tr class="sum"><td colspan="4">RECEITA OPERACIONAL (soma dos ✔) — número do dash</td><td class="num mv">'+fmt2(tot)+'</td><td></td></tr>';
-      exc.forEach(r=>{h+='<tr class="out"><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.c)+'</td><td>'+esc(r.d)+'</td><td class="num mv">'+fmt2(r.p)+'</td><td class="num mv">'+fmt2(r.v)+'</td><td class="motivo">✘ '+(MOTIVO_REC[r.t]||r.t)+'</td></tr>'});
-      if(exc.length)h+='<tr class="sub"><td colspan="4">Total que caiu no banco no mês (✔ + ✘, tudo que está lançado na planilha)</td><td class="num mv">'+fmt2(tot+totExc)+'</td><td></td></tr>';
-      h+='</table>';
-      h+='<div class="drill-note">💡 <b>Para conferir com o extrato bancário:</b> o extrato soma TUDO que entrou (inclusive transferências entre as próprias contas, reembolsos e rendimentos). O dash conta como receita só o que veio de cliente. Se o extrato mostrar um valor maior que o "Total que caiu no banco" acima, existe entrada no banco que ainda não foi lançada na aba Recebimentos.</div>';
-      body=h;
-    }
+    sub=SUB_REC;
+    body=buildRecTable(m);
   }else if(drillKey==='desp'){
     title='Base de cálculo — Despesa operacional de '+MF;
-    sub='📄 Aba <b>Pagamentos Terceiriza</b> · coluna A = mês · C = FORNECEDOR · D = Descrição · F = VALOR PREVISTO · <b>G = VALOR PAGO (é o que soma)</b>. Categoria e fixa/variável são definidas pelo texto de C/D.';
-    const rows=D.detPag.filter(r=>r.m===m);
-    if(!rows.length){body=semDet()}
-    else{
-      const inc=rows.filter(r=>r.nat==='op'), exc=rows.filter(r=>r.nat!=='op'&&r.nat!=='inv'), cdb=rows.filter(r=>r.nat==='inv');
-      const tot=inc.reduce((s,r)=>s+r.v,0);
-      const totDist=rows.filter(r=>r.nat==='dist').reduce((s,r)=>s+r.v,0);
-      const totTransf=rows.filter(r=>r.nat==='transf').reduce((s,r)=>s+r.v,0);
-      const totCdb=cdb.reduce((s,r)=>s+r.v,0);
-      let h='<table class="drill-tbl"><tr><th>Linha</th><th>Fornecedor (col. C)</th><th>Descrição (col. D)</th><th>Categoria</th><th>Tipo</th><th style="text-align:right">Pago (G)</th></tr>';
-      inc.forEach(r=>{h+='<tr><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.f)+'</td><td>'+esc(r.d)+'</td><td>'+esc(r.cat)+'</td><td>'+(r.fv==='fixa'?'fixa':'variável')+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
-      h+='<tr class="sum"><td colspan="5">DESPESA OPERACIONAL (soma) — número do dash</td><td class="num mv">'+fmt2(tot)+'</td></tr>';
-      exc.concat(cdb).forEach(r=>{h+='<tr class="out"><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.f)+'</td><td>'+esc(r.d)+'</td><td colspan="2" class="motivo">✘ '+(MOTIVO_PAG[r.nat]||r.nat)+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
-      h+='<tr class="sub"><td colspan="5">+ Distribuição de lucros '+ (totTransf? '+ transferências ':'') +'= <b>saídas do banco sem CDB</b></td><td class="num mv">'+fmt2(tot+totDist+totTransf)+'</td></tr>';
-      if(totCdb)h+='<tr class="sub"><td colspan="5">+ Aporte CDB = <b>total de saídas do banco no mês</b></td><td class="num mv">'+fmt2(tot+totDist+totTransf+totCdb)+'</td></tr>';
-      h+='</table>';
-      h+='<div class="drill-note">💡 <b>Para conferir com o extrato:</b> o total de saídas do banco = despesa operacional + distribuição de lucros + transferências + CDB. O dash mostra como "despesa" só o custo de rodar a operação; retirada de sócio e CDB não são custo.</div>';
-      body=h;
-    }
+    sub=SUB_DESP;
+    body=buildDespTable(m);
+  }else if(drillKey==='recdesp'){
+    title='Base de cálculo — Receita × Despesa de '+MF;
+    sub='Entradas e saídas do mês, lado a lado. Coluna F = previsto · coluna G = realizado (recebido/pago).';
+    body='<div class="drill-sub"><b>📥 ENTRADAS — '+MF+'</b><br>'+SUB_REC+'</div>'+buildRecTable(m)
+      +'<div class="drill-sub" style="margin-top:26px;border-top:1px solid var(--border);padding-top:16px"><b>📤 SAÍDAS — '+MF+'</b><br>'+SUB_DESP+'</div>'+buildDespTable(m);
   }else if(drillKey==='lucro'){
     title='Base de cálculo — Lucro operacional de '+MF;
     sub='Lucro operacional = receita operacional − despesa operacional. Fontes: abas <b>Recebimentos</b> e <b>Pagamentos Terceiriza</b>, coluna G.';
