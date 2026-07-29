@@ -510,7 +510,9 @@ krunway:'Quantos meses o caixa aguenta se a receita zerar hoje.<br><br><b>Númer
 kinter:'Saldo disponível em conta no Inter, sem contar o CDB.<br><br>📄 Aba <b>Fluxo de caixa - INTER</b>, célula <b>F3</b> (SALDO DISPONÍVEL).',
 kcdb:'Total aplicado no CDB. É reserva da empresa, não despesa.<br><br>📄 Aba <b>Fluxo de caixa - INTER</b>, célula <b>F2</b> (INVESTIMENTO CDB).',
 knubank:'Saldo atual da conta Nubank (usada principalmente para o cartão).<br><br>📄 Aba <b>Fluxo de caixa - NUBANK</b>, célula <b>F1</b> (SALDO ATUAL).',
-kburn:'Média dos últimos 3 meses fechados: despesa operacional + retiradas dos sócios (coluna G da aba <b>Pagamentos Terceiriza</b>, sem CDB e sem transferências). É quanto sai do caixa num mês típico.',
+kdespmed:'Média da despesa operacional dos últimos 3 meses fechados.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G (VALOR PAGO), sem distribuição de lucros, CDB e transferências.<br><br>🔍 2 cliques = as linhas do último mês fechado.',
+klucromed:'Média do lucro operacional (receita − despesa operacional) dos últimos 3 meses fechados.<br><br><b>Margem média</b> = lucro dos 3 meses ÷ receita dos 3 meses.<br><br>📄 Abas <b>Recebimentos</b> e <b>Pagamentos Terceiriza</b>, coluna G.<br><br>🔍 2 cliques = a conta armada.',
+
 kreserva:'Quanto sobra DENTRO da empresa num mês típico: lucro operacional − distribuição de lucros, média dos últimos 3 meses fechados.<br><br>O % mostra quanto de cada real faturado fica guardado.',
 socev:'Soma de tudo que cada sócio recebeu no mês: distribuição de lucros + pró-labore + reembolso de despesas + prestação de serviços (Thiago).<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G — linhas cuja descrição contém "Distribuição", "Prolabore", "Reembolso" ou "Tiago Gladstone", atribuídas ao sócio pelo nome na linha. O último mês do gráfico (tom claro) vem do plano da aba Distribuição Sócios.<br><br>🔍 2 cliques = cada pagamento com linha da planilha.',
 socplano:'O bloco de cada mês na aba <b>Distribuição Sócios</b> tem um resumo por sócio nas colunas <b>I a N</b>: I = nome, J = JÁ PAGO, K = PROLABORE, L = A PAGAR, M = FALTA, N = TOTAL definido.<br><br>"Pago do definido" compara o que já saiu com o que foi combinado no mês.',
@@ -873,7 +875,11 @@ function renderCaixa(){
   h+=kpiCard(p.accent,'Banco Inter (disponível)','kinter',fmt(D.saldos.interDisp),'conta principal');
   h+=kpiCard(p.teal,'CDB (investido)','kcdb',fmt(D.saldos.cdb),'abr 20k · mai 10k · jun 10k · jul 10k');
   h+=kpiCard(p.sky,'Nubank','knubank',fmt(D.saldos.nubank),'conta secundária');
-  h+=kpiCard(p.orange,'Queima média mensal','kburn',fmt(k.burn3),'só operação: '+fmt(k.burnOp3)+'/mês');
+  let lu3=0,re3=0,n3=0;
+  for(let m3=mf;m3>mf-3&&m3>=0;m3--){lu3+=D.lucroOp[m3];re3+=D.receitaOp[m3];n3++}
+  const lucroMed=n3?lu3/n3:0, margemMed=re3>0?lu3/re3*100:0;
+  h+=kpiCard(p.orange,'Despesa op. média','kdespmed',fmt(k.burnOp3),'média dos últimos 3 meses fechados','','desp');
+  h+=kpiCard(lucroMed>=0?p.green:p.red,'Lucro op. médio','klucromed',fmt(lucroMed),'margem média de '+fmtPct(margemMed)+' · últimos 3 meses fechados',lucroMed>=0?'pos':'neg','lucro');
   h+=kpiCard(reservaMedia>=0?p.green:p.red,'Reserva média mensal','kreserva',fmt(reservaMedia),'<b class="'+(reservaPct>=0?'pos':'neg')+'">'+fmtPct(reservaPct)+' da receita</b> · lucro − retiradas (média 3m)',reservaMedia>=0?'pos':'neg');
   el('caixaRow').innerHTML=h;
 }
