@@ -353,9 +353,9 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     </div>
 
     <div class="sec">Comparativo anual</div>
-    <div class="card" data-drill="rec">
-      <h3>Receita mensal — 2025 × 2026 <span class="hq" data-h="yoy">?</span></h3>
-      <div class="d">Crescimento ano contra ano · <span class="src">📄 abas Receita e Despesas - 2025 + Recebimentos 2026</span></div>
+    <div class="card" data-drill="recdesp">
+      <h3>Receita e despesa mensal — 2025 × 2026 <span class="hq" data-h="yoy">?</span></h3>
+      <div class="d">Crescimento ano contra ano — 2026 = previsto (col. F) · 2025 = histórico realizado · <span class="src">📄 abas Receita e Despesas - 2025 + Recebimentos/Pagamentos 2026 (VALOR PREVISTO)</span></div>
       <div class="chart-box"><canvas id="chYoY"></canvas></div>
     </div>
 
@@ -498,7 +498,8 @@ realproj:'<b>Realizado</b>: receita operacional (aba <b>Recebimentos</b>, col. G
 cli:'Coluna <b>G (VALOR RECEBIDO)</b> da aba <b>Recebimentos Terceiriza</b>, agrupada por cliente (col. C + D), no mês escolhido. Regime de caixa: se o cliente pagou 2 parcelas no mês, somam as duas.<br><br>🔍 2 cliques = as linhas exatas da planilha.',
 lucrocli:'Para cada cliente: receita do mês − custos diretos.<br><br>📄 Aba <b>CUSTO X CLIENTE</b>, bloco do mês: coluna CLIENTE, coluna seguinte = parcela (receita) e a soma das colunas de custo até a coluna anterior ao SUBTOTAL. A leitura é dinâmica porque o layout do bloco muda de posição a cada mês.',
 pend:'Linhas da aba <b>Recebimentos Terceiriza</b> com VALOR PREVISTO (col. F) &gt; 0, VALOR RECEBIDO (col. G) = 0 e DATA DE VENCIMENTO (col. E) anterior a hoje.',
-yoy:'Receita mensal 2026 (operacional, col. G da aba Recebimentos, sem transferência/reembolso) × receita mensal 2025 (aba <b>Receita e Despesas - 2025</b>, linha TOTAL do bloco de receitas, colunas B a M).',
+yoy:'Comparativo ano contra ano, receita e despesa.<br><br><b>2026 (linhas cheias/tracejadas fortes)</b> = PREVISTO: coluna <b>F (VALOR PREVISTO)</b> das abas <b>Recebimentos</b> (receita, sem transferência/reembolso/rendimento) e <b>Pagamentos Terceiriza</b> (despesa operacional, sem distribuição/CDB/transferência).<br><br><b>2025</b> = realizado histórico: aba <b>Receita e Despesas - 2025</b>, linhas TOTAL dos blocos de receita e de custos (colunas B a M = jan a dez).<br><br>🔍 2 cliques = linhas de 2026, com previsto e realizado.',
+
 anual:'Consolidado mês a mês: receita e despesa operacionais (abas Recebimentos/Pagamentos, col. G), lucro, margem, retiradas, CDB e saldo de fim de mês (linhas SALDO FINAL dos fluxos).',
 ltv:'<b>LTV</b> = tudo que o cliente pagou do primeiro ao último mês (2025: aba histórica · 2026: aba Recebimentos, col. G).<br><br><b>Meses</b> = meses com pagamento recebido. Encerramentos por fim de prazo (Kelem, consultorias) estão marcados — não são churn.',
 kcaixa:'Todo o dinheiro da empresa agora:<br>· Saldo disponível Inter = célula <b>F3</b> da aba <b>Fluxo de caixa - INTER</b><br>· CDB = célula <b>F2</b> da mesma aba<br>· Nubank = célula <b>F1</b> da aba <b>Fluxo de caixa - NUBANK</b><br><br>Essas células são alimentadas pela própria planilha (saldo bancário).<br><br>🔍 2 cliques = detalhe das 3 células.',
@@ -1133,8 +1134,10 @@ function initCharts(){
   ]},options:baseOpts()});
 
   mkChart('chYoY',{type:'line',data:{labels:MESES,datasets:[
-    {label:'2026',data:D.receitaOp.map((v,i)=>i<=ma?v:null),borderColor:p.accent,backgroundColor:p.accent,borderWidth:2.5,pointRadius:4,tension:.3},
-    {label:'2025',data:D.rec25,borderColor:p.gold,backgroundColor:p.gold,borderWidth:2,pointRadius:3,tension:.3}
+    {label:'Receita 2026 (prevista)',data:D.receitaPrev.map((v,i)=>i<=ma?v:null),borderColor:p.accent,backgroundColor:p.accent,borderWidth:2.5,pointRadius:4,tension:.3},
+    {label:'Receita 2025',data:D.rec25,borderColor:p.gold,backgroundColor:p.gold,borderWidth:2,pointRadius:3,tension:.3},
+    {label:'Despesa 2026 (prevista)',data:D.despPrevOp.map((v,i)=>i<=ma?v:null),borderColor:p.orange,backgroundColor:p.orange,borderDash:[6,5],borderWidth:2,pointRadius:3,tension:.3},
+    {label:'Despesa 2025',data:D.desp25,borderColor:p.red,backgroundColor:p.red,borderDash:[6,5],borderWidth:1.5,pointRadius:2.5,tension:.3}
   ]},options:baseOpts()});
 
   // Sócios: janeiro até o mês seguinte ao atual (último = definido na planilha, tom claro)
