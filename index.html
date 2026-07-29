@@ -259,7 +259,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     <div class="sec">Receita recorrente</div>
     <div class="card" data-drill="mrr">
       <h3>MRR — evolução no ano <span class="hq" data-h="mrr">?</span></h3>
-      <div class="d">Receita recorrente realmente recebida por contrato; tracejado = mês atual (parcial) · <span class="src">📄 abas Fluxo de caixa INTER/NUBANK (bloco RECEITA)s CONTRATO)</span></div>
+      <div class="d">Tracejado = previsto dos contratos ativos (previsibilidade) · linha cheia = o que já foi recebido · <span class="src">📄 abas Recebimentos (col. F) + Fluxo de caixa INTER/NUBANK (bloco RECEITA)s CONTRATO)</span></div>
       <div class="chart-box"><canvas id="chMrr"></canvas></div>
     </div>
 
@@ -491,7 +491,7 @@ top5:'Soma de janeiro até hoje por categoria, só despesa operacional (coluna G
 cat:'Cada linha de pagamento é classificada pelo texto das colunas C/D: Pedro/Dani/Marcos/Joara → Equipe CS · INSS/Imposto/Prefeitura → Impostos · Prados/Eutika/INPI → Contabilidade &amp; Jurídico · "Cartão de crédito" → Cartão · MLabs/edição/tráfego → Marketing, etc. O que não casa com nenhuma regra vira "Outras despesas".<br><br>% ao lado da barra = gasto da categoria ÷ receita operacional do mês.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G (VALOR PAGO).<br><br>🔍 2 cliques = as linhas de cada categoria.',
 dist:'<b>Distribuição de lucros</b>: linhas da aba Pagamentos com "Distribuição" na descrição — é retirada dos sócios, não custo da operação.<br><b>CDB</b>: linhas "INVESTIMENTO CDB" — dinheiro que continua da empresa, rendendo.<br><br>"Retirada ÷ lucro" = distribuição do mês ÷ lucro operacional do mês.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G.<br><br>🔍 2 cliques = cada retirada com linha da planilha.',
 lucrodist:'Compara o que a operação gerou de lucro com o que foi distribuído aos sócios, mês a mês.<br><br><b>Lucro operacional</b> = receita − despesa operacional (abas Recebimentos/Pagamentos, coluna G).<br><b>Distribuição</b> = linhas com "Distribuição" na descrição da aba Pagamentos, coluna G.<br><b>Sobra na empresa (lucro líquido após distribuição)</b> = lucro − distribuição. Se a linha fica negativa, o mês distribuiu mais do que gerou e consumiu reserva.<br><br>🔍 2 cliques = a conta armada do mês, linha a linha.',
-mrr:'MRR = receita recorrente <b>realmente recebida</b> por contrato no mês.<br><br>📄 Fonte: blocos <b>RECEITA</b> das abas <b>Fluxo de caixa - INTER</b> e <b>Fluxo de caixa - NUBANK</b> (colunas D a O = jan a dez), somando as linhas de contrato. Ficam fora: "Transferencia entre contas", "Reembolso" e "Rendimento".<br><br>⚠️ A aba de Projeção NÃO é usada aqui (ela é estimativa) — só no card "Realizado × Projetado".<br><br>Nº de contratos = linhas de cliente com valor &gt; 0 no mês. Tracejado no gráfico = mês atual, ainda parcial.<br><br>🔍 2 cliques = cada contrato com aba e linha.',
+mrr:'<b>Previsto (tracejado)</b> = previsibilidade dos contratos ativos: coluna <b>F (VALOR PREVISTO)</b> das linhas de cliente do mês, aba <b>Recebimentos Terceiriza</b>.<br><b>Recebido (linha cheia)</b> = o que realmente caiu: blocos <b>RECEITA</b> das abas <b>Fluxo de caixa INTER/NUBANK</b> (colunas D a O). Ficam fora dos dois: transferência, reembolso e rendimento.<br><br>⚠️ A aba de Projeção NÃO é usada aqui — só no card "Realizado × Projetado".<br><br>No mês em andamento, a diferença entre as duas linhas = o que ainda está por vencer/receber.<br><br>🔍 2 cliques = contrato a contrato, com linha da planilha.',
 ticket:'Ticket médio = MRR do mês ÷ nº de contratos com valor recebido no mês. Se cai, os contratos novos estão entrando menores que os antigos.<br><br>📄 Fonte: blocos RECEITA das abas <b>Fluxo de caixa INTER/NUBANK</b> (mesma base do MRR).',
 realproj:'<b>Realizado</b>: receita operacional (aba <b>Recebimentos</b>, col. G, sem transferência/reembolso/rendimento).<br><b>Projetado</b>: linha <b>SUBTOTAL RECEITAS</b> da aba <b>Projeção Receita e Despesas - 2</b> (colunas C a N) — este é o ÚNICO lugar do dash que usa a aba de Projeção.<br><br>Diferenças são normais: parcela adiantada/atrasada muda o mês do realizado.',
 cli:'Coluna <b>G (VALOR RECEBIDO)</b> da aba <b>Recebimentos Terceiriza</b>, agrupada por cliente (col. C + D), no mês escolhido. Regime de caixa: se o cliente pagou 2 parcelas no mês, somam as duas.<br><br>🔍 2 cliques = as linhas exatas da planilha.',
@@ -501,7 +501,7 @@ yoy:'Receita mensal 2026 (operacional, col. G da aba Recebimentos, sem transfer�
 anual:'Consolidado mês a mês: receita e despesa operacionais (abas Recebimentos/Pagamentos, col. G), lucro, margem, retiradas, CDB e saldo de fim de mês (linhas SALDO FINAL dos fluxos).',
 ltv:'<b>LTV</b> = tudo que o cliente pagou do primeiro ao último mês (2025: aba histórica · 2026: aba Recebimentos, col. G).<br><br><b>Meses</b> = meses com pagamento recebido. Encerramentos por fim de prazo (Kelem, consultorias) estão marcados — não são churn.',
 kcaixa:'Todo o dinheiro da empresa agora:<br>· Saldo disponível Inter = célula <b>F3</b> da aba <b>Fluxo de caixa - INTER</b><br>· CDB = célula <b>F2</b> da mesma aba<br>· Nubank = célula <b>F1</b> da aba <b>Fluxo de caixa - NUBANK</b><br><br>Essas células são alimentadas pela própria planilha (saldo bancário).<br><br>🔍 2 cliques = detalhe das 3 células.',
-kmrr:'Receita recorrente <b>recebida</b> no último mês fechado, por contrato.<br><br>📄 Blocos RECEITA das abas <b>Fluxo de caixa INTER/NUBANK</b> (valores reais — a aba de Projeção não é usada).<br><br>🔍 2 cliques = cada contrato com aba e linha.',
+kmrr:'<b>Previsibilidade dos creators</b>: o que está contratado para entrar no mês atual = soma da coluna <b>F (VALOR PREVISTO)</b> das linhas de cliente do mês na aba <b>Recebimentos Terceiriza</b> (sem transferência/reembolso/rendimento).<br><br>"Recebido até agora" = o que desses contratos já caiu no caixa (blocos RECEITA dos fluxos INTER/NUBANK).<br><br>A aba de Projeção não é usada.<br><br>🔍 2 cliques = contrato a contrato: previsto, recebido e o que falta.',
 krec:'Dinheiro de clientes que entrou no caixa no último mês fechado = soma da coluna <b>G (VALOR RECEBIDO)</b> da aba <b>Recebimentos Terceiriza</b> no mês.<br><br><b>NÃO entra</b>: transferência entre contas próprias, reembolso (ex.: notebook Pamela) e rendimento de banco. Por isso este número é MENOR que "todo o dinheiro que caiu no banco" — o extrato soma também transferências e reembolsos, que não são receita da empresa.<br><br>🔍 2 cliques = linha a linha, incluindo o que foi excluído e por quê.',
 kdesp:'Custo de rodar a empresa no último mês fechado = soma da coluna <b>G (VALOR PAGO)</b> da aba <b>Pagamentos Terceiriza</b> no mês, <b>excluindo</b>: distribuição de lucros, aporte no CDB e transferência entre contas.<br><br>Total de saídas do banco = este número + distribuição + transferências (+ CDB). O detalhe com essa conta completa abre com 2 cliques.',
 klucro:'Receita operacional − despesa operacional do mês fechado. É o que a operação gerou <b>antes</b> de distribuir aos sócios.<br><br>Se comparar com "quanto sobrou na conta", desconte também a distribuição de lucros (que não é custo, é uso do lucro).<br><br>🔍 2 cliques = a conta armada com os dois lados.',
@@ -542,7 +542,7 @@ function normData(d){
   d.receitaOp=d.receitaOp||z(); d.despOp=d.despOp||z();
   d.despFixa=d.despFixa||z(); d.despVar=d.despVar||z();
   d.distLucros=d.distLucros||z(); d.invCDB=d.invCDB||z();
-  d.mrr=d.mrr||z(); d.saldoFimMes=d.saldoFimMes||z();
+  d.mrr=d.mrr||z(); d.receitaPrev=d.receitaPrev||z(); d.saldoFimMes=d.saldoFimMes||z();
   d.rec25=d.rec25||z(); d.desp25=d.desp25||z(); d.projRec=d.projRec||z();
   d.catMes=d.catMes||{}; d.recPorClienteMes=d.recPorClienteMes||{};
   d.custoCliente=d.custoCliente||{}; d.pendencias=d.pendencias||[];
@@ -682,15 +682,27 @@ function renderDrill(){
       body=h;
     }
   }else if(drillKey==='mrr'){
-    title='Base de cálculo — MRR de '+MF;
-    sub='📄 Blocos <b>RECEITA</b> das abas <b>Fluxo de caixa - INTER</b> e <b>Fluxo de caixa - NUBANK</b> · colunas D a O = jan a dez · valores REALMENTE recebidos por contrato (a aba de Projeção não é usada). Fora: transferências, reembolsos e rendimentos.';
+    title='Base de cálculo — MRR / previsibilidade de '+MF;
+    sub='<b>Previsto</b> = coluna F (VALOR PREVISTO) das linhas de cliente do mês, aba <b>Recebimentos Terceiriza</b> · <b>Recebido</b> = blocos RECEITA das abas <b>Fluxo de caixa INTER/NUBANK</b> (colunas D a O). Fora: transferências, reembolsos e rendimentos.';
+    const prevRows=D.detRec.filter(r=>r.m===m&&r.t==='cliente');
     const rows=D.mrrDet.filter(r=>r.m===m);
-    if(!rows.length){body=D.mrrDet.length?'<div class="drill-note">Nenhum valor de contrato lançado no bloco RECEITA dos fluxos em '+MF+'.</div>':semDet()}
+    if(!prevRows.length&&!rows.length){body=(D.detRec.length||D.mrrDet.length)?'<div class="drill-note">Nenhum contrato lançado em '+MF+'.</div>':semDet()}
     else{
-      let h='<table class="drill-tbl"><tr><th>Aba</th><th>Linha</th><th>Contrato (col. A)</th><th>Cliente (col. B)</th><th style="text-align:right">Recebido no mês</th></tr>';
-      rows.forEach(r=>{h+='<tr><td>Fluxo '+r.aba+'</td><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.n)+'</td><td>'+esc(r.c)+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
-      h+='<tr class="sum"><td colspan="4">MRR de '+MF+' · '+(D.nContratos[m]||0)+' contratos — número do dash</td><td class="num mv">'+fmt2(rows.reduce((s,r)=>s+r.v,0))+'</td></tr></table>';
-      h+='<div class="drill-note">💡 Nº de contratos = linhas de cliente com valor &gt; 0 no mês. Se um contrato pago não aparece aqui, a célula do mês dele está vazia no bloco RECEITA da aba de fluxo.</div>';
+      let h='';
+      if(prevRows.length){
+        h+='<table class="drill-tbl"><tr><th>Linha</th><th>Cliente (col. C)</th><th>Descrição (col. D)</th><th style="text-align:right">Previsto (F)</th><th style="text-align:right">Recebido (G)</th><th>Status</th></tr>';
+        prevRows.forEach(r=>{h+='<tr><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.c)+'</td><td>'+esc(r.d)+'</td><td class="num mv">'+fmt2(r.p)+'</td><td class="num mv">'+fmt2(r.v)+'</td><td>'+(r.v>0?'✔ pago':'⏳ a receber')+'</td></tr>'});
+        const tp=prevRows.reduce((s,r)=>s+r.p,0), tv=prevRows.reduce((s,r)=>s+r.v,0);
+        h+='<tr class="sum"><td colspan="3">PREVISIBILIDADE de '+MF+' ('+new Set(prevRows.map(r=>r.c)).size+' contratos ativos) — número do dash</td><td class="num mv">'+fmt2(tp)+'</td><td class="num mv">'+fmt2(tv)+'</td><td></td></tr>';
+        h+='<tr class="sub"><td colspan="4">Falta receber dos contratos do mês</td><td class="num mv">'+fmt2(Math.max(0,tp-tv))+'</td><td></td></tr></table>';
+      }
+      if(rows.length){
+        h+='<div class="drill-sub" style="margin-top:16px"><b>Recebido por contrato — blocos RECEITA dos fluxos de caixa:</b></div>';
+        h+='<table class="drill-tbl"><tr><th>Aba</th><th>Linha</th><th>Contrato (col. A)</th><th>Cliente (col. B)</th><th style="text-align:right">Recebido no mês</th></tr>';
+        rows.forEach(r=>{h+='<tr><td>Fluxo '+r.aba+'</td><td class="drill-linha">L'+r.l+'</td><td>'+esc(r.n)+'</td><td>'+esc(r.c)+'</td><td class="num mv">'+fmt2(r.v)+'</td></tr>'});
+        h+='<tr class="sum"><td colspan="4">Recebido em '+MF+' · '+(D.nContratos[m]||0)+' contratos</td><td class="num mv">'+fmt2(rows.reduce((s,r)=>s+r.v,0))+'</td></tr></table>';
+      }
+      h+='<div class="drill-note">💡 No mês em andamento, "⏳ a receber" são parcelas ainda não vencidas ou não pagas. Se um contrato pago não aparece no bloco de recebidos, a célula do mês dele está vazia no bloco RECEITA da aba de fluxo.</div>';
       body=h;
     }
   }else if(drillKey==='caixa'){
@@ -784,8 +796,9 @@ function renderKpis(){
   const mf=D.mesFechadoIdx, ma=D.mesAtualIdx, k=D.kpis, p=PAL();
   let h='';
   h+=kpiCard(p.accent,'Caixa total hoje','kcaixa',fmt(D.saldos.total),'Inter '+fmtK(D.saldos.interDisp)+' · CDB '+fmtK(D.saldos.cdb)+' · Nu '+fmtK(D.saldos.nubank),'','caixa');
-  h+=kpiCard(p.teal,'MRR '+MESES[mf]+' — recorrente','kmrr',fmt(D.mrr[mf]),(D.nContratos[mf]||0)+' contratos · '+MESES[ma]+' (parcial): '+fmtK(D.mrr[ma]),'','mrr');
-  h+=kpiCard(p.sky,'Receita '+MESES[mf],'krec',fmt(D.receitaOp[mf]),delta(D.receitaOp[mf],D.receitaOp[mf-1]),'','rec');
+  const nPrevMa=(function(){const rs=D.detRec.filter(r=>r.m===ma&&r.t==='cliente'&&r.p>0);return rs.length?new Set(rs.map(r=>r.c)).size:(D.nContratos[ma]||0)})();
+  h+=kpiCard(p.teal,'MRR '+MESES[ma]+' — previsto','kmrr',fmt(D.receitaPrev[ma]||0),nPrevMa+' contratos ativos · recebido até agora: '+fmtK(D.mrr[ma]),'','mrr');
+  h+=kpiCard(p.sky,'Receita recebida '+MESES[mf],'krec',fmt(D.receitaOp[mf]),delta(D.receitaOp[mf],D.receitaOp[mf-1]),'','rec');
   h+=kpiCard(p.orange,'Despesa op. '+MESES[mf],'kdesp',fmt(D.despOp[mf]),delta(D.despOp[mf],D.despOp[mf-1]),'','desp');
   h+=kpiCard(D.lucroOp[mf]>=0?p.green:p.red,'Lucro op. '+MESES[mf],'klucro',fmt(D.lucroOp[mf]),'margem de '+fmtPct(D.margemOp[mf]),D.lucroOp[mf]>=0?'pos':'neg','lucro');
   h+=kpiCard(k.runwayOpMeses>=3?p.green:p.gold,'Fôlego de caixa','krunway',
@@ -1063,12 +1076,11 @@ function initCharts(){
     {label:'Lucro operacional',data:D.lucroOp.slice(0,ma+1),backgroundColor:D.lucroOp.slice(0,ma+1).map(v=>v>=0?p.green:p.red),borderRadius:6,maxBarThickness:38}
   ]},options:(()=>{const o=baseOpts();o.plugins.legend.display=false;return o})()});
 
-  const mfC=D.mesFechadoIdx;
-  const mrrReal=D.mrr.map((v,i)=>i<=mfC?v:null);
-  const mrrParcial=D.mrr.map((v,i)=>(i>=mfC&&i<=ma)?v:null);
+  const mrrReal=D.mrr.map((v,i)=>i<=ma?v:null);
+  const mrrPrev=D.receitaPrev.map((v,i)=>i<=ma?v:null);
   mkChart('chMrr',{type:'line',data:{labels:MESES,datasets:[
-    {label:'MRR recebido',data:mrrReal,borderColor:p.accent,backgroundColor:p.accent,borderWidth:2.5,pointRadius:4,tension:.3},
-    {label:'Mês atual (parcial)',data:mrrParcial,borderColor:p.a2,borderDash:[6,5],borderWidth:2,pointRadius:3,pointStyle:'rectRot',tension:.3}
+    {label:'Previsto (contratos ativos)',data:mrrPrev,borderColor:p.a2,borderDash:[6,5],borderWidth:2,pointRadius:3,pointStyle:'rectRot',tension:.3},
+    {label:'Recebido',data:mrrReal,borderColor:p.accent,backgroundColor:p.accent,borderWidth:2.5,pointRadius:4,tension:.3}
   ]},options:(()=>{const o=baseOpts();o.plugins.tooltip.callbacks.afterLabel=c=>' contratos: '+(D.nContratos[c.dataIndex]||'—');return o})()});
 
   mkChart('chSaldo',{type:'line',data:{labels:lb,datasets:[
