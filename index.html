@@ -497,7 +497,7 @@ ticket:'Ticket médio = MRR do mês ÷ nº de contratos com valor recebido no m�
 realproj:'<b>Realizado</b>: receita operacional (aba <b>Recebimentos</b>, col. G, sem transferência/reembolso/rendimento).<br><b>Projetado</b>: linha <b>SUBTOTAL RECEITAS</b> da aba <b>Projeção Receita e Despesas - 2</b> (colunas C a N) — este é o ÚNICO lugar do dash que usa a aba de Projeção.<br><br>Diferenças são normais: parcela adiantada/atrasada muda o mês do realizado.',
 cli:'Coluna <b>G (VALOR RECEBIDO)</b> da aba <b>Recebimentos Terceiriza</b>, agrupada por cliente (col. C + D), no mês escolhido. Regime de caixa: se o cliente pagou 2 parcelas no mês, somam as duas.<br><br>🔍 2 cliques = as linhas exatas da planilha.',
 lucrocli:'Para cada cliente: receita do mês − custos diretos.<br><br>📄 Aba <b>CUSTO X CLIENTE</b>, bloco do mês: coluna CLIENTE, coluna seguinte = parcela (receita) e a soma das colunas de custo até a coluna anterior ao SUBTOTAL. A leitura é dinâmica porque o layout do bloco muda de posição a cada mês.',
-pend:'Linhas da aba <b>Recebimentos Terceiriza</b> com VALOR PREVISTO (col. F) &gt; 0, VALOR RECEBIDO (col. G) = 0 e DATA DE VENCIMENTO (col. E) anterior a hoje.',
+pend:'Linhas da aba <b>Recebimentos Terceiriza</b> com VALOR PREVISTO (col. F) &gt; 0, VALOR RECEBIDO (col. G) = 0 e DATA DE VENCIMENTO (col. E) anterior a hoje.<br><br><b>Dias de atraso</b> = hoje − data de vencimento (col. E). Amarelo &gt; 7 dias · vermelho &gt; 30 dias.',
 yoy:'Receita ano contra ano.<br><br><b>2026</b> = PREVISTO: coluna <b>F (VALOR PREVISTO)</b> da aba <b>Recebimentos Terceiriza</b> (sem transferência/reembolso/rendimento).<br><br><b>2025</b> = realizado histórico: aba <b>Receita e Despesas - 2025</b>, linha TOTAL do bloco de receitas (colunas B a M = jan a dez).<br><br>🔍 2 cliques = as linhas de 2026, com previsto e recebido.',
 anual:'Consolidado mês a mês: receita e despesa operacionais (abas Recebimentos/Pagamentos, col. G), lucro, margem, retiradas, CDB e saldo de fim de mês (linhas SALDO FINAL dos fluxos).',
 ltv:'<b>LTV</b> = tudo que o cliente pagou do primeiro ao último mês (2025: aba histórica · 2026: aba Recebimentos, col. G).<br><br><b>Meses</b> = meses com pagamento recebido. Encerramentos por fim de prazo (Kelem, consultorias) estão marcados — não são churn.',
@@ -980,10 +980,21 @@ function renderMchips(){
 function setMesCat(m){mesSelCat=m;renderMchips();drawCat()}
 function setMesCli(m){mesSelCli=m;renderMchips();drawCli()}
 
+function diasAtraso(venc){
+  const pt=venc.split('/');
+  if(pt.length!==3)return null;
+  const dv=new Date(+pt[2],+pt[1]-1,+pt[0]);
+  const hj=new Date(); hj.setHours(0,0,0,0);
+  return Math.round((hj-dv)/86400000);
+}
 function renderPend(){
   if(!D.pendencias.length){el('pendTable').innerHTML='<div style="color:var(--green);font-size:14px">✅ Nenhuma cobrança vencida em aberto.</div>';return}
-  let h='<table class="top-table"><tr><th>Cliente</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr>';
-  D.pendencias.forEach(p=>{h+='<tr><td>'+p.cliente+'</td><td>'+p.vencimento+'</td><td class="mv">'+fmt(p.previsto)+'</td><td><span class="st pend">VENCIDA</span></td></tr>'});
+  let h='<table class="top-table"><tr><th>Cliente</th><th>Vencimento</th><th>Dias de atraso</th><th>Valor</th><th>Status</th></tr>';
+  [...D.pendencias].sort((a,b)=>(diasAtraso(b.vencimento)||0)-(diasAtraso(a.vencimento)||0)).forEach(p=>{
+    const dias=diasAtraso(p.vencimento);
+    const cls=dias===null?'':dias>30?'neg':dias>7?'warn':'';
+    h+='<tr><td>'+p.cliente+'</td><td>'+p.vencimento+'</td><td><b class="'+cls+'">'+(dias===null?'—':dias+(dias===1?' dia':' dias'))+'</b></td><td class="mv">'+fmt(p.previsto)+'</td><td><span class="st pend">VENCIDA</span></td></tr>';
+  });
   el('pendTable').innerHTML=h+'</table>';
 }
 
