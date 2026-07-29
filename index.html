@@ -187,8 +187,8 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
 
     <div class="sec">Evolução mensal</div>
     <div class="card" data-drill="rec">
-      <h3>Receita × Despesa operacional <span class="hq" data-h="recdesp">?</span></h3>
-      <div class="d">Quanto entrou de clientes e quanto custou rodar a operação, mês a mês · <span class="src">📄 abas Recebimentos + Pagamentos</span></div>
+      <h3>Receita × Despesa operacional — previsto <span class="hq" data-h="recdesp">?</span></h3>
+      <div class="d">O que está contratado para entrar e o custo previsto da operação, mês a mês (coluna F das duas abas) · <span class="src">📄 abas Recebimentos + Pagamentos (VALOR PREVISTO)</span></div>
       <div class="chart-box"><canvas id="chRecDesp"></canvas></div>
     </div>
     <div class="card" data-drill="lucro" style="margin-top:20px">
@@ -482,7 +482,8 @@ let D=null, usandoLive=false, charts={}, mesSelCat=5, mesSelCli=5;
 
 /* ============ HINTS ("?" com explicação + aba de origem) ============ */
 const HINTS={
-recdesp:'<b>RECEITA OPERACIONAL</b> = soma da coluna <b>G (VALOR RECEBIDO)</b> da aba <b>Recebimentos Terceiriza</b>, filtrando a coluna A pelo mês. Dados começam na linha 3 (linha 2 é o cabeçalho).<br><br><b>Ficam FORA da receita</b> (mas aparecem na base de cálculo): linhas cujo Nome Cliente (col. C) ou Descrição (col. D) contém "Transferencia" (dinheiro trocando de conta própria), "Reembolso" (ex.: reembolso do notebook da Pamela) ou "Rendimento" (juros de banco).<br><br><b>DESPESA OPERACIONAL</b> = soma da coluna <b>G (VALOR PAGO)</b> da aba <b>Pagamentos Terceiriza</b> (dados a partir da linha 2), excluindo "Distribuição de lucros", "INVESTIMENTO CDB" e "Transferencia".<br><br>🔍 <b>2 cliques no cartão</b> = lista linha a linha o que entrou e o que foi excluído.',
+recdesp:'Este gráfico mostra o <b>PREVISTO</b> (previsibilidade), não o realizado.<br><br><b>Receita prevista</b> = soma da coluna <b>F (VALOR PREVISTO)</b> da aba <b>Recebimentos Terceiriza</b>, filtrando a coluna A pelo mês (dados a partir da linha 3). Ficam fora: linhas de "Transferencia", "Reembolso" e "Rendimento".<br><br><b>Despesa prevista</b> = soma da coluna <b>F (VALOR PREVISTO)</b> da aba <b>Pagamentos Terceiriza</b> (dados a partir da linha 2), excluindo "Distribuição de lucros", "INVESTIMENTO CDB" e "Transferencia".<br><br>O <b>realizado</b> (coluna G — recebido/pago) segue nos KPIs "Receita recebida", "Despesa op." e no gráfico de Lucro.<br><br>🔍 2 cliques no cartão = linha a linha, com previsto E recebido lado a lado.',
+
 lucro:'Lucro operacional = receita operacional − despesa operacional do mês (ver "?" do gráfico acima para as colunas exatas). A % sobre a barra é a margem (lucro ÷ receita).<br><br>⚠️ É o lucro <b>antes</b> da distribuição aos sócios — a distribuição é uso do lucro, não custo. Por isso este número é maior que o "lucro de caixa" (o que sobrou na conta), que desconta as retiradas.<br><br>📄 Abas <b>Recebimentos</b> (col. G) e <b>Pagamentos Terceiriza</b> (col. G).<br><br>🔍 2 cliques = base de cálculo com a conta armada.',
 cmp:'Compara o último mês fechado com o mês anterior e com o mesmo mês de 2025.<br><br>📄 2026: abas <b>Recebimentos/Pagamentos Terceiriza</b> (coluna G, regras operacionais). 2025: aba <b>Receita e Despesas - 2025</b>, linhas <b>TOTAL</b> (receita e custos), colunas B a M = jan a dez.',
 saldo:'Saldo no fim de cada mês = linha <b>SALDO FINAL</b> da aba <b>Fluxo de caixa - INTER</b> (colunas D a O = jan a dez) + linha SALDO FINAL da aba <b>Fluxo de caixa - NUBANK</b> + o total aportado no CDB até aquele mês (linhas "INVESTIMENTO CDB" da aba Pagamentos, acumulado).',
@@ -539,7 +540,7 @@ function PAL(){return {accent:css('--accent'),a2:css('--a2'),teal:css('--teal'),
 
 function normData(d){
   const z=()=>new Array(12).fill(0);
-  d.receitaOp=d.receitaOp||z(); d.despOp=d.despOp||z();
+  d.receitaOp=d.receitaOp||z(); d.despOp=d.despOp||z(); d.despPrevOp=d.despPrevOp||z();
   d.despFixa=d.despFixa||z(); d.despVar=d.despVar||z();
   d.distLucros=d.distLucros||z(); d.invCDB=d.invCDB||z();
   d.mrr=d.mrr||z(); d.receitaPrev=d.receitaPrev||z(); d.saldoFimMes=d.saldoFimMes||z();
@@ -1068,8 +1069,8 @@ function initCharts(){
   const p=PAL(), ma=D.mesAtualIdx, lb=mesesAte(ma);
 
   mkChart('chRecDesp',{type:'bar',data:{labels:lb,datasets:[
-    {label:'Receita operacional',data:D.receitaOp.slice(0,ma+1),backgroundColor:p.accent,borderRadius:6,maxBarThickness:34},
-    {label:'Despesa operacional',data:D.despOp.slice(0,ma+1),backgroundColor:p.orange,borderRadius:6,maxBarThickness:34}
+    {label:'Receita prevista (contratos)',data:D.receitaPrev.slice(0,ma+1),backgroundColor:p.accent,borderRadius:6,maxBarThickness:34},
+    {label:'Despesa prevista',data:D.despPrevOp.slice(0,ma+1),backgroundColor:p.orange,borderRadius:6,maxBarThickness:34}
   ]},options:baseOpts()});
 
   mkChart('chLucro',{type:'bar',data:{labels:lb,datasets:[
