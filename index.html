@@ -312,7 +312,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
       </div>
       <div class="card">
         <h3>Detalhe: receita, custo e margem <span class="hq" data-h="lucrocli">?</span></h3>
-        <div class="d">Verde ≥30% de margem · amarelo abaixo disso · vermelho no prejuízo · <span class="src">📄 aba CUSTO X CLIENTE</span></div>
+        <div class="d">Custo <b>sem a parte do Thiago</b> (sócio) · verde ≥30% de margem · amarelo abaixo disso · vermelho no prejuízo · <span class="src">📄 aba CUSTO X CLIENTE</span></div>
         <div class="tblwrap" id="lucroCliTable"></div>
       </div>
     </div>
@@ -423,13 +423,13 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
 
   <!-- ================= CS — CHURN & LTV ================= -->
   <div class="tab-content" id="tab-cs">
-    <div class="sec">Churn da carteira · só contratos recorrentes — consultorias e Ana Claudia ficam fora · dados até 26/07/2026</div>
+    <div class="sec">Churn da carteira · só contratos recorrentes — consultorias e Ana Claudia ficam fora · dados até out/2026</div>
     <div class="kpis" id="csKpis"></div>
 
     <div class="sec">Movimento da carteira em 2026</div>
     <div class="card">
       <h3>Quem entrou, quem saiu e o tamanho da carteira, mês a mês <span class="hq" data-h="churnmov">?</span></h3>
-      <div class="d">Barras = contratos que entraram e que saíram no mês · linha = contratos recorrentes ativos · passe o mouse para ver o churn de cada mês · <span class="src">📄 histórico de contratos (snapshot 26/07/2026)</span></div>
+      <div class="d">Barras = contratos que entraram e que saíram no mês · linha = contratos recorrentes ativos · passe o mouse para ver o churn de cada mês · <span class="src">📄 histórico de contratos (Projeção + Recebimentos, atualizado 19/10/2026)</span></div>
       <div class="chart-box"><canvas id="chChurn"></canvas></div>
     </div>
 
@@ -452,7 +452,7 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
       <p><b>2. O "vale da morte" é do 2º ao 5º mês.</b> Dos encerrados, quase todos saíram com 5 meses ou menos. Quem passa do 6º mês tende a ficar muito: Bruno está há 17 meses (R$ 105 mil), Andrea há 11 (R$ 176 mil), Gessica há 14 (R$ 49 mil) — os três "veteranos" respondem por mais da metade de tudo que a empresa já faturou. Tradução prática: o LTV se decide nos <b>primeiros 90 dias</b>. É aí que o creator precisa VER resultado (relatório mensal de valor entregue, número de alunos recuperados, reembolso evitado) — não no 6º mês, quando a decisão de sair já foi tomada.</p>
       <p><b>3. Ticket baixo não compra lealdade.</b> Os contratos de ~R$ 3.000 (César, Dra. Investidora, Kenia, Arlene) saíram na mesma velocidade dos caros — e alguns davam prejuízo operacional. Já Rafaela e Lucas pagavam R$ 8–10 mil e também saíram rápido, mas deixaram R$ 38 mil e R$ 20 mil em poucos meses. Conclusão: preço menor não retém, só reduz o LTV. Reforça a tese do ticket mínimo de R$ 4.500–5.000.</p>
       <p><b>4. Nem todo encerramento é churn.</b> Kelem (contrato de 3 meses), Acelera e Ana Claudia (consultorias pontuais) terminaram no prazo combinado. Por isso o dash mostra dois números: o churn bruto (toda saída de recorrente) e o não planejado (só cancelamento de verdade).</p>
-      <p style="color:var(--t3);font-size:12.5px">Metodologia: meses = meses com pagamento recebido; total pago = soma de tudo que o cliente pagou desde o início (2025 + 2026, regime de caixa). Snapshot calculado em 26/07/2026 — peça atualização quando quiser recalcular.</p>
+      <p style="color:var(--t3);font-size:12.5px">Metodologia: meses = meses com pagamento recebido; total pago = soma de tudo que o cliente pagou desde o início (2025 + 2026, regime de caixa). Base atualizada em 19/10/2026 (contratos ativos = previsão de out/26 na aba Projeção) — peça atualização quando quiser recalcular.</p>
     </div>
   </div>
 
@@ -505,7 +505,7 @@ mrr:'<b>Previsto (tracejado)</b> = previsibilidade dos contratos ativos: coluna 
 ticket:'Ticket médio = MRR do mês ÷ nº de contratos com valor recebido no mês. Se cai, os contratos novos estão entrando menores que os antigos.<br><br>📄 Fonte: blocos RECEITA das abas <b>Fluxo de caixa INTER/NUBANK</b> (mesma base do MRR).',
 realproj:'<b>Realizado</b>: receita operacional (aba <b>Recebimentos</b>, col. G, sem transferência/reembolso/rendimento).<br><b>Projetado</b>: linha <b>SUBTOTAL RECEITAS</b> da aba <b>Projeção Receita e Despesas - 2</b> (colunas C a N) — este é o ÚNICO lugar do dash que usa a aba de Projeção.<br><br>Diferenças são normais: parcela adiantada/atrasada muda o mês do realizado.',
 cli:'Coluna <b>G (VALOR RECEBIDO)</b> da aba <b>Recebimentos Terceiriza</b>, agrupada por cliente (col. C + D), no mês escolhido. Regime de caixa: se o cliente pagou 2 parcelas no mês, somam as duas.<br><br>🔍 2 cliques = as linhas exatas da planilha.',
-lucrocli:'Para cada cliente: receita do mês − custos diretos.<br><br>📄 Aba <b>CUSTO X CLIENTE</b>, bloco do mês: coluna CLIENTE, coluna seguinte = parcela (receita) e a soma das colunas de custo até a coluna anterior ao SUBTOTAL. A leitura é dinâmica porque o layout do bloco muda de posição a cada mês.',
+lucrocli:'Para cada cliente: receita do mês − custos diretos.<br><br>📄 Aba <b>CUSTO X CLIENTE</b>, bloco do mês: coluna CLIENTE, coluna seguinte = parcela (receita) e a soma das colunas de custo até a coluna anterior ao SUBTOTAL. A leitura é dinâmica porque o layout do bloco muda de posição a cada mês.<br><br><b>A coluna THIAGO fica fora do custo</b>: ele é sócio, então a parte dele não entra como custo do cliente (mesmo estando na planilha).',
 pend:'Linhas da aba <b>Recebimentos Terceiriza</b> com VALOR PREVISTO (col. F) &gt; 0, VALOR RECEBIDO (col. G) = 0 e DATA DE VENCIMENTO (col. E) anterior a hoje.<br><br><b>Dias de atraso</b> = hoje − data de vencimento (col. E). Amarelo &gt; 7 dias · vermelho &gt; 30 dias.',
 yoy:'Receita ano contra ano.<br><br><b>2026</b> = PREVISTO: coluna <b>F (VALOR PREVISTO)</b> da aba <b>Recebimentos Terceiriza</b> (sem transferência/reembolso/rendimento).<br><br><b>2025</b> = realizado histórico: aba <b>Receita e Despesas - 2025</b>, linha TOTAL do bloco de receitas (colunas B a M = jan a dez).<br><br>🔍 2 cliques = as linhas de 2026, com previsto e recebido.',
 anual:'Consolidado mês a mês: receita e despesa operacionais (abas Recebimentos/Pagamentos, col. G), lucro, margem, retiradas, CDB e saldo de fim de mês (linhas SALDO FINAL dos fluxos).',
@@ -513,7 +513,7 @@ ltv:'<b>LTV</b> = tudo que o cliente pagou do primeiro ao último mês (2025: ab
 kchurn:'<b>Churn de clientes em 2026</b> = contratos recorrentes que encerraram em 2026 ÷ contratos recorrentes que passaram pela carteira em 2026.<br><br><b>Ficam fora dos dois lados da conta</b>: Acelera Concursos e Ana Claudia — consultorias pontuais que terminaram no prazo combinado, não são cancelamento.<br><br>O card "Como esse % é calculado" mostra a conta armada, nome a nome.',
 kchurnnp:'Mesma conta do churn bruto, mas tirando também a <b>Kelem</b>: o contrato dela era fechado de 3 meses e foi cumprido — encerrar no prazo combinado não é cancelamento.<br><br>Este é o churn que mede de verdade a perda não planejada de clientes.',
 kchurnmes:'Para cada mês de 2026: saídas do mês ÷ contratos recorrentes ativos no mês. O KPI é a média desses percentuais de janeiro a julho.<br><br>É a taxa que se compara com benchmarks de mercado (churn mensal) e que entra na conta clássica de LTV (1 ÷ churn mensal = vida esperada em meses).',
-kativos:'Contratos recorrentes com pagamento em andamento no snapshot (26/07/2026). Consultorias pontuais não entram.',
+kativos:'Contratos recorrentes com previsão de pagamento em out/26 na aba Projeção (atualizado 19/10/2026). Consultorias pontuais não entram.',
 kmrrperd:'Soma do ticket mensal dos contratos recorrentes que encerraram em 2026. É quanto de receita mensal a empresa perdeu no ano e precisou repor com vendas novas só para ficar no zero a zero.',
 churnmov:'Reconstrução da carteira mês a mês a partir do histórico de contratos (início e fim de cada cliente, mesmo dado da tabela de LTV abaixo).<br><br><b>Entrou</b> = contratos recorrentes que começaram no mês.<br><b>Saiu</b> = contratos cujo último mês pago foi este.<br><b>Linha</b> = contratos ativos no mês.<br><br>Churn do mês (no tooltip) = saídas ÷ ativos do mês. Consultorias (Acelera, Ana Claudia) ficam fora de tudo.',
 kcaixa:'Todo o dinheiro da empresa agora:<br>· Saldo disponível Inter = célula <b>F3</b> da aba <b>Fluxo de caixa - INTER</b><br>· CDB = célula <b>F2</b> da mesma aba<br>· Nubank = célula <b>F1</b> da aba <b>Fluxo de caixa - NUBANK</b><br><br>Essas células são alimentadas pela própria planilha (saldo bancário).<br><br>🔍 2 cliques = detalhe das 3 células.',
@@ -1070,30 +1070,36 @@ function renderAnual(){
 }
 
 /* ============ CS — CHURN & LTV ============ */
-/* Snapshot do histórico de contratos (26/07/2026) — mesma base da antiga tabela de LTV.
+/* Histórico de contratos (atualizado 19/10/2026 pela Projeção + Recebimentos; antes: snapshot 26/07/2026) — mesma base da antiga tabela de LTV.
    tipo: 'rec' = recorrente · 'prazo' = recorrente com prazo fechado cumprido · 'cons' = consultoria pontual (fora do churn e das médias) */
-const CS_MESREF=6; // jul/26 (0-based) — último mês coberto pelo snapshot
+const CS_MESREF=9; // out/26 (0-based) — último mês coberto pela base de contratos
 const CS_CONTRATOS=[
- {c:'Andrea Vermont',    ini:'2025-09', fim:null,      meses:11, total:175967, ticket:15997, tipo:'rec',   st:'ATIVO'},
- {c:'Bruno (Arkes)',     ini:'2025-02', fim:null,      meses:17, total:105182, ticket:6187,  tipo:'rec',   st:'ATIVO'},
- {c:'Dra. Gessica',      ini:'2025-06', fim:null,      meses:14, total:48958,  ticket:3497,  tipo:'rec',   st:'ATIVO'},
+ {c:'Andrea Vermont',    ini:'2025-09', fim:null,      meses:14, total:223958, ticket:15997, tipo:'rec',   st:'ATIVO'},
+ {c:'Bruno (Arkes)',     ini:'2025-02', fim:null,      meses:20, total:123278, ticket:6164,  tipo:'rec',   st:'ATIVO'},
+ {c:'Dra. Gessica',      ini:'2025-06', fim:'2026-08', meses:15, total:52455,  ticket:3497,  tipo:'rec',   st:'encerrado'},
+ {c:'Tay Training',      ini:'2026-05', fim:'2026-09', meses:5,  total:44985,  ticket:8997,  tipo:'rec',   st:'encerrado'},
  {c:'Rafaela Bueno',     ini:'2025-12', fim:'2026-04', meses:5,  total:38122,  ticket:7624,  tipo:'rec',   st:'encerrado'},
- {c:'Arlene Imob',       ini:'2025-10', fim:'2026-07', meses:10, total:29970,  ticket:2997,  tipo:'rec',   st:'encerrado'},
- {c:'Tay Training',      ini:'2026-05', fim:null,      meses:3,  total:26991,  ticket:8997,  tipo:'rec',   st:'ATIVO'},
- {c:'CSM Academy',       ini:'2026-03', fim:null,      meses:5,  total:25000,  ticket:5000,  tipo:'rec',   st:'ATIVO (6 meses)'},
+ {c:'Magp Treinamento',  ini:'2026-03', fim:null,      meses:8,  total:31976,  ticket:3997,  tipo:'rec',   st:'ATIVO'},
+ {c:'Mercado E-Commerce',ini:'2026-03', fim:null,      meses:8,  total:31976,  ticket:3997,  tipo:'rec',   st:'ATIVO'},
+ {c:'Arlene Imob',       ini:'2025-10', fim:'2026-08', meses:11, total:32097,  ticket:2918,  tipo:'rec',   st:'encerrado'},
+ {c:'CSM Academy',       ini:'2026-03', fim:'2026-08', meses:6,  total:30000,  ticket:5000,  tipo:'prazo', st:'fim do prazo (6 meses)'},
+ {c:'Tia do Inglês',     ini:'2026-04', fim:null,      meses:7,  total:27979,  ticket:3997,  tipo:'rec',   st:'ATIVO'},
  {c:'Lucas Arrial',      ini:'2026-05', fim:'2026-06', meses:2,  total:19793,  ticket:9896,  tipo:'rec',   st:'encerrado'},
  {c:'Kelem',             ini:'2026-01', fim:'2026-03', meses:3,  total:18122,  ticket:6041,  tipo:'prazo', st:'fim do prazo'},
- {c:'Magp Treinamento',  ini:'2026-03', fim:null,      meses:4,  total:15988,  ticket:3997,  tipo:'rec',   st:'ATIVO'},
- {c:'Mercado E-Commerce',ini:'2026-03', fim:null,      meses:4,  total:15988,  ticket:3997,  tipo:'rec',   st:'ATIVO'},
+ {c:'Boost (Leo Simão)', ini:'2026-07', fim:null,      meses:4,  total:15988,  ticket:3997,  tipo:'rec',   st:'ATIVO'},
+ {c:'Psimama',           ini:'2026-07', fim:null,      meses:4,  total:15988,  ticket:3997,  tipo:'rec',   st:'ATIVO'},
  {c:'César Matsumoto',   ini:'2025-11', fim:'2026-02', meses:4,  total:15824,  ticket:3956,  tipo:'rec',   st:'encerrado'},
+ {c:'Acelera Concursos (recorrente)',ini:'2026-09', fim:null, meses:2, total:14995, ticket:9997, tipo:'rec', st:'ATIVO'},
  {c:'Dra. Investidora',  ini:'2025-12', fim:'2026-04', meses:5,  total:14985,  ticket:2997,  tipo:'rec',   st:'encerrado'},
- {c:'Tia do Inglês',     ini:'2026-04', fim:null,      meses:3,  total:11991,  ticket:3997,  tipo:'rec',   st:'ATIVO'},
+ {c:'Diana Carmen',      ini:'2026-08', fim:null,      meses:3,  total:11991,  ticket:3997,  tipo:'rec',   st:'ATIVO'},
+ {c:'CP Iuris',          ini:'2026-08', fim:null,      meses:3,  total:11991,  ticket:3997,  tipo:'rec',   st:'ATIVO'},
  {c:'Francês Ativo',     ini:'2026-04', fim:'2026-06', meses:3,  total:11991,  ticket:3997,  tipo:'rec',   st:'encerrado'},
  {c:'Gabriel Becker',    ini:'2025-06', fim:'2025-11', meses:6,  total:11982,  ticket:1997,  tipo:'rec',   st:'encerrado'},
+ {c:'Concursos e Vestibulares',ini:'2026-08', fim:null, meses:3,  total:9675,   ticket:3225,  tipo:'rec',   st:'ATIVO'},
  {c:'Acelera Concursos', ini:'2026-02', fim:'2026-04', meses:2,  total:10000,  ticket:5000,  tipo:'cons',  st:'consultoria'},
  {c:'Kenia Redoma',      ini:'2025-07', fim:'2025-09', meses:3,  total:8991,   ticket:2997,  tipo:'rec',   st:'encerrado'},
- {c:'Boost (Leo Simão)', ini:'2026-07', fim:null,      meses:1,  total:3997,   ticket:3997,  tipo:'rec',   st:'ATIVO'},
- {c:'Psimama',           ini:'2026-07', fim:null,      meses:1,  total:3997,   ticket:3997,  tipo:'rec',   st:'ATIVO'},
+ {c:'Simpla Club',       ini:'2026-09', fim:null,      meses:2,  total:7994,   ticket:3997,  tipo:'rec',   st:'ATIVO'},
+ {c:'Lirane Suliano',    ini:'2026-10', fim:null,      meses:1,  total:3297,   ticket:3297,  tipo:'rec',   st:'ATIVO'},
  {c:'Ana Claudia',       ini:'2026-02', fim:'2026-02', meses:1,  total:2500,   ticket:2500,  tipo:'cons',  st:'pgto único'}
 ];
 let CSD=null; // resultados derivados, usados também pelo gráfico
@@ -1107,7 +1113,8 @@ function csCalc(){
   const enc=rec.filter(x=>x.fim), ativ=rec.filter(x=>!x.fim);
   const sai26=enc.filter(x=>csYm(x.fim)>=0);                    // encerrados em 2026
   const carteira26=rec.filter(x=>csYm(x.ini)<=CS_MESREF&&(!x.fim||csYm(x.fim)>=0)); // passou pela carteira em 2026
-  const sai26np=sai26.filter(x=>x.tipo==='rec');                // sem fim-de-prazo (Kelem)
+  const sai26np=sai26.filter(x=>x.tipo==='rec');                // sem fim-de-prazo (Kelem, CSM)
+  const prazo26=sai26.filter(x=>x.tipo==='prazo');
   const meses=[];let chSum=0,chN=0;
   for(let m=0;m<=CS_MESREF;m++){
     const ativos=rec.filter(x=>csYm(x.ini)<=m&&(!x.fim||csYm(x.fim)>=m)).length;
@@ -1119,7 +1126,7 @@ function csCalc(){
   }
   const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
   return {
-    rec:rec,enc:enc,ativ:ativ,sai26:sai26,sai26np:sai26np,carteira26:carteira26,meses:meses,
+    rec:rec,enc:enc,ativ:ativ,sai26:sai26,sai26np:sai26np,prazo26:prazo26,carteira26:carteira26,meses:meses,
     churn26:sai26.length/carteira26.length*100,
     churn26np:sai26np.length/carteira26.length*100,
     churnMes:chN?chSum/chN:0,
@@ -1146,9 +1153,9 @@ function renderCS(){
   const nomeSai=CSD.sai26.map(x=>x.c.split(' (')[0]+' ('+CS_MABBR[csYm(x.fim)]+')').join(', ');
   const vidaEsp=CSD.churnMes>0?100/CSD.churnMes:0;
   el('csExplain').innerHTML=
-    '<p><b>1. O % principal — churn bruto de '+fmtPct(CSD.churn26)+'.</b> A conta: <b>'+CSD.sai26.length+' contratos recorrentes encerraram em 2026</b> ('+nomeSai+') ÷ <b>'+CSD.carteira26.length+' contratos recorrentes que estiveram na carteira</b> em algum momento do ano = '+fmtPct(CSD.churn26)+'. Como você pediu, <b>Acelera Concursos</b> (consultoria) e <b>Ana Claudia</b> (pagamento único) ficam fora dos dois lados da conta — eram trabalhos pontuais, terminar no prazo não é cancelamento.</p>'+
-    '<p><b>2. Nem toda saída é cancelamento.</b> A Kelem tinha contrato fechado de 3 meses e cumpriu até o fim. Tirando ela, o <b>churn não planejado</b> — o que mede perda real de cliente — fica em <b>'+fmtPct(CSD.churn26np)+'</b> ('+CSD.sai26np.length+' de '+CSD.carteira26.length+').</p>'+
-    '<p><b>3. Churn mensal médio de '+fmtPct(CSD.churnMes)+'.</b> Aqui a conta é mês a mês: saídas do mês ÷ contratos ativos naquele mês, e o KPI é a média de janeiro a julho. É esse número que se compara com o mercado (SaaS/serviços B2B saudável: 2–4% ao mês) — hoje a Terceiriza roda bem acima disso.</p>'+
+    '<p><b>1. O % principal — churn bruto de '+fmtPct(CSD.churn26)+'.</b> A conta: <b>'+CSD.sai26.length+' contratos recorrentes encerraram em 2026</b> ('+nomeSai+') ÷ <b>'+CSD.carteira26.length+' contratos recorrentes que estiveram na carteira</b> em algum momento do ano = '+fmtPct(CSD.churn26)+'. Como você pediu, as consultorias pontuais da <b>Acelera Concursos</b> (fev e abr) e a <b>Ana Claudia</b> (pagamento único) ficam fora dos dois lados da conta. O contrato recorrente da Acelera, que começou em set/26, entra normalmente.</p>'+
+    '<p><b>2. Nem toda saída é cancelamento.</b> '+CSD.prazo26.map(x=>x.c).join(' e ')+' tinham contrato com prazo fechado e cumpriram até o fim. Tirando esses, o <b>churn não planejado</b> — o que mede perda real de cliente — fica em <b>'+fmtPct(CSD.churn26np)+'</b> ('+CSD.sai26np.length+' de '+CSD.carteira26.length+').</p>'+
+    '<p><b>3. Churn mensal médio de '+fmtPct(CSD.churnMes)+'.</b> Aqui a conta é mês a mês: saídas do mês ÷ contratos ativos naquele mês, e o KPI é a média de janeiro a '+MESES_FULL[CS_MESREF].toLowerCase()+'. É esse número que se compara com o mercado (SaaS/serviços B2B saudável: 2–4% ao mês) — hoje a Terceiriza roda bem acima disso.</p>'+
     '<p><b>4. A ponte entre churn e LTV.</b> Na fórmula clássica, vida esperada = 1 ÷ churn mensal = <b>~'+f1(vidaEsp)+' meses</b>, e LTV projetado = ticket médio da carteira ('+fmt(CSD.ticketAtiv)+') × vida esperada ≈ <b>'+fmt(CSD.ticketAtiv*vidaEsp)+'</b>. Só que esse número é puxado para cima pelos veteranos (Bruno, Andrea, Gessica): olhando só quem já saiu, a vida real foi <b>'+f1(CSD.vidaEnc)+' meses</b> e o LTV real, <b>'+fmt(CSD.ltvEnc)+'</b>. Para decisões de captação e desconto, use o número observado — o projetado só vira verdade se o churn dos primeiros 90 dias cair.</p>';
 
   // ---- chips + tabela de LTV ----
