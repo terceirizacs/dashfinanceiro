@@ -226,8 +226,21 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
       </div>
       <div class="card" data-drill="desp">
         <h3>Top 5 despesas do ano <span class="hq" data-h="top5">?</span></h3>
-        <div class="d">Categorias com maior gasto acumulado em 2026 · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
+        <div class="d">Maior gasto acumulado em 2026, <b>sem os sócios</b> · % da despesa op. e da receita do ano · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
         <div class="chart-box"><canvas id="chTopDesp"></canvas></div>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-top:20px">
+      <div class="card" data-drill="desp">
+        <h3>Sócios no ano <span class="hq" data-h="socAno">?</span></h3>
+        <div class="d">Tudo que saiu para os sócios em 2026 · % da receita do ano · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
+        <div class="chart-box"><canvas id="chSocAno"></canvas></div>
+      </div>
+      <div class="card" data-drill="desp">
+        <h3>Equipe CS no ano, por pessoa <span class="hq" data-h="equipe">?</span></h3>
+        <div class="d">Fixo + variáveis (comissão, sábados) acumulados em 2026 · % da receita do ano · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
+        <div class="chart-box"><canvas id="chEquipeAno"></canvas></div>
       </div>
     </div>
 
@@ -235,8 +248,13 @@ nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;overflow-x:auto;-webk
     <div class="pillrow" id="mchipsCat"></div>
     <div class="card" data-drill="desp" data-drill-mes="cat">
       <h3>Categorias no mês <span class="hq" data-h="cat">?</span></h3>
-      <div class="d">O número ao lado de cada barra é o % que a categoria representa do faturamento do mês · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
+      <div class="d">Ao lado de cada barra: % do faturamento do mês · % da despesa operacional do mês · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
       <div class="chart-box"><canvas id="chCat"></canvas></div>
+    </div>
+    <div class="card" data-drill="desp" data-drill-mes="cat" style="margin-top:20px">
+      <h3>Equipe CS no mês <span class="hq" data-h="equipe">?</span></h3>
+      <div class="d">Dani, Pedro e Lorraine com fixo e variáveis separados · <span class="src">📄 aba Pagamentos Terceiriza</span></div>
+      <div class="tblwrap" id="equipeTable"></div>
     </div>
 
     <div class="sec">Saídas não-operacionais</div>
@@ -477,8 +495,10 @@ lucro:'Lucro operacional = receita operacional − despesa operacional do mês (
 cmp:'Compara o último mês fechado com o mês anterior e com o mesmo mês de 2025.<br><br>📄 2026: abas <b>Recebimentos/Pagamentos Terceiriza</b> (coluna G, regras operacionais). 2025: aba <b>Receita e Despesas - 2025</b>, linhas <b>TOTAL</b> (receita e custos), colunas B a M = jan a dez.',
 saldo:'Saldo no fim de cada mês = linha <b>SALDO FINAL</b> da aba <b>Fluxo de caixa - INTER</b> (colunas D a O = jan a dez) + linha SALDO FINAL da aba <b>Fluxo de caixa - NUBANK</b> + o total aportado no CDB até aquele mês (linhas "INVESTIMENTO CDB" da aba Pagamentos, acumulado).',
 fixvar:'<b>Fixas</b>: existem todo mês independente do nº de clientes (equipe, pró-labore, contabilidade, ferramentas).<br><b>Variáveis</b>: crescem com a operação (impostos, cartão, marketing, reembolsos).<br><br>A classificação é automática pelo texto das colunas C (FORNECEDOR) e D (Descrição) de cada linha da aba <b>Pagamentos Terceiriza</b>.<br><br>🔍 2 cliques = cada linha com sua categoria e tipo.',
-top5:'Soma de janeiro até hoje por categoria, só despesa operacional (coluna G da aba <b>Pagamentos Terceiriza</b>). Distribuição de lucros, CDB e transferências ficam de fora.',
-cat:'Cada linha de pagamento é classificada pelo texto das colunas C/D: Pedro/Dani/Marcos/Joara → Equipe CS · INSS/Imposto/Prefeitura → Impostos · Prados/Eutika/INPI → Contabilidade &amp; Jurídico · "Cartão de crédito" → Cartão · MLabs/edição/tráfego → Marketing, etc. O que não casa com nenhuma regra vira "Outras despesas".<br><br>% ao lado da barra = gasto da categoria ÷ receita operacional do mês.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G (VALOR PAGO).<br><br>🔍 2 cliques = as linhas de cada categoria.',
+top5:'Soma de janeiro até hoje por categoria, só despesa operacional (coluna G da aba <b>Pagamentos Terceiriza</b>). <b>Pró-labore, reembolso e serviços dos sócios ficam fora</b> (estão no card Sócios no ano). Distribuição de lucros, CDB e transferências também ficam de fora.<br><br>% ao lado da barra = gasto ÷ despesa operacional do ano · gasto ÷ receita operacional do ano.',
+socAno:'Pró-labore + reembolso de despesas + serviços do Thiago (despesa operacional) e distribuição de lucros (fora da despesa operacional), de janeiro até hoje.<br><br>% = valor ÷ receita operacional do ano.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G (VALOR PAGO).',
+equipe:'Pagamentos da equipe CS na aba <b>Pagamentos Terceiriza</b> (coluna G), identificados pelo nome no FORNECEDOR (Danielle, Pedro Henrique, Lorraine, Marcos, Joara).<br><br><b>Fixo</b> = pagamento mensal / prestação de serviços. <b>Variável</b> = linhas com comissão, sábados, bônus ou prêmio na descrição.<br><br>% faturamento = total ÷ receita operacional · % despesa = total ÷ despesa operacional.',
+cat:'Cada linha de pagamento é classificada pelo texto das colunas C/D: Pedro/Dani/Lorraine/Marcos/Joara (fixo + comissão) → Equipe CS · INSS/Imposto/Prefeitura → Impostos · Prados/Eutika/INPI → Contabilidade &amp; Jurídico · "Cartão de crédito" → Cartão · MLabs/edição/tráfego → Marketing, etc. O que não casa com nenhuma regra vira "Outras despesas".<br><br>% ao lado da barra = gasto da categoria ÷ receita operacional do mês · gasto ÷ despesa operacional do mês.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G (VALOR PAGO).<br><br>🔍 2 cliques = as linhas de cada categoria.',
 dist:'<b>Distribuição de lucros</b>: linhas da aba Pagamentos com "Distribuição" na descrição — é retirada dos sócios, não custo da operação.<br><b>CDB</b>: linhas "INVESTIMENTO CDB" — dinheiro que continua da empresa, rendendo.<br><br>"Retirada ÷ lucro" = distribuição do mês ÷ lucro operacional do mês.<br><br>📄 Aba <b>Pagamentos Terceiriza</b>, coluna G.<br><br>🔍 2 cliques = cada retirada com linha da planilha.',
 lucrodist:'Compara o que a operação gerou de lucro com o que foi distribuído aos sócios, mês a mês.<br><br><b>Lucro operacional</b> = receita − despesa operacional (abas Recebimentos/Pagamentos, coluna G).<br><b>Distribuição</b> = linhas com "Distribuição" na descrição da aba Pagamentos, coluna G.<br><b>Sobra na empresa (lucro líquido após distribuição)</b> = lucro − distribuição. Se a linha fica negativa, o mês distribuiu mais do que gerou e consumiu reserva.<br><br>🔍 2 cliques = a conta armada do mês, linha a linha.',
 mrr:'<b>Previsto (tracejado)</b> = previsibilidade dos contratos ativos: coluna <b>F (VALOR PREVISTO)</b> das linhas de cliente do mês, aba <b>Recebimentos Terceiriza</b>.<br><b>Recebido (linha cheia)</b> = o que realmente caiu: blocos <b>RECEITA</b> das abas <b>Fluxo de caixa INTER/NUBANK</b> (colunas D a O). Ficam fora dos dois: transferência, reembolso e rendimento.<br><br>⚠️ A aba de Projeção NÃO é usada aqui — só no card "Realizado × Projetado".<br><br>No mês em andamento, a diferença entre as duas linhas = o que ainda está por vencer/receber.<br><br>🔍 2 cliques = contrato a contrato, com linha da planilha.',
@@ -532,6 +552,11 @@ const fmt2=v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFra
 const fmtK=v=>{const a=Math.abs(v);if(a>=1000)return 'R$ '+(v/1000).toLocaleString('pt-BR',{maximumFractionDigits:0})+'k';return 'R$ '+Math.round(v)};
 const fmtPct=v=>v.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
 const el=id=>document.getElementById(id);
+const EQUIPE=[['danielle','Dani'],['pedro henrique','Pedro'],['lorraine','Lorraine'],['marcos rocha','Marcos'],['joara','Joara']];
+function pessoaEquipe(t){t=(t||'').toLowerCase();const e=EQUIPE.find(x=>t.indexOf(x[0])>=0);return e?e[1]:''}
+function ehVariavelEquipe(t){return /comiss|s[áa]bado|b[ôo]nus|pr[êe]mi|vari[áa]v/i.test(t||'')}
+const CAT_SOCIOS=['Pró-labore sócios','Reembolso sócios','Serviços Thiago (sócio)'];
+const PCT_FN={}; // texto de % desenhado ao lado das barras, por id do gráfico
 function css(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim()}
 function PAL(){return {accent:css('--accent'),a2:css('--a2'),teal:css('--teal'),green:css('--green'),red:css('--red'),orange:css('--orange'),gold:css('--gold'),sky:css('--sky'),pink:css('--pink'),t1:css('--t1'),t2:css('--t2'),t3:css('--t3'),grid:css('--grid')}}
 
@@ -545,6 +570,22 @@ function normData(d){
   d.catMes=d.catMes||{}; d.recPorClienteMes=d.recPorClienteMes||{};
   d.custoCliente=d.custoCliente||{}; d.pendencias=d.pendencias||[];
   d.detRec=d.detRec||[]; d.detPag=d.detPag||[]; d.mrrDet=d.mrrDet||[];
+  if(d.detPag.length){
+    // equipe CS: Lorraine entra na categoria; comissão/sábados = variável
+    d.detPag.forEach(r=>{
+      if(r.nat!=='op')return;
+      const pe=pessoaEquipe(r.f+' '+r.d);
+      if(!pe)return;
+      r.cat='Equipe CS'; r.eq=pe; r.fv=ehVariavelEquipe(r.d)?'variavel':'fixa';
+    });
+    const cm={}, fx=z(), vr=z();
+    d.detPag.forEach(r=>{
+      if(r.nat!=='op'||r.m<0||r.m>11)return;
+      (cm[r.cat]=cm[r.cat]||z())[r.m]+=r.v;
+      if(r.fv==='fixa')fx[r.m]+=r.v; else vr[r.m]+=r.v;
+    });
+    d.catMes=cm; d.despFixa=fx; d.despVar=vr;
+  }
   d.socioMes=d.socioMes||{Pamela:z(),Phellipe:z(),Thiago:z()};
   d.distPlano=d.distPlano||{};
   d.mesAtualIdx=(typeof d.mesAtualIdx==='number')?d.mesAtualIdx:6;
@@ -1170,16 +1211,15 @@ const margemLabels={
       });
       ctx.restore();
     }
-    if(chart.canvas.id==='chCat'){
-      const fat=D.receitaOp[mesSelCat]||0;
-      if(fat>0){
-        ctx.save();ctx.font='600 11px JetBrains Mono';ctx.fillStyle=p.t2;ctx.textAlign='left';ctx.textBaseline='middle';
-        const ds=chart.data.datasets[0].data;
-        chart.getDatasetMeta(0).data.forEach((bar,i)=>{
-          ctx.fillText(fmtPct(ds[i]/fat*100),bar.x+8,bar.y);
-        });
-        ctx.restore();
-      }
+    const fn=PCT_FN[chart.canvas.id];
+    if(fn){
+      ctx.save();ctx.font='600 11px JetBrains Mono';ctx.fillStyle=p.t2;ctx.textAlign='left';ctx.textBaseline='middle';
+      const n=chart.data.datasets.length, last=chart.getDatasetMeta(n-1).data;
+      last.forEach((bar,i)=>{
+        let tot=0;chart.data.datasets.forEach(ds=>tot+=ds.data[i]||0);
+        const t=fn(tot,i); if(t)ctx.fillText(t,bar.x+8,bar.y);
+      });
+      ctx.restore();
     }
   }
 };
@@ -1219,10 +1259,36 @@ function initCharts(){
     {type:'line',label:'Sobra na empresa (lucro − distribuição)',data:D.lucroOp.slice(0,ma+1).map((v,i)=>v-D.distLucros[i]),borderColor:p.accent,backgroundColor:p.accent,borderWidth:2.5,pointRadius:4,tension:.3}
   ]},options:baseOpts()});
 
-  const cats=Object.entries(D.catMes).map(([c,v])=>[c,v.reduce((a,b)=>a+b,0)]).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const soma=a=>a.reduce((x,y)=>x+y,0);
+  const recAno=soma(D.receitaOp), despAno=soma(D.despOp);
+  const cats=Object.entries(D.catMes).filter(([c])=>CAT_SOCIOS.indexOf(c)<0).map(([c,v])=>[c,soma(v)]).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  PCT_FN.chTopDesp=v=>(despAno?fmtPct(v/despAno*100)+' desp':'')+(recAno?' · '+fmtPct(v/recAno*100)+' rec':'');
   mkChart('chTopDesp',{type:'bar',data:{labels:cats.map(c=>c[0]),datasets:[
     {label:'Acumulado 2026',data:cats.map(c=>c[1]),backgroundColor:p.orange,borderRadius:6,maxBarThickness:26}
-  ]},options:hbarOpts()});
+  ]},options:(()=>{const o=hbarOpts();o.layout={padding:{right:130}};
+    o.plugins.tooltip.callbacks.label=c=>' '+fmt(c.parsed.x)+' · '+fmtPct(despAno?c.parsed.x/despAno*100:0)+' da despesa op. · '+fmtPct(recAno?c.parsed.x/recAno*100:0)+' da receita';return o})()});
+
+  const soc=CAT_SOCIOS.map(c=>[c==='Serviços Thiago (sócio)'?'Serviços Thiago':c==='Reembolso sócios'?'Reembolso de despesas':'Pró-labore',soma(D.catMes[c]||[0])]);
+  soc.push(['Distribuição de lucros',soma(D.distLucros)]);
+  soc.sort((a,b)=>b[1]-a[1]);
+  const socTot=soma(soc.map(s=>s[1]));
+  soc.push(['Total sócios',socTot]);
+  PCT_FN.chSocAno=v=>recAno?fmtPct(v/recAno*100)+' rec':'';
+  mkChart('chSocAno',{type:'bar',data:{labels:soc.map(s=>s[0]),datasets:[
+    {label:'Acumulado 2026',data:soc.map(s=>s[1]),backgroundColor:soc.map((s,i)=>i===soc.length-1?p.accent:p.pink),borderRadius:6,maxBarThickness:26}
+  ]},options:(()=>{const o=hbarOpts();o.layout={padding:{right:70}};
+    o.plugins.tooltip.callbacks.label=c=>' '+fmt(c.parsed.x)+' · '+fmtPct(recAno?c.parsed.x/recAno*100:0)+' da receita do ano';return o})()});
+
+  const eq=equipeResumo(null);
+  PCT_FN.chEquipeAno=v=>recAno?fmtPct(v/recAno*100)+' rec':'';
+  mkChart('chEquipeAno',{type:'bar',data:{labels:eq.map(e=>e.nome),datasets:[
+    {label:'Fixo',data:eq.map(e=>e.fixo),backgroundColor:p.orange,borderRadius:6,maxBarThickness:26},
+    {label:'Variável',data:eq.map(e=>e.vari),backgroundColor:p.gold,borderRadius:6,maxBarThickness:26}
+  ]},options:(()=>{const o=hbarOpts();o.layout={padding:{right:70}};o.plugins.legend.display=true;
+    o.scales.x.stacked=true;o.scales.y.stacked=true;
+    o.plugins.tooltip.callbacks.label=c=>' '+c.dataset.label+': '+fmt(c.parsed.x);
+    o.plugins.tooltip.callbacks.footer=it=>{if(!it.length)return '';const e=eq[it[0].dataIndex];return 'Total: '+fmt(e.total)+' · '+fmtPct(recAno?e.total/recAno*100:0)+' da receita do ano'};
+    return o})()});
 
   drawCat(); drawCli(); drawLucroCli();
 
@@ -1280,13 +1346,37 @@ function initCharts(){
 function drawCat(){
   const p=PAL();
   const items=Object.entries(D.catMes).map(([c,v])=>[c,v[mesSelCat]]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
-  const fat=D.receitaOp[mesSelCat]||0;
+  const fat=D.receitaOp[mesSelCat]||0, dsp=D.despOp[mesSelCat]||0;
   const o=hbarOpts();
-  o.plugins.tooltip.callbacks.label=c=>' '+fmt(c.parsed.x)+(fat>0?' · '+fmtPct(c.parsed.x/fat*100)+' do faturamento':'');
-  o.layout={padding:{right:56}};
+  o.plugins.tooltip.callbacks.label=c=>' '+fmt(c.parsed.x)+(fat>0?' · '+fmtPct(c.parsed.x/fat*100)+' do faturamento':'')+(dsp>0?' · '+fmtPct(c.parsed.x/dsp*100)+' da despesa':'');
+  o.layout={padding:{right:130}};
+  PCT_FN.chCat=v=>(fat?fmtPct(v/fat*100)+' fat':'')+(dsp?' · '+fmtPct(v/dsp*100)+' desp':'');
+  renderEquipe();
   mkChart('chCat',{type:'bar',data:{labels:items.map(i=>i[0]),datasets:[
     {label:'Despesa em '+MESES_FULL[mesSelCat],data:items.map(i=>i[1]),backgroundColor:p.orange,borderRadius:6,maxBarThickness:24}
   ]},options:o});
+}
+// m=null → ano inteiro; senão só o mês m
+function equipeResumo(m){
+  const by={};
+  D.detPag.forEach(r=>{
+    if(!r.eq||r.nat!=='op'||(m!==null&&r.m!==m))return;
+    const e=by[r.eq]=by[r.eq]||{nome:r.eq,fixo:0,vari:0,total:0};
+    if(r.fv==='variavel')e.vari+=r.v; else e.fixo+=r.v;
+    e.total+=r.v;
+  });
+  return Object.values(by).filter(e=>e.total>0).sort((a,b)=>b.total-a.total);
+}
+function renderEquipe(){
+  const m=mesSelCat, eq=equipeResumo(m), fat=D.receitaOp[m]||0, dsp=D.despOp[m]||0;
+  const pf=v=>fat?fmtPct(v/fat*100):'—', pd=v=>dsp?fmtPct(v/dsp*100):'—';
+  let h='<table class="top-table"><tr><th>Pessoa</th><th>Fixo</th><th>Variável</th><th>Total no mês</th><th>% faturamento</th><th>% despesa</th></tr>';
+  const t={fixo:0,vari:0,total:0};
+  eq.forEach(e=>{t.fixo+=e.fixo;t.vari+=e.vari;t.total+=e.total;
+    h+='<tr><td>'+esc(e.nome)+'</td><td class="mv">'+fmt(e.fixo)+'</td><td class="mv">'+fmt(e.vari)+'</td><td class="mv"><b>'+fmt(e.total)+'</b></td><td>'+pf(e.total)+'</td><td>'+pd(e.total)+'</td></tr>'});
+  if(!eq.length)h+='<tr><td colspan="6">Sem pagamentos da equipe em '+MESES_FULL[m]+'.</td></tr>';
+  h+='<tr class="tot"><td>Equipe CS</td><td class="mv">'+fmt(t.fixo)+'</td><td class="mv">'+fmt(t.vari)+'</td><td class="mv">'+fmt(t.total)+'</td><td>'+pf(t.total)+'</td><td>'+pd(t.total)+'</td></tr></table>';
+  el('equipeTable').innerHTML=h;
 }
 function drawCli(){
   const p=PAL();
